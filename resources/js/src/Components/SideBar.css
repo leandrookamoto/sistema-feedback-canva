@@ -1,0 +1,11 @@
+.sidebar{
+    width: 25%;
+    height: 600px;
+    background-color: lightgray;
+    display: flex;
+}
+
+.home{
+    color: gray;
+    cursor: pointer;
+}
