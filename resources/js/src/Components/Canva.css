@@ -1,0 +1,11 @@
+.canvaContainer{
+    border: 1px solid lightgray;
+    width: 500px;
+    height: 300px;
+    color: lightgray;
+}
+
+
+.headerCanva{
+    border-bottom: 1px solid lightgray;
+}

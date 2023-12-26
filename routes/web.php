@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CadastroController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('user', [UserController::class,'getUserData']);
+
 
 // Rota para o login
 Route::get('/', function () {
@@ -34,5 +39,18 @@ Route::middleware([
     Route::get('/welcome', function () {
         return view('welcome');
     })->name('welcome');
+
+    // Endpoint para recuperar os dados do usuário
+    Route::get('/api/user', [UserController::class, 'getUserData']);
+
+    Route::get('/colaboradores-atestado', [CadastroController::class, 'getAllColaboradoresAtestado']);
+
+    Route::post('/cadastrar-usuario', [CadastroController::class, 'createCadastro'])->name('cadastrar.usuario');
+
+    Route::get('/cadastrados', [CadastroController::class, 'getAllCadastro']);
+
+    Route::put('/cadastro/{id}/update-avaliacao', [CadastroController::class, 'updateAvaliacao']);
+
+    Route::delete('/deleteFuncionario/{id}', [CadastroController::class, 'deleteFuncionario']);
 
 });

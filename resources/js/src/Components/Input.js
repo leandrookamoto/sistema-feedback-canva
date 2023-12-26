@@ -1,4 +1,3 @@
-import React from 'react';
 
 
 export default function Input({value, newOnChange, label='Animais', placeholder='Coloque o animal', type}) {

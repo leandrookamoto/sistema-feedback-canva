@@ -1,5 +1,4 @@
-import React from 'react';
-import {Bar} from 'react-chartjs-2';
+import {Doughnut} from 'react-chartjs-2';
 import {Chart as ChartJS} from 'chart.js/auto';
 
 // const data = {
@@ -16,7 +15,6 @@ export default function Chart({data}){
 
 
     return (<>
-        BarChart
-        <Bar data={data}/>
+        <Doughnut data={data}/>
     </>)
 }
