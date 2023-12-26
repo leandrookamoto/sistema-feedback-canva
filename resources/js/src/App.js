@@ -11,6 +11,7 @@ import Home from './Components/Home';
 import CadastrarComponent from './Components/CadastrarComponent';
 import validator from 'validator';
 import Dialog from './Components/Dialog';
+import Feedback from './Components/Feedback';
 
 
 
@@ -20,6 +21,7 @@ export default function App() {
     //Variáveis para mudança de tela
     const [cadastrar, setCadastrar] = useState(false);
     const [homeRender,setHomeRender] = useState(false);
+    const [feedback, setFeedback] = useState(false);
 
     //Variáveis para gravação de estado
     const [usuario,setUsuario] = useState('');
@@ -220,6 +222,17 @@ export default function App() {
             console.log(dado.id);
           }
 
+          //Funções para renderização dos componentes
+          function handleCadastrar(){
+            setCadastrar(true);
+            setFeedback(false);
+          }
+
+          function handleCadastrados(){
+            setCadastrar(false);
+            setFeedback(true);
+          }
+
 
 
 
@@ -230,7 +243,11 @@ export default function App() {
             <section className='d-flex w-100'>
 
             {/* Aqui é a renderização do Sidebar */}
-            <Sidebar onClickCadastrar={() => setCadastrar(true)} />
+            <Sidebar 
+            onClickCadastrar={handleCadastrar} 
+            onClickCadastrados={handleCadastrados}
+            
+            />
              
               <div className='m-3' style={{width: '70%'}}>
                 {/* <Chart data={data} /> */}
@@ -248,6 +265,8 @@ export default function App() {
                 handleChangeSetor={e=>setSetor(e.currentTarget.value)}
                 gravar={gravar}
                 />}
+
+                {feedback&&<Feedback listaCadastro={listaCadastro}/>}
 
                 
 
