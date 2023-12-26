@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import {useState, useEffect} from 'react';
 import Pagination from './Pagination';
+import Canva from './Canva';
+
 
 
 export default function Feedback({listaCadastro}){
@@ -74,6 +76,7 @@ export default function Feedback({listaCadastro}){
       
 
 
+        //Função Capitalize
       function capitalizeWords(sentence) {
         return sentence.toLowerCase().replace(/(^|\s)\S/g, (match) => match.toUpperCase());
       }
@@ -86,11 +89,15 @@ export default function Feedback({listaCadastro}){
           const novaListaFiltrada = listaCadastro.filter((item)=>item.nome.includes(nova)||item.email.includes(mail));
           console.log(listaFiltrada)
           setListaFiltrada(novaListaFiltrada);
+          setPage(1);
       }
 
 
     return(<>
         <h5>Escolha o funcionário</h5>
+        <Canva/>
+
+
         <div style={estiloInput}>
                   <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
                   <input

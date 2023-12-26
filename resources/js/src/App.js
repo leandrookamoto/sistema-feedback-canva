@@ -235,6 +235,18 @@ export default function App() {
           };
 
 
+          //Função Capitalize
+          function capitalizeWords(sentence) {
+            return sentence.toLowerCase().replace(/(^|\s)\S/g, (match) => match.toUpperCase());
+          }
+
+          //Função para gravar o nome e padronizar a escrita
+          function handleChangeName(event){
+            const newName = capitalizeWords(event.currentTarget.value)
+            setNome(newName);
+
+          }
+
       
 
 
@@ -263,7 +275,7 @@ export default function App() {
                 nome={nome}
                 email={email}
                 handleChangeEmail={handleEmailChange}
-                handleChangeName={e=>setNome(e.currentTarget.value)}
+                handleChangeName={handleChangeName}
                 isValid={isValid}
                 setor={setor}
                 handleChangeSetor={e=>setSetor(e.currentTarget.value)}

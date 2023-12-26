@@ -7,7 +7,7 @@ export default function PaginationControlled({handleChange, page, totalPage=10})
 
   return (
     <Stack spacing={2}>
-      <Typography>Page: {page}</Typography>
+      <Typography>Página: {page}</Typography>
       <Pagination count={totalPage} page={page} onChange={handleChange} />
     </Stack>
   );
