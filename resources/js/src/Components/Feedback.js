@@ -9,6 +9,7 @@ export default function Feedback({listaCadastro}){
     //Variável para gravação de estado para a função pesquisar
     const [listaFiltrada, setListaFiltrada] = useState([]);
 
+
     //Variáveis para o estilo do search input
     const estiloInput = {
         position: 'relative',
@@ -41,16 +42,33 @@ export default function Feedback({listaCadastro}){
 
 
         //Lógica para o controle da paginação
-        var pageSize = 3;
         const [page, setPage] = useState(1);
-        const offset = (page - 1) * pageSize;
-        const currentData = listaFiltrada.slice(offset, offset + pageSize);
+        const pageSize = 3;
 
-        const total = listaFiltrada.length/pageSize;
-        const totalPage = is_Natural(total)?total:parseInt(total.toFixed(0))+1;
-        const handleChange = (event, value) => {
-            setPage(value);
-          };
+
+        useEffect(() => {
+            setPage(1); // Redefine a página para 1 sempre que a lista filtrada mudar
+          }, [listaCadastro]);
+
+
+        function pesquisar(e) {
+    const busca = e.currentTarget.value.trim().toLowerCase();
+    const novaListaFiltrada = listaCadastro.filter(
+      (item) =>
+        item.nome.toLowerCase().includes(busca) || // Verifica se o nome inclui a busca
+        item.email.toLowerCase().includes(busca) // Verifica se o email inclui a busca
+    );
+    setListaFiltrada(novaListaFiltrada);
+    setPage(1); // Redefine a página para 1 ao iniciar uma nova pesquisa
+  }
+
+  const offset = (page - 1) * pageSize;
+  const currentData = listaFiltrada.length === 0 ? listaCadastro.slice(offset, offset + pageSize) : listaFiltrada.slice(offset, offset + pageSize);
+  const totalPage = Math.ceil((listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) / pageSize);
+
+  const handleChange = (event, value) => {
+    setPage(value);
+  };
         const [filter, setFilter]=useState('');
         
       
@@ -91,7 +109,7 @@ export default function Feedback({listaCadastro}){
                   />
                 </div>
         {/* Aqui é a renderização da lista de funcionários */}
-        {listaFiltrada.length !== 0&& listaFiltrada.map((item,index)=><div key={index} onClick={()=>selecionarFuncionario(index)}>
+        {currentData.map((item,index)=><div key={index} onClick={()=>selecionarFuncionario(index)}>
                 <Card
                  nome={item.nome}
                  email={item.email}
@@ -104,17 +122,7 @@ export default function Feedback({listaCadastro}){
                     )}
 
 
-                {listaFiltrada.length == 0&& listaCadastro.map((item,index)=><div key={index} onClick={()=>selecionarFuncionario(index)}>
-                <Card
-                 nome={item.nome}
-                 email={item.email}
-                 setor={item.setor}
-                 chefe={item.administrador}
-                 avaliarBotao={()=>setHistorico(true)}
-                 botao1='Selecionar'
-                 />
-                 </div>
-                    )}
+               
 
                 <Pagination
                         page={page}
