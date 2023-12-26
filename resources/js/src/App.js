@@ -220,18 +220,22 @@ export default function App() {
             setIdFuncionario(dado.id);
             setSelectedFuncionario2(true);
             console.log(dado.id);
-          }
+          };
+
 
           //Funções para renderização dos componentes
           function handleCadastrar(){
             setCadastrar(true);
             setFeedback(false);
-          }
+          };
 
           function handleCadastrados(){
             setCadastrar(false);
             setFeedback(true);
-          }
+          };
+
+
+      
 
 
 
