@@ -13,6 +13,8 @@ import validator from 'validator';
 import Dialog from './Components/Dialog';
 
 
+
+
 export default function App() {
 
     //Variáveis para mudança de tela
@@ -30,17 +32,23 @@ export default function App() {
     const [mouthDate, setMouthDate] = useState('');
     const [idFuncionario, setIdFuncionario] = useState(null);
     const [isValid, setIsValid] = useState(true);
+    const [historico, setHistorico] = useState('');
+    
+
 
     //Variáveis que controlam a abertura dos Dialogs
     const [openCadastro, setOpenCadastro] = useState(false);
     const [open,setOpen] = useState(false);
     const [openEmail, setOpenEmail] = useState('');
+    const [cadastroSucesso, setCadastroSucesso] = useState(false);
+    
 
     
     //Variável para descrição do Dialog/Modal/Popup
     const mesmoFuncionario = 'Você já cadastrou esse funcionário!';
     const validacao='Favor preencher todos os dados!';
     const validaEmail = 'Favor inserir um e-mail válido!';
+    const sucessoCadastro = 'Cadastro realizado com sucesso!';
 
 
     //Primeira requisição para a recuperação dos dados dos usuários ao inicializar o programa
@@ -54,12 +62,10 @@ export default function App() {
           axios.get('/cadastrados')
             .then(response => {
               const lista = response.data;
-              console.log(lista);
               const listaFiltrada = lista.filter(item => item.administrador === usuarioLogado);
               setListaCadastro(listaFiltrada);
 
               const id = response.data.length?lista[response.data.length-1].id:0;
-              console.log(`Este é o id final: ${id}`)
               setNewId(id);
             })
             .catch(error => {
@@ -78,7 +84,6 @@ export default function App() {
         axios.get('/colaboradores-atestado')
             .then(response => {
               setListaAtestado(response.data);
-              console.log(response.data);
               // const listaFiltrada = lista.filter(item => item.administrador === usuarioLogado);
               // setListaCadastro(listaFiltrada);
 
@@ -93,6 +98,17 @@ export default function App() {
               console.error('Erro na segunda requisição:', error);
             });
     }, []);
+
+
+
+    console.table(listaCadastro)
+    const handleEmailChange = (event) => {
+      const emailValue = event.target.value;
+      setEmail(emailValue.toLowerCase());
+  
+      // Verifica se o e-mail tem um formato válido usando validator.js
+      setIsValid(validator.isEmail(emailValue));
+    };
 
 
 
@@ -195,6 +211,15 @@ export default function App() {
             };
 
 
+            //Seleciona pelo clique no card
+          function selecionarFuncionario(index){
+            const dado = listaCadastro[index];
+            setDadosFuncionario([dado]); // Armazena o objeto em um array
+            setIdFuncionario(dado.id);
+            setSelectedFuncionario2(true);
+            console.log(dado.id);
+          }
+
 
 
 
@@ -203,26 +228,38 @@ export default function App() {
           <main>
             <header className='header'></header>
             <section className='d-flex w-100'>
+
+            {/* Aqui é a renderização do Sidebar */}
             <Sidebar onClickCadastrar={() => setCadastrar(true)} />
              
               <div className='m-3' style={{width: '70%'}}>
                 {/* <Chart data={data} /> */}
+                {/* Aqui é a renderização da Home */}
                 {homeRender&&<Home/>}
+
+                {/* Aqui é a renderização do Cadastro */}
                 {cadastrar&&<CadastrarComponent
                 nome={nome}
                 email={email}
-                handleChangeEmail={e=>setEmail(e.currentTarget.value)}
+                handleChangeEmail={handleEmailChange}
                 handleChangeName={e=>setNome(e.currentTarget.value)}
                 isValid={isValid}
                 setor={setor}
                 handleChangeSetor={e=>setSetor(e.currentTarget.value)}
                 gravar={gravar}
                 />}
+
+                
+
+
               </div>
             </section>
             <Dialog open={openCadastro} descricao={mesmoFuncionario} handleClose={()=>setOpenCadastro(false)}/>
             <Dialog open={open} descricao={validacao} handleClose={()=>setOpen(false)}/>
             <Dialog open={openEmail} descricao={validaEmail} handleClose={()=>setOpenEmail(false)}/>
+            <Dialog open={cadastroSucesso} descricao={sucessoCadastro} handleClose={()=>setCadastroSucesso(false)} Title='Cadastro'/>
+
+
           </main>
 
 
