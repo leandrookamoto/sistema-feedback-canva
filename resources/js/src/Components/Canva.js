@@ -21,7 +21,7 @@ export default function Canva(){
     const [isValidAtencao, setIsValidAtencao] = useState(true);
     const [isValidMelhorias, setIsValidMelhorias] = useState(true);
     const [notes, setNotes] = useState({});
-    const [notasFinais, setNotasFinais] = useState(null);
+    const [notaFinal, setNotaFinal] = useState(null);
 
     //Constante para abertura do Dialog/Modal
     const [open,setOpen] = useState(false);
@@ -93,11 +93,11 @@ export default function Canva(){
         const notesValues = Object.values(notes).map((note) => parseFloat(note));
         const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
         const final = total / notesValues.length || 0;
-        setNotasFinais(final.toFixed(2));
+        setNotaFinal(final.toFixed(2));
       };
         
 
-      console.log(`Esta é a notaFinal ${notasFinais}`);
+      console.log(`Esta é a notaFinal ${notaFinal}`);
  
     
 
@@ -167,13 +167,13 @@ export default function Canva(){
                         {listaCanva.map(item=>item.atividades.map((item,index)=><div className={listaAtividades.length<=3?'d-flex justify-content-center align-items-center post-it2':'d-flex justify-content-center align-items-center post-it'}>{item}</div>))}
                     </div>
                 </div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center" ><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{notaFinal==1&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{(notaFinal>1&&notaFinal<=2)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{(notaFinal>2&&notaFinal<=3)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{(notaFinal>3&&notaFinal<=4)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{(notaFinal>4&&notaFinal<=5)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">{(notaFinal>5&&notaFinal<=6)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
+                <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center" >{(notaFinal>6&&notaFinal<=7)&&<div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div>}</div>
 
                 <div className="row w-100">
                     
