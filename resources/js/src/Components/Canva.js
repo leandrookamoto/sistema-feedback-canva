@@ -106,16 +106,12 @@ export default function Canva(){
         </div>
 
         <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Qual é o nível do profissional?</label>
-            <select class="form-select" aria-label="Default select example" onChange={e=>setSenioridade(e.currentTarget.value)}>
-                <option value="Novato">Novato</option>
-                <option value="Novato">Aprendiz</option>
-                <option value="Praticante">Praticante</option>
-                <option value="Profissional">Profissional</option>
-                <option value="Professor">Professor</option>
-                <option value="Líder">Líder</option>
-                <option value="Mestre">Mestre</option>
-            </select>
+            <label for="exampleFormControlInput1" class="form-label">Qual é o nível do profissional por atividade?</label>
+            {listaAtividades.map((item,index)=><>
+            
+            </>)}
+            
+            
             </div>
 
             <button type="button" class="btn btn-primary mb-2" onClick={gravar}>Gravar</button>
@@ -142,13 +138,13 @@ export default function Canva(){
                         {listaCanva.map(item=>item.atividades.map((item,index)=><div className={listaAtividades.length<=3?'d-flex justify-content-center align-items-center post-it2':'d-flex justify-content-center align-items-center post-it'}>{item}</div>))}
                     </div>
                 </div>
-                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div><div style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
-                <div className="customBorder3 col">Teste</div>
-                <div className="customBorder3 col">Teste</div>
-                <div className="customBorder3 col">Teste</div>
-                <div className="customBorder3 col">Teste</div>
-                <div className="customBorder3 col">Teste</div>
-                <div className="customBorder4 col " >Teste</div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
+                <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center" ><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
 
                 <div className="row w-100">
                     
