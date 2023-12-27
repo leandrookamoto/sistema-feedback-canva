@@ -1,5 +1,8 @@
+import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
 import {useState} from 'react';
+import Dialog  from './Dialog';
+
 export default function Canva(){
     //Constantes para gravação de estado para o canva
     const [listaCanva,setListaCanva] = useState([]);
@@ -7,35 +10,99 @@ export default function Canva(){
     const [atividades,setAtividades] = useState('');
     const [listaAtividades, setListaAtividades] = useState([]);
     const [senioridade, setSenioridade] = useState('');
-    const [listaTeste, setListaTeste] = useState([]);
+    const [fortes, setFortes]=useState('');
+    const [listaFortes, setListaFortes] = useState([])
+    const [atencao, setAtencao] = useState('');
+    const [listaAtencao, setListaAtencao] = useState([]);
+    const [melhorias, setMelhorias] = useState('');
+    const [listaMelhorias, setListaMelhorias] = useState([]);
+    const [isValidAtividades, setIsValidAtividades] = useState(true);
+    const [isValidFortes, setIsValidFortes] = useState(true);
+    const [isValidAtencao, setIsValidAtencao] = useState(true);
+    const [isValidMelhorias, setIsValidMelhorias] = useState(true);
 
-    //Funções para gravação do listaCanva e atividades
+    //Constante para abertura do Dialog/Modal
+    const [open,setOpen] = useState(false);
+    const descricao = 'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação'
+
+    //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias
     function handleAtividades(e){
-        setAtividades(e.target.value);
-        const newActivities = e.target.value.split(',').map(activity => activity.trim());
+        const value = e.currentTarget.value;
+        setAtividades(e.currentTarget.value);
+        const newActivities = e.currentTarget.value.split(',').map(activity => activity.trim());
         setListaAtividades(newActivities.filter(activity => activity !== ''));
+        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const isValidInput = regex.test(e.currentTarget.value);
+        setIsValidAtividades(isValidInput);
+    }
+
+    function handleFortes(e){
+        const value = e.currentTarget.value;
+        setFortes(e.currentTarget.value);
+        const newFortes = e.currentTarget.value.split(',').map(activity => activity.trim());
+        setListaFortes(newFortes.filter(forte => forte !== ''));
+        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const isValidInput = regex.test(e.currentTarget.value);
+        setIsValidFortes(isValidInput);
+    }
+
+    function handleAtencao(e){
+        const value = e.currentTarget.value;
+        setAtencao(e.currentTarget.value);
+        const newAtencao = e.currentTarget.value.split(',').map(activity => activity.trim());
+        setListaAtencao(newAtencao.filter(atencao => atencao !== ''));
+        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const isValidInput = regex.test(e.currentTarget.value);
+        setIsValidAtencao(isValidInput);
+    }
+
+    function handleMelhorias(e){
+        const value = e.currentTarget.value;
+        setMelhorias(e.currentTarget.value);
+        const newMelhorias = e.currentTarget.value.split(',').map(activity => activity.trim());
+        setListaMelhorias(newMelhorias.filter(melhorias => melhorias !== ''));
+        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const isValidInput = regex.test(e.currentTarget.value);
+        setIsValidMelhorias(isValidInput);
     }
 
     function gravar(){
-        const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade}]
+
+        if(!isValidAtencao||!isValidAtividades||!isValidFortes||!isValidMelhorias){
+            setOpen(true);
+        }else{
+        const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes}]
         setListaCanva(lista);
         const newList = lista.map((item)=>item.atividades);
         setListaTeste(newList);
-        console.log(`Este é o newList: ${newList}`)
+        console.log(`Este é o newList: ${newList}`);
+    }
 
     }
         
-        console.log(listaCanva);
+ 
     
 
     return(<>
         <div class="mb-3">
             <label for="exampleFormControlInput1" class="form-label">Competência</label>
-            <input class="form-control" id="exampleFormControlInput1" placeholder="Adicione a competência necessária" onChange={e=>setCompetencia(e.currentTarget.value)}/>
+            <input class="form-control" id="exampleFormControlInput1" placeholder="Adicione a competência necessária" value={competencia} onChange={e=>setCompetencia(e.currentTarget.value)}/>
         </div>
         <div class="mb-3">
             <label for="exampleFormControlInput1" class="form-label">Atividades</label>
-            <input class="form-control" id="exampleFormControlInput1" placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula. Ex: Atendimento, Agendamento" onChange={handleAtividades}/>
+            <input class="form-control" id="exampleFormControlInput1" value={atividades}  placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula. Ex: Atendimento, Agendamento" onChange={handleAtividades}/>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Pontos fortes</label>
+            <input class="form-control" id="exampleFormControlInput1" value={fortes}  placeholder="Adicione os pontos fortes. Separe os pontos fortes por vírgula. Ex: Pontualidade, Disciplina" onChange={handleFortes}/>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Pontos de atenção</label>
+            <input class="form-control" id="exampleFormControlInput1" value={atencao}  placeholder="Adicione os pontos fortes. Separe os pontos de atenção por vírgula. Ex: Atrasos, Falta de Conhecimento" onChange={handleAtencao}/>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Ações de melhorias</label>
+            <input class="form-control" id="exampleFormControlInput1" value={melhorias}  placeholder="Adicione as ações de melhorias. Separe as ações de melhorias por vírgula. Ex: Aumentar conhecimentos, Treinamentos" onChange={handleMelhorias}/>
         </div>
 
         <div class="mb-3">
@@ -51,7 +118,7 @@ export default function Canva(){
             </select>
             </div>
 
-            <button type="button" class="btn btn-primary" onClick={gravar}>Gravar</button>
+            <button type="button" class="btn btn-primary mb-2" onClick={gravar}>Gravar</button>
 
 
         <section className="canvaContainer container w-100 mb-3">
@@ -69,10 +136,10 @@ export default function Canva(){
              </div>
 
              <div className="row">
-                <div className="customBorder3 col-2 d-flex justify-content-center align-items-center"><div className='post-it d-flex justify-content-center align-items-center'>{listaCanva.map((item, index)=><>{item.competencia}</>)}</div></div>
+                <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">{listaCanva.map((item, index)=><div className='post-it d-flex justify-content-center align-items-center'>{item.competencia}</div>)}</div>
                 <div className="customBorder3 col-3">
                     <div className='box mt-1'>
-                    <div className='post-it2 d-flex justify-content-center align-items-center'>Teste</div>
+                        {listaCanva.map(item=>item.atividades.map((item,index)=><div className={listaAtividades.length<=3?'d-flex justify-content-center align-items-center post-it2':'d-flex justify-content-center align-items-center post-it'}>{item}</div>))}
                     </div>
                 </div>
                 <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center"><div className='mb-3' style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div><div style={{borderRadius: '100%', width: '45px', height:'45px', backgroundColor: 'red'}}></div></div>
@@ -92,7 +159,7 @@ export default function Canva(){
 </svg></div>
                         <div>Pontos Fortes</div>
                         </div>
-                        <div className='customBorder7'>Teste</div>
+                        <div className='customBorder7'>{listaCanva.map(item=>item.fortes.map((item,index)=><div>{item}</div>))}</div>
                         
                         </div>
                     <div className='customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center' ><div>
@@ -102,7 +169,7 @@ export default function Canva(){
 </svg></div>
                         <div>Pontos de atenção</div>
                         </div>
-                        <div className='customBorder7'>Teste</div>
+                        <div className='customBorder7'>{listaCanva.map(item=>item.atencao.map((item,index)=><div>{item}</div>))}</div>
                         
                         </div>
                         <div className='customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center' ><div>
@@ -111,13 +178,15 @@ export default function Canva(){
 </svg></div>
                         <div>Ações de melhoria</div>
                         </div>
-                        <div className='customBorder7'>Teste</div>
+                        <div className='customBorder7'>{listaCanva.map(item=>item.melhorias.map((item,index)=><div>{item}</div>))}</div>
                         
                         </div>
                 </div>
              </div>
            
         </section>
+
+        <Dialog open={open} descricao={descricao} handleClose={()=>setOpen(false)} Title='Atenção'/>
 
 
         

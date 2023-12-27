@@ -42,22 +42,22 @@
 
 .customBorder5{
     border-right: 1px solid lightgray;
-    height: 100px;
+    height: auto;
     display: flex;
     align-items: center;
 }
 
 
 .customBorder6{
-    height: 100px;
+    height: auto;
 }
 
 .customBorder7{
-    height: 100px;
+    min-height: auto;
 }
 
 .customBorder8{
-    height: 100px;
+    height: auto;
     display: flex;
     align-items: center;
 } 
@@ -81,11 +81,12 @@
 
   div.post-it2 {
     width: 100%; 
-    max-height: 40%; 
+    height: 40%; 
     background-color: #feff32;
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
     margin-bottom: 10px; 
-    font-size: 12px;
+    font-size: 10px;
+    font-weight: bold;
   }
 
 
