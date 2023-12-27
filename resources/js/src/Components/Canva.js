@@ -18,6 +18,8 @@ export default function Canva(){
     const [listaMelhorias, setListaMelhorias] = useState([]);
     const [notes, setNotes] = useState({});
     const [notaFinal, setNotaFinal] = useState(null);
+    const [selectedDate, setSelectedDate] =useState('');
+    const [mouthDate, setMouthDate] = useState('');
 
     //Constantes para validações em geral
     const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -31,7 +33,7 @@ export default function Canva(){
     const descricao = 'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação'
     const validaNota = 'O intervalo de notas é de 1 a 7'
 
-    //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias
+    //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
     function handleAtividades(e){
         const value = e.currentTarget.value;
         setAtividades(e.currentTarget.value);
@@ -72,6 +74,19 @@ export default function Canva(){
         setIsValidMelhorias(isValidInput);
     }
 
+
+    const handleNoteChange = (item, e) => {
+        const value = e.target.value;
+        
+        if(value>7||value<1){
+            setOpenValidaNota(true);
+        }else{
+        setNotes({ ...notes, [item]: value });
+        }
+      };
+
+
+      //Função para gravar os dados
     function gravar(){
 
         if(!isValidAtencao||!isValidAtividades||!isValidFortes||!isValidMelhorias){
@@ -87,22 +102,37 @@ export default function Canva(){
     }
 
 
-
-    const handleNoteChange = (item, e) => {
-        const value = e.target.value;
-        if(value>7||value<1){
-            setOpenValidaNota(true);
-        }else{
-        setNotes({ ...notes, [item]: value });
-        }
-      };
-    
+        //Função para calcular a nota
       function calculateFinalGrade () {
         const notesValues = Object.values(notes).map((note) => parseFloat(note));
         const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
         const final = total / notesValues.length || 0;
         setNotaFinal(final.toFixed(2));
       };
+
+
+      //Função para obter somente o mês pelo input date
+      function obterNomeDoMes(dataString) {
+        const meses = [
+          'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+      
+        const partesData = dataString.split('-');
+        const ano = parseInt(partesData[0]);
+        const mesIndex = parseInt(partesData[1]) - 1; // Subtrai 1 para considerar o índice do array
+      
+        const data = new Date(ano, mesIndex, 1); // Cria uma nova data com o ano e mês
+      
+        return meses[data.getMonth()]; // Retorna o nome do mês correspondente ao índice do array de meses
+      }
+
+
+      function handleChangeMonth(e){
+        setSelectedDate(e.currentTarget.value);
+        setMouthDate(obterNomeDoMes(e.currentTarget.value));
+        console.log(obterNomeDoMes(e.currentTarget.value));
+      }
         
 
       console.log(`Esta é a notaFinal ${notaFinal}`);
@@ -110,6 +140,11 @@ export default function Canva(){
     
 
     return(<>
+
+            <input type="date" id="data-pagamento" name="data_pagamento" value={selectedDate} 
+                                onChange={handleChangeMonth} className="form-control" />
+
+                    <p>Mês: {mouthDate}</p>
         <div className="mb-3">
             <label for="exampleFormControlInput1" className="form-label">Competência</label>
             <input className="form-control" id="exampleFormControlInput1" placeholder="Adicione a competência necessária" value={competencia} onChange={e=>setCompetencia(e.currentTarget.value)}/>
