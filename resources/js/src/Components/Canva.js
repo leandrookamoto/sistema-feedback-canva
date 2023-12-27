@@ -20,6 +20,8 @@ export default function Canva(){
     const [isValidFortes, setIsValidFortes] = useState(true);
     const [isValidAtencao, setIsValidAtencao] = useState(true);
     const [isValidMelhorias, setIsValidMelhorias] = useState(true);
+    const [notes, setNotes] = useState({});
+    const [notasFinais, setNotasFinais] = useState(null);
 
     //Constante para abertura do Dialog/Modal
     const [open,setOpen] = useState(false);
@@ -74,47 +76,74 @@ export default function Canva(){
         const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes}]
         setListaCanva(lista);
         const newList = lista.map((item)=>item.atividades);
-        setListaTeste(newList);
         console.log(`Este é o newList: ${newList}`);
+        calculateFinalGrade();
     }
 
     }
+
+
+
+    const handleNoteChange = (item, e) => {
+        const value = e.target.value;
+        setNotes({ ...notes, [item]: value });
+      };
+    
+      function calculateFinalGrade () {
+        const notesValues = Object.values(notes).map((note) => parseFloat(note));
+        const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
+        const final = total / notesValues.length || 0;
+        setNotasFinais(final.toFixed(2));
+      };
         
+
+      console.log(`Esta é a notaFinal ${notasFinais}`);
  
     
 
     return(<>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Competência</label>
-            <input class="form-control" id="exampleFormControlInput1" placeholder="Adicione a competência necessária" value={competencia} onChange={e=>setCompetencia(e.currentTarget.value)}/>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Competência</label>
+            <input className="form-control" id="exampleFormControlInput1" placeholder="Adicione a competência necessária" value={competencia} onChange={e=>setCompetencia(e.currentTarget.value)}/>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Atividades</label>
-            <input class="form-control" id="exampleFormControlInput1" value={atividades}  placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula. Ex: Atendimento, Agendamento" onChange={handleAtividades}/>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Atividades</label>
+            <input className="form-control" id="exampleFormControlInput1" value={atividades}  placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula. Ex: Atendimento, Agendamento" onChange={handleAtividades}/>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Pontos fortes</label>
-            <input class="form-control" id="exampleFormControlInput1" value={fortes}  placeholder="Adicione os pontos fortes. Separe os pontos fortes por vírgula. Ex: Pontualidade, Disciplina" onChange={handleFortes}/>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Pontos fortes</label>
+            <input className="form-control" id="exampleFormControlInput1" value={fortes}  placeholder="Adicione os pontos fortes. Separe os pontos fortes por vírgula. Ex: Pontualidade, Disciplina" onChange={handleFortes}/>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Pontos de atenção</label>
-            <input class="form-control" id="exampleFormControlInput1" value={atencao}  placeholder="Adicione os pontos fortes. Separe os pontos de atenção por vírgula. Ex: Atrasos, Falta de Conhecimento" onChange={handleAtencao}/>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Pontos de atenção</label>
+            <input className="form-control" id="exampleFormControlInput1" value={atencao}  placeholder="Adicione os pontos fortes. Separe os pontos de atenção por vírgula. Ex: Atrasos, Falta de Conhecimento" onChange={handleAtencao}/>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Ações de melhorias</label>
-            <input class="form-control" id="exampleFormControlInput1" value={melhorias}  placeholder="Adicione as ações de melhorias. Separe as ações de melhorias por vírgula. Ex: Aumentar conhecimentos, Treinamentos" onChange={handleMelhorias}/>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Ações de melhorias</label>
+            <input className="form-control" id="exampleFormControlInput1" value={melhorias}  placeholder="Adicione as ações de melhorias. Separe as ações de melhorias por vírgula. Ex: Aumentar conhecimentos, Treinamentos" onChange={handleMelhorias}/>
         </div>
 
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Qual é o nível do profissional por atividade?</label>
+        <div className="mb-3">
+            <label for="exampleFormControlInput1" className="form-label">Qual é o nível do profissional por atividade?</label>
             {listaAtividades.map((item,index)=><>
-            
+                <div key={index}>
+          <label>
+            {item}:
+            <input
+              type="number"
+              className="form-control"
+              value={notes[item] || ''}
+              onChange={(e) => handleNoteChange(item, e)}
+              placeholder={`Nota para ${item}`}
+            />
+          </label>
+        </div>
             </>)}
             
             
             </div>
 
-            <button type="button" class="btn btn-primary mb-2" onClick={gravar}>Gravar</button>
+            <button type="button" className="btn btn-primary mb-2" onClick={gravar}>Gravar</button>
 
 
         <section className="canvaContainer container w-100 mb-3">
@@ -149,7 +178,7 @@ export default function Canva(){
                 <div className="row w-100">
                     
                 <div className='customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center' ><div>
-                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-smile" viewBox="0 0 16 16">
+                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-emoji-smile" viewBox="0 0 16 16">
   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
   <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5"/>
 </svg></div>
@@ -159,7 +188,7 @@ export default function Canva(){
                         
                         </div>
                     <div className='customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center' ><div>
-                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-frown" viewBox="0 0 16 16">
+                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-emoji-frown" viewBox="0 0 16 16">
   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
   <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5"/>
 </svg></div>
@@ -169,7 +198,7 @@ export default function Canva(){
                         
                         </div>
                         <div className='customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center' ><div>
-                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                        <div className='d-flex justify-content-center'><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-check-circle-fill" viewBox="0 0 16 16">
   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
 </svg></div>
                         <div>Ações de melhoria</div>
