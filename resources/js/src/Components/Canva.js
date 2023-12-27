@@ -16,16 +16,20 @@ export default function Canva(){
     const [listaAtencao, setListaAtencao] = useState([]);
     const [melhorias, setMelhorias] = useState('');
     const [listaMelhorias, setListaMelhorias] = useState([]);
+    const [notes, setNotes] = useState({});
+    const [notaFinal, setNotaFinal] = useState(null);
+
+    //Constantes para validações em geral
     const [isValidAtividades, setIsValidAtividades] = useState(true);
     const [isValidFortes, setIsValidFortes] = useState(true);
     const [isValidAtencao, setIsValidAtencao] = useState(true);
     const [isValidMelhorias, setIsValidMelhorias] = useState(true);
-    const [notes, setNotes] = useState({});
-    const [notaFinal, setNotaFinal] = useState(null);
+    const [openValidaNota, setOpenValidaNota] = useState(false);
 
     //Constante para abertura do Dialog/Modal
     const [open,setOpen] = useState(false);
     const descricao = 'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação'
+    const validaNota = 'O intervalo de notas é de 1 a 7'
 
     //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias
     function handleAtividades(e){
@@ -33,7 +37,7 @@ export default function Canva(){
         setAtividades(e.currentTarget.value);
         const newActivities = e.currentTarget.value.split(',').map(activity => activity.trim());
         setListaAtividades(newActivities.filter(activity => activity !== ''));
-        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
         const isValidInput = regex.test(e.currentTarget.value);
         setIsValidAtividades(isValidInput);
     }
@@ -43,7 +47,7 @@ export default function Canva(){
         setFortes(e.currentTarget.value);
         const newFortes = e.currentTarget.value.split(',').map(activity => activity.trim());
         setListaFortes(newFortes.filter(forte => forte !== ''));
-        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
         const isValidInput = regex.test(e.currentTarget.value);
         setIsValidFortes(isValidInput);
     }
@@ -53,7 +57,7 @@ export default function Canva(){
         setAtencao(e.currentTarget.value);
         const newAtencao = e.currentTarget.value.split(',').map(activity => activity.trim());
         setListaAtencao(newAtencao.filter(atencao => atencao !== ''));
-        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
         const isValidInput = regex.test(e.currentTarget.value);
         setIsValidAtencao(isValidInput);
     }
@@ -63,7 +67,7 @@ export default function Canva(){
         setMelhorias(e.currentTarget.value);
         const newMelhorias = e.currentTarget.value.split(',').map(activity => activity.trim());
         setListaMelhorias(newMelhorias.filter(melhorias => melhorias !== ''));
-        const regex = /^[\w\s]+(,\s*[\w\s]+)*$/;
+        const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
         const isValidInput = regex.test(e.currentTarget.value);
         setIsValidMelhorias(isValidInput);
     }
@@ -86,7 +90,11 @@ export default function Canva(){
 
     const handleNoteChange = (item, e) => {
         const value = e.target.value;
+        if(value>7||value<1){
+            setOpenValidaNota(true);
+        }else{
         setNotes({ ...notes, [item]: value });
+        }
       };
     
       function calculateFinalGrade () {
@@ -212,6 +220,7 @@ export default function Canva(){
         </section>
 
         <Dialog open={open} descricao={descricao} handleClose={()=>setOpen(false)} Title='Atenção'/>
+        <Dialog open={openValidaNota} descricao={validaNota} handleClose={()=>setOpenValidaNota(false)} Title='Atenção'/>
 
 
         
