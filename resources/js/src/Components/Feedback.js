@@ -152,12 +152,15 @@ export default function Feedback({ listaCadastro }) {
 
   //Função para renderizar a avaliação
   function onClickBotao1() {
-    setAvaliar(true);
-    setAvaliar2(true);
+    setAvaliar(current=>!current);
+    
   }
 
-  console.log(avaliar);
-  console.log(avaliar2);
+  //useEffect para avaliar
+  useEffect(()=>{
+    setAvaliar2(current=>!current);
+  },[avaliar])
+
 
   return (
     <>
