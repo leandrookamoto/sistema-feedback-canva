@@ -20,6 +20,7 @@ export default function Canva(){
     const [notaFinal, setNotaFinal] = useState(null);
     const [selectedDate, setSelectedDate] =useState('');
     const [mouthDate, setMouthDate] = useState('');
+    const [yearDate, setYearDate] = useState('');
 
     //Constantes para validações em geral
     const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -74,16 +75,27 @@ export default function Canva(){
         setIsValidMelhorias(isValidInput);
     }
 
-
-    const handleNoteChange = (item, e) => {
-        const value = e.target.value;
+      
+      const handleNoteChange = (item, e) => {
+        const value = e.target.value.trim(); // Remover espaços em branco extras
         
-        if(value>7||value<1){
+        if (value === '') {
+          setNotes({ ...notes, [item]: '' });
+        } else {
+          const numericValue = parseFloat(value);
+      
+          if (!isNaN(numericValue)) {
+            if (numericValue >= 1 && numericValue <= 7) {
+              setNotes({ ...notes, [item]: numericValue });
+            } else {
+                setOpenValidaNota(true);
+            }
+          } else {
             setOpenValidaNota(true);
-        }else{
-        setNotes({ ...notes, [item]: value });
+          }
         }
       };
+      
 
 
   //Função para gravar os dados
@@ -99,7 +111,7 @@ export default function Canva(){
 
 //useEffect para manter a notaFinal atualizada para gravar
 useEffect(()=>{
-    const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes, data: mouthDate, nota: notaFinal}]
+    const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes, mes: mouthDate, ano: yearDate, nota: notaFinal}]
     setListaCanva(lista);
     console.log(lista);
 },[notaFinal]);
@@ -125,17 +137,21 @@ useEffect(()=>{
         const partesData = dataString.split('-');
         const ano = parseInt(partesData[0]);
         const mesIndex = parseInt(partesData[1]) - 1; // Subtrai 1 para considerar o índice do array
+        const dia = parseInt(partesData[2]);
       
-        const data = new Date(ano, mesIndex, 1); // Cria uma nova data com o ano e mês
+        const data = new Date(ano, mesIndex, dia); // Cria uma nova data com o ano, mês e dia
       
-        return meses[data.getMonth()]; // Retorna o nome do mês correspondente ao índice do array de meses
+        const nomeMes = meses[data.getMonth()]; // Obtém o nome do mês correspondente ao índice do array de meses
+      
+        return { nomeMes, ano };
       }
 
 
       function handleChangeMonth(e){
         setSelectedDate(e.currentTarget.value);
-        setMouthDate(obterNomeDoMes(e.currentTarget.value));
-        console.log(obterNomeDoMes(e.currentTarget.value));
+        const { nomeMes, ano } = obterNomeDoMes(e.currentTarget.value);
+        setMouthDate(nomeMes);
+        setYearDate(ano);
       }
         
 
@@ -194,7 +210,7 @@ useEffect(()=>{
 
 
         <section className="canvaContainer container w-100 mb-3">
-            <div className='headerCanva'>Feedback Canva</div>
+            <div className='headerCanva d-flex justify-content-between align-items-center'><div>Feedback Canva</div>{mouthDate&&<div style={{fontSize: '15px'}}>Data: {mouthDate}/{yearDate}</div>}</div>
             <div className="row">
                 <div className="customBorder col-2 d-flex justify-content-center align-items-center">Competência</div>
                 <div className="customBorder col-3 d-flex justify-content-center align-items-center">Atividades</div>
