@@ -1,6 +1,6 @@
 import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Dialog  from './Dialog';
 
 export default function Canva(){
@@ -86,20 +86,24 @@ export default function Canva(){
       };
 
 
-      //Função para gravar os dados
-    function gravar(){
+  //Função para gravar os dados
+  function gravar(){
+    if(!isValidAtencao||!isValidAtividades||!isValidFortes||!isValidMelhorias){
+        setOpen(true);
+    }else{
+    calculateFinalGrade();
+    // Eu usei o useEffect para deixar a notaFinal atualizada antes de gravar
+}
+};
 
-        if(!isValidAtencao||!isValidAtividades||!isValidFortes||!isValidMelhorias){
-            setOpen(true);
-        }else{
-        const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes}]
-        setListaCanva(lista);
-        const newList = lista.map((item)=>item.atividades);
-        console.log(`Este é o newList: ${newList}`);
-        calculateFinalGrade();
-    }
 
-    }
+//useEffect para manter a notaFinal atualizada para gravar
+useEffect(()=>{
+    const lista = [...listaCanva, {competencia: competencia, atividades: listaAtividades, senioridade: senioridade, atencao: listaAtencao, melhorias: listaMelhorias, fortes: listaFortes, data: mouthDate, nota: notaFinal}]
+    setListaCanva(lista);
+    console.log(lista);
+},[notaFinal]);
+
 
 
         //Função para calcular a nota
@@ -204,7 +208,19 @@ export default function Canva(){
              </div>
 
              <div className="row">
-                <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">{listaCanva.map((item, index)=><div className='post-it d-flex justify-content-center align-items-center'>{item.competencia}</div>)}</div>
+                <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
+                {listaCanva.length > 0 && listaAtividades.length > 0 && (
+                    listaCanva.map((item, index) => (
+                        item.competencia && ( // Verifica se a competência existe
+                        <div key={index} className='post-it d-flex justify-content-center align-items-center'>
+                            {item.competencia}
+                        </div>
+                        )
+                    ))
+                    )}
+
+
+                    </div>
                 <div className="customBorder3 col-3">
                     <div className='box mt-1'>
                         {listaCanva.map(item=>item.atividades.map((item,index)=><div className={listaAtividades.length<=3?'d-flex justify-content-center align-items-center post-it2':'d-flex justify-content-center align-items-center post-it'}>{item}</div>))}
