@@ -9,13 +9,14 @@ export default function Feedback({ listaCadastro }) {
   //Variável para gravação de estado para a função pesquisar
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [dadosFuncionario, setDadosFuncionario] = useState([]);
+  const [dadosFuncionarioSort, setDadosFuncionarioSort] = useState([]);
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [filter, setFilter] = useState('');
   const [currentData, setCurrentData] = useState([]);
   const [funcionarioEscolhido, setFuncionarioEscolhido] = useState(false);
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
-  const [avaliar2,setAvaliar2]=useState(false);
+  const [avaliar2, setAvaliar2] = useState(false);
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -43,6 +44,24 @@ export default function Feedback({ listaCadastro }) {
 
     return n >= 0.0 && Math.floor(n) === n && n !== Infinity;
   }
+
+  //UseEffect para fazer a ordenação por nome
+  useEffect(() => {
+    const dados = dadosFuncionario.sort((a, b) => {
+      const nomeA = a.nome.toUpperCase();
+      const nomeB = b.nome.toUpperCase();
+
+      if (nomeA < nomeB) {
+        return -1;
+      }
+      if (nomeA > nomeB) {
+        return 1;
+      }
+      return 0;
+    });
+
+    setDadosFuncionarioSort(dados);
+  }, [dadosFuncionario]);
 
   //Lógica para o controle da paginação
   const [page, setPage] = useState(1);
@@ -101,8 +120,8 @@ export default function Feedback({ listaCadastro }) {
   }
 
   //Função para voltar a tela do início da seleção dos funcionários
-  function voltar(){
-    () => setFuncionarioEscolhido((current) => !current);
+  function voltar() {
+    setFuncionarioEscolhido((current) => !current);
     setDadosFuncionario(listaCadastro);
   }
 
@@ -131,15 +150,14 @@ export default function Feedback({ listaCadastro }) {
     setFuncionarioEscolhido((current) => !current);
   }
 
-
   //Função para renderizar a avaliação
-  function onClickBotao1(){
+  function onClickBotao1() {
     setAvaliar(true);
     setAvaliar2(true);
   }
 
-  console.log(avaliar)
-  console.log(avaliar2)
+  console.log(avaliar);
+  console.log(avaliar2);
 
   return (
     <>
@@ -163,7 +181,7 @@ export default function Feedback({ listaCadastro }) {
             />
           </div>
 
-          {dadosFuncionario.map((item) => (
+          {dadosFuncionarioSort.map((item) => (
             <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
               <Card
                 nome={item.nome}
@@ -185,7 +203,7 @@ export default function Feedback({ listaCadastro }) {
 
       {funcionarioEscolhido && (
         <>
-          {dadosFuncionario.map((item) => (
+          {dadosFuncionarioSort.map((item) => (
             <div key={item.id}>
               <Card
                 nome={item.nome}
@@ -206,7 +224,14 @@ export default function Feedback({ listaCadastro }) {
         </>
       )}
 
-      {(avaliar||historico) && <Canva historico={historico} avaliar2={avaliar2} onHistorico={e=>setHistorico(e)} onAvaliacao={e=>setAvaliar2(e)}/>}
+      {(avaliar || historico) && (
+        <Canva
+          historico={historico}
+          avaliar2={avaliar2}
+          onHistorico={(e) => setHistorico(e)}
+          onAvaliacao={(e) => setAvaliar2(e)}
+        />
+      )}
     </>
   );
 }
