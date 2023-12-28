@@ -36,46 +36,48 @@ export default function Canva(){
 
     //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
     function handleAtividades(e){
-        const value = e.currentTarget.value;
-        setAtividades(e.currentTarget.value);
-        const newActivities = e.currentTarget.value.split(',').map(activity => activity.trim());
+        const value = capitalizeWords(e.currentTarget.value);
+        setAtividades(value);
+        const newActivities = value.split(/,| e /).map(activity => activity.trim());
         setListaAtividades(newActivities.filter(activity => activity !== ''));
         const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-        const isValidInput = regex.test(e.currentTarget.value);
+        const isValidInput = regex.test(value);
         setIsValidAtividades(isValidInput);
     }
 
     function handleFortes(e){
-        const value = e.currentTarget.value;
-        setFortes(e.currentTarget.value);
-        const newFortes = e.currentTarget.value.split(',').map(activity => activity.trim());
+        const value = capitalizeWords(e.currentTarget.value);
+        setFortes(value);
+        const newFortes = value.split(/,| e /).map(activity => activity.trim());
         setListaFortes(newFortes.filter(forte => forte !== ''));
         const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-        const isValidInput = regex.test(e.currentTarget.value);
+        const isValidInput = regex.test(value);
         setIsValidFortes(isValidInput);
     }
 
     function handleAtencao(e){
-        const value = e.currentTarget.value;
-        setAtencao(e.currentTarget.value);
-        const newAtencao = e.currentTarget.value.split(',').map(activity => activity.trim());
+        const value = capitalizeWords(e.currentTarget.value);
+        setAtencao(value);
+        const newAtencao = value.split(/,| e /).map(activity => activity.trim());
         setListaAtencao(newAtencao.filter(atencao => atencao !== ''));
         const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-        const isValidInput = regex.test(e.currentTarget.value);
+        const isValidInput = regex.test(value);
         setIsValidAtencao(isValidInput);
     }
 
     function handleMelhorias(e){
-        const value = e.currentTarget.value;
-        setMelhorias(e.currentTarget.value);
-        const newMelhorias = e.currentTarget.value.split(',').map(activity => activity.trim());
+        const value = capitalizeWords(e.currentTarget.value);
+        setMelhorias(value);
+        const newMelhorias = value.split(/,| e /).map(activity => activity.trim());
         setListaMelhorias(newMelhorias.filter(melhorias => melhorias !== ''));
         const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-        const isValidInput = regex.test(e.currentTarget.value);
+        const isValidInput = regex.test(value);
         setIsValidMelhorias(isValidInput);
+        console.log(value)
     }
 
       
+        //Grava e valida as notas para o cálculo
       const handleNoteChange = (item, e) => {
         const value = e.target.value.trim(); // Remover espaços em branco extras
         
@@ -95,6 +97,19 @@ export default function Canva(){
           }
         }
       };
+
+      //Função para padronizar a digitação dos inputs
+      function capitalizeWords(sentence) {
+        return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
+          if (match.toLowerCase() === 'de'||match.toLowerCase() === 'e') {
+            return match.toLowerCase(); 
+          } else {
+            return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+          }
+        });
+      }
+      
+      
       
 
 
@@ -171,19 +186,19 @@ useEffect(()=>{
         </div>
         <div className="mb-3">
             <label for="exampleFormControlInput1" className="form-label">Atividades</label>
-            <input className="form-control" id="exampleFormControlInput1" value={atividades}  placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula. Ex: Atendimento, Agendamento" onChange={handleAtividades}/>
+            <input className="form-control" id="exampleFormControlInput1" value={atividades}  placeholder="Adicione as atividades necessárias. Separe as atividades por vírgula ou a letra 'e'. Ex: Atendimento, Agendamento e Comunicação" onChange={handleAtividades}/>
         </div>
         <div className="mb-3">
             <label for="exampleFormControlInput1" className="form-label">Pontos fortes</label>
-            <input className="form-control" id="exampleFormControlInput1" value={fortes}  placeholder="Adicione os pontos fortes. Separe os pontos fortes por vírgula. Ex: Pontualidade, Disciplina" onChange={handleFortes}/>
+            <input className="form-control" id="exampleFormControlInput1" value={fortes}  placeholder="Adicione os pontos fortes. Separe os pontos fortes por vírgula ou a letra 'e'. Ex: Pontualidade, Disciplina e Honestidade" onChange={handleFortes}/>
         </div>
         <div className="mb-3">
             <label for="exampleFormControlInput1" className="form-label">Pontos de atenção</label>
-            <input className="form-control" id="exampleFormControlInput1" value={atencao}  placeholder="Adicione os pontos fortes. Separe os pontos de atenção por vírgula. Ex: Atrasos, Falta de Conhecimento" onChange={handleAtencao}/>
+            <input className="form-control" id="exampleFormControlInput1" value={atencao}  placeholder="Adicione os pontos fortes. Separe os pontos de atenção por vírgula ou a letra 'e'. Ex: Atrasos, Vestimenta e Desrespeito" onChange={handleAtencao}/>
         </div>
         <div className="mb-3">
             <label for="exampleFormControlInput1" className="form-label">Ações de melhorias</label>
-            <input className="form-control" id="exampleFormControlInput1" value={melhorias}  placeholder="Adicione as ações de melhorias. Separe as ações de melhorias por vírgula. Ex: Aumentar conhecimentos, Treinamentos" onChange={handleMelhorias}/>
+            <input className="form-control" id="exampleFormControlInput1" value={melhorias}  placeholder="Adicione as ações de melhorias. Separe as ações de melhorias por vírgula ou a letra 'e'. Ex: Cursos, Treinamentos e Comunicação" onChange={handleMelhorias}/>
         </div>
 
         <div className="mb-3">
