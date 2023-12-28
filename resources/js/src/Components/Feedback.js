@@ -159,6 +159,7 @@ export default function Feedback({ listaCadastro }) {
   //useEffect para avaliar
   useEffect(()=>{
     setAvaliar2(current=>!current);
+    setHistorico(false);
   },[avaliar])
 
 
@@ -233,6 +234,8 @@ export default function Feedback({ listaCadastro }) {
           avaliar2={avaliar2}
           onHistorico={(e) => setHistorico(e)}
           onAvaliacao={(e) => setAvaliar2(e)}
+          idFuncionario={idFuncionario}
+          onChangeId={(e)=> setIdFuncionario(e)}
         />
       )}
     </>

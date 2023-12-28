@@ -3,7 +3,7 @@ import './Canva.css';
 import { useState, useEffect } from 'react';
 import Dialog from './Dialog';
 
-export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao }) {
+export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao, idFuncionario, onChangeId }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
   const [competencia, setCompetencia] = useState('');
@@ -148,6 +148,41 @@ export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao })
     console.log(lista);
     onHistorico(true);
     onAvaliacao(false);
+
+
+    axios
+                .put(`/cadastro/${idFuncionario}/update-avaliacao`, {
+                    avaliacoes: lista,
+                })
+                .then((response) => {
+                    console.log("Resposta do servidor:", response.data)
+                    // Aqui você pode atualizar o estado ou fazer outras ações com base na resposta
+                    setHistorico(true)
+                })
+
+            axios
+                .get("/cadastrados")
+                .then((response) => {
+                    const lista = response.data
+                    const listaFiltrada = lista.filter(
+                        (item) => item.administrador === usuario,
+                    )
+                    setListaCadastro(listaFiltrada)
+
+                    const id = response.data.length
+                        ? lista[response.data.length - 1].id
+                        : 0
+                    console.log(`Este é o id final: ${id}`)
+                    onChangeId(id)
+                })
+                .catch((error) => {
+                    // Tratar erros da segunda requisição, se necessário
+                    console.error("Erro na segunda requisição:", error)
+                })
+
+                .catch((error) => {
+                    console.error("Erro ao enviar requisição:", error)
+                });
   }, [notaFinal]);
 
   //Função para calcular a nota
