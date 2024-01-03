@@ -5,6 +5,24 @@ import { useState, useEffect } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
 
+// 1. Renomeie e extraia a lógica do useEffect para ordenar os dados
+function orderEmployeeData(data) {
+  const dadosOrdenados = [...data].sort((a, b) => {
+    const nomeA = a.nome.toUpperCase();
+    const nomeB = b.nome.toUpperCase();
+
+    if (nomeA < nomeB) {
+      return -1;
+    }
+    if (nomeA > nomeB) {
+      return 1;
+    }
+    return 0;
+  });
+
+  return dadosOrdenados;
+}
+
 export default function Feedback({
   listaCadastro,
   usuario,
@@ -38,35 +56,18 @@ export default function Feedback({
     color: 'gray',
   };
 
-  //useEffect para o controle da paginação
+  // useEffect para a ordenação por nome
   useEffect(() => {
-    if (filter) {
-      setPage(1);
+    const dadosOrdenados = orderEmployeeData(dadosFuncionario);
+
+    // Verifique se os dados ordenados são diferentes dos dados originais antes de atualizar o estado
+    const isDifferent =
+      JSON.stringify(dadosOrdenados) !== JSON.stringify(dadosFuncionario);
+
+    // Atualize o estado apenas se os dados ordenados forem diferentes dos dados originais
+    if (isDifferent) {
+      setDadosFuncionario(dadosOrdenados);
     }
-  }, [filter]);
-
-  function is_Natural(n) {
-    if (typeof n !== 'number') return 'Not a number';
-
-    return n >= 0.0 && Math.floor(n) === n && n !== Infinity;
-  }
-
-  //UseEffect para fazer a ordenação por nome
-  useEffect(() => {
-    const dados = dadosFuncionario.sort((a, b) => {
-      const nomeA = a.nome.toUpperCase();
-      const nomeB = b.nome.toUpperCase();
-
-      if (nomeA < nomeB) {
-        return -1;
-      }
-      if (nomeA > nomeB) {
-        return 1;
-      }
-      return 0;
-    });
-
-    setDadosFuncionarioSort(dados);
   }, [dadosFuncionario]);
 
   //Lógica para o controle da paginação
@@ -74,8 +75,28 @@ export default function Feedback({
   var pageSize = 3;
 
   useEffect(() => {
-    setPage(1); // Redefine a página para 1 sempre que a lista filtrada mudar
+    setPage(1);
   }, [listaCadastro]);
+
+  function orderEmployeeData(data) {
+    return [...data].sort((a, b) => {
+      const nomeA = a.nome.toUpperCase();
+      const nomeB = b.nome.toUpperCase();
+      if (nomeA < nomeB) return -1;
+      if (nomeA > nomeB) return 1;
+      return 0;
+    });
+  }
+
+  useEffect(() => {
+    const dadosOrdenados = orderEmployeeData(dadosFuncionario);
+    const isDifferent =
+      JSON.stringify(dadosOrdenados) !== JSON.stringify(dadosFuncionario);
+
+    if (isDifferent) {
+      setDadosFuncionario(dadosOrdenados);
+    }
+  }, [dadosFuncionario]);
 
   useEffect(() => {
     const offset = (page - 1) * pageSize;
@@ -85,11 +106,7 @@ export default function Feedback({
         : listaFiltrada.slice(offset, offset + pageSize);
 
     setDadosFuncionario(dataToShow);
-  }, [page, pageSize, listaCadastro, listaFiltrada,dadosFuncionario]);
-
-  useEffect(() => {
-    setDadosFuncionario(currentData);
-  }, [currentData]);
+  }, [page, pageSize, listaCadastro, listaFiltrada]);
 
   const totalPage = Math.ceil(
     (listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) /
@@ -127,8 +144,9 @@ export default function Feedback({
 
   //Função para voltar a tela do início da seleção dos funcionários
   function voltar() {
-    setFuncionarioEscolhido((current) => !current);
+    setFuncionarioEscolhido(false);
     setDadosFuncionario(listaCadastro);
+    setListaFiltrada(listaCadastro); // Redefinindo lista filtrada para lista completa
   }
 
   //Seleciona pelo clique no card
@@ -138,22 +156,14 @@ export default function Feedback({
     );
 
     if (funcionarioSelecionado) {
-      // Define os dados do funcionário selecionado
       setDadosFuncionario([funcionarioSelecionado]);
       setIdFuncionario(id);
-
-      // Redefine a página atual para 1 (ou outra página inicial)
       setPage(1);
-      // Redefine os dados exibidos para conter apenas o funcionário selecionado
-      setListaFiltrada([funcionarioSelecionado]); // ou outra lógica para exibir apenas o funcionário selecionado
-
-      console.log(id);
-      console.table([funcionarioSelecionado]);
+      setListaFiltrada([funcionarioSelecionado]);
+      setFuncionarioEscolhido(true);
     } else {
       console.error(`Funcionário com o ID ${id} não encontrado.`);
     }
-
-    setFuncionarioEscolhido((current) => !current);
   }
 
   //Função para apagar funcionário
