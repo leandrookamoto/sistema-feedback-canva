@@ -169,10 +169,16 @@ export default function Feedback({
       const listaFiltrada2 = lista.filter(
         (item) => item.administrador === usuario,
       );
+      const id = response.data.length
+              ? lista[response.data.length - 1].id
+              : 0;
+            console.log(`Este é o id final: ${id}`);
 
       // Atualiza o estado dadosFuncionario com a lista filtrada recebida
       setDadosFuncionario(listaFiltrada2);
       setListaFiltrada(listaFiltrada2);
+      onChangeListaCadastro(listaFiltrada2);
+      onChangeNewId(id);
 
       // Agora que as operações assíncronas foram concluídas, atualiza a variável de controle
       setFuncionarioEscolhido(false);
