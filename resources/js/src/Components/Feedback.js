@@ -257,6 +257,8 @@ export default function Feedback({
           idFuncionario={idFuncionario}
           onChangeId={(e) => setIdFuncionario(e)}
           listaCadastro={listaCadastro}
+          onHistorico={e=>setHistorico(e)}
+          onAvaliacao={e=>setAvaliar2(e)}
         />
       )}
     </>

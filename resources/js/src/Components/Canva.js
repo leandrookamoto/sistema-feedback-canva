@@ -1,6 +1,6 @@
 import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import Dialog from './Dialog';
 
 export default function Canva({
@@ -43,10 +43,47 @@ export default function Canva({
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
 
+  console.log(listaCanva);
+
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
-    console.log(listaCadastro.avaliacoes);
+    const objetoEncontrado = listaCadastro.find(
+      (objeto) => objeto.id === idFuncionario,
+    );
+
+    if (objetoEncontrado) {
+      console.log('Objeto encontrado:', objetoEncontrado);
+      if (objetoEncontrado.avaliacoes) {
+        const avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
+        console.log(avaliacoes);
+        setListaCanva(avaliacoes);
+        setNotaFinal(objetoEncontrado.nota);
+
+        if (Array.isArray(avaliacoes) && avaliacoes.length > 0) {
+          const atividades = avaliacoes[0].atividades || [];
+          console.log(atividades);
+          setAtividades(atividades);
+        } else {
+          console.log('avaliacoes não é um array ou está vazio:', avaliacoes);
+          setAtividades([]);
+        }
+      } else {
+        console.log('Nenhum dado de avaliações encontrado');
+        setListaCanva([]);
+        setAtividades([]);
+      }
+    } else {
+      console.log('Nenhum objeto encontrado com o ID:', idProcurado);
+      setListaCanva([]);
+      setAtividades([]);
+    }
   }, []);
+
+  useEffect(() => {
+    // Este useEffect monitora as alterações em listaCanva
+    // e executa o que for necessário quando ela mudar
+    console.log('ListaCanva alterada:', listaCanva);
+  }, [listaCanva]);
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -455,7 +492,7 @@ export default function Canva({
           <div className="row">
             <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
               {listaCanva.length > 0 &&
-                listaAtividades.length > 0 &&
+                
                 listaCanva.map(
                   (item, index) =>
                     item.competencia && ( // Verifica se a competência existe
