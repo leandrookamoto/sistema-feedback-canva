@@ -5,7 +5,12 @@ import { useState, useEffect } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
 
-export default function Feedback({ listaCadastro }) {
+export default function Feedback({
+  listaCadastro,
+  usuario,
+  onChangeListaCadastro,
+  onChangeNewId,
+}) {
   //Variável para gravação de estado para a função pesquisar
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [dadosFuncionario, setDadosFuncionario] = useState([]);
@@ -17,6 +22,7 @@ export default function Feedback({ listaCadastro }) {
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
   const [avaliar2, setAvaliar2] = useState(false);
+  const [validacaoApagar, setValidacaoApagar] = useState(false);
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -65,7 +71,7 @@ export default function Feedback({ listaCadastro }) {
 
   //Lógica para o controle da paginação
   const [page, setPage] = useState(1);
-  const pageSize = 3;
+  var pageSize = 3;
 
   useEffect(() => {
     setPage(1); // Redefine a página para 1 sempre que a lista filtrada mudar
@@ -78,8 +84,8 @@ export default function Feedback({ listaCadastro }) {
         ? listaCadastro.slice(offset, offset + pageSize)
         : listaFiltrada.slice(offset, offset + pageSize);
 
-    setCurrentData(dataToShow);
-  }, [page, pageSize, listaCadastro, listaFiltrada]);
+    setDadosFuncionario(dataToShow);
+  }, [page, pageSize, listaCadastro, listaFiltrada,dadosFuncionario]);
 
   useEffect(() => {
     setDadosFuncionario(currentData);
@@ -150,18 +156,41 @@ export default function Feedback({ listaCadastro }) {
     setFuncionarioEscolhido((current) => !current);
   }
 
+  //Função para apagar funcionário
+  async function apagar() {
+    try {
+      // Lógica para apagar o funcionário selecionado
+      await axios.delete(`/deleteFuncionario/${idFuncionario}`);
+
+      // Faz a requisição para obter a lista de funcionários atualizada
+      const response = await axios.get('/cadastrados');
+      const lista = response.data;
+      const listaFiltrada2 = lista.filter(
+        (item) => item.administrador === usuario,
+      );
+
+      // Atualiza o estado dadosFuncionario com a lista filtrada recebida
+      setDadosFuncionario(listaFiltrada2);
+      setListaFiltrada(listaFiltrada2);
+
+      // Agora que as operações assíncronas foram concluídas, atualiza a variável de controle
+      setFuncionarioEscolhido(false);
+    } catch (error) {
+      // Tratar erros caso a deleção ou a requisição GET falhem
+      console.error('Erro ao apagar o funcionário ou obter a lista:', error);
+    }
+  }
+
   //Função para renderizar a avaliação
   function onClickBotao1() {
-    setAvaliar(current=>!current);
-    
+    setAvaliar((current) => !current);
   }
 
   //useEffect para avaliar
-  useEffect(()=>{
-    setAvaliar2(current=>!current);
+  useEffect(() => {
+    setAvaliar2((current) => !current);
     setHistorico(false);
-  },[avaliar])
-
+  }, [avaliar]);
 
   return (
     <>
@@ -185,7 +214,7 @@ export default function Feedback({ listaCadastro }) {
             />
           </div>
 
-          {dadosFuncionarioSort.map((item) => (
+          {dadosFuncionario.map((item) => (
             <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
               <Card
                 nome={item.nome}
@@ -207,7 +236,7 @@ export default function Feedback({ listaCadastro }) {
 
       {funcionarioEscolhido && (
         <>
-          {dadosFuncionarioSort.map((item) => (
+          {dadosFuncionario.map((item) => (
             <div key={item.id}>
               <Card
                 nome={item.nome}
@@ -219,7 +248,7 @@ export default function Feedback({ listaCadastro }) {
                 botao2="Histórico"
                 historicoBotao={() => setHistorico((current) => !current)}
                 botao3="Apagar"
-                // apagarBotao={}
+                apagarBotao={apagar}
                 botao4="Voltar"
                 voltar={voltar}
               />
@@ -235,7 +264,7 @@ export default function Feedback({ listaCadastro }) {
           onHistorico={(e) => setHistorico(e)}
           onAvaliacao={(e) => setAvaliar2(e)}
           idFuncionario={idFuncionario}
-          onChangeId={(e)=> setIdFuncionario(e)}
+          onChangeId={(e) => setIdFuncionario(e)}
         />
       )}
     </>
