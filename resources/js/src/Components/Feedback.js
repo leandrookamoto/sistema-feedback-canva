@@ -5,24 +5,6 @@ import { useState, useEffect } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
 
-// 1. Renomeie e extraia a lógica do useEffect para ordenar os dados
-function orderEmployeeData(data) {
-  const dadosOrdenados = [...data].sort((a, b) => {
-    const nomeA = a.nome.toUpperCase();
-    const nomeB = b.nome.toUpperCase();
-
-    if (nomeA < nomeB) {
-      return -1;
-    }
-    if (nomeA > nomeB) {
-      return 1;
-    }
-    return 0;
-  });
-
-  return dadosOrdenados;
-}
-
 export default function Feedback({
   listaCadastro,
   usuario,
@@ -32,10 +14,8 @@ export default function Feedback({
   //Variável para gravação de estado para a função pesquisar
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [dadosFuncionario, setDadosFuncionario] = useState([]);
-  const [dadosFuncionarioSort, setDadosFuncionarioSort] = useState([]);
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [filter, setFilter] = useState('');
-  const [currentData, setCurrentData] = useState([]);
   const [funcionarioEscolhido, setFuncionarioEscolhido] = useState(false);
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
@@ -138,6 +118,8 @@ export default function Feedback({
     setFuncionarioEscolhido(false);
     setDadosFuncionario(listaCadastro);
     setListaFiltrada(listaCadastro); // Redefinindo lista filtrada para lista completa
+    setAvaliar(false);
+    setAvaliar2(false);
   }
 
   //Seleciona pelo clique no card
@@ -190,14 +172,18 @@ export default function Feedback({
 
   //Função para renderizar a avaliação
   function onClickBotao1() {
-    setAvaliar((current) => !current);
+    setAvaliar(current=>!current);
+    setAvaliar2(current=>!current);
+    setHistorico(false);
   }
 
-  //useEffect para avaliar
-  useEffect(() => {
-    setAvaliar2((current) => !current);
-    setHistorico(false);
-  }, [avaliar]);
+  //Função para renderizar o Histórico
+  function historicoBotao(){
+    setHistorico(current=>!current);
+    setAvaliar(false);
+    setAvaliar2(false);
+  }
+
 
   return (
     <>
@@ -253,7 +239,7 @@ export default function Feedback({
                 onClickBotao1={onClickBotao1}
                 botao1="Avaliar"
                 botao2="Histórico"
-                historicoBotao={() => setHistorico((current) => !current)}
+                historicoBotao={historicoBotao}
                 botao3="Apagar"
                 apagarBotao={apagar}
                 botao4="Voltar"
@@ -268,10 +254,9 @@ export default function Feedback({
         <Canva
           historico={historico}
           avaliar2={avaliar2}
-          onHistorico={(e) => setHistorico(e)}
-          onAvaliacao={(e) => setAvaliar2(e)}
           idFuncionario={idFuncionario}
           onChangeId={(e) => setIdFuncionario(e)}
+          listaCadastro={listaCadastro}
         />
       )}
     </>

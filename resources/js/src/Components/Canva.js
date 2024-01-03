@@ -3,7 +3,15 @@ import './Canva.css';
 import { useState, useEffect } from 'react';
 import Dialog from './Dialog';
 
-export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao, idFuncionario, onChangeId }) {
+export default function Canva({
+  historico,
+  avaliar2,
+  onHistorico,
+  onAvaliacao,
+  idFuncionario,
+  onChangeId,
+  listaCadastro,
+}) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
   const [competencia, setCompetencia] = useState('');
@@ -34,6 +42,11 @@ export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao, i
   const descricao =
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
+
+  //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
+  useEffect(() => {
+    console.log(listaCadastro.avaliacoes);
+  }, []);
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -124,65 +137,45 @@ export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao, i
       setOpen(true);
     } else {
       calculateFinalGrade();
-      // Eu usei o useEffect para deixar a notaFinal atualizada antes de gravar
+      // Chame o useEffect explicitamente para a gravação quando a notaFinal for atualizada
+      // O useEffect atualizará a listaCanva somente se a notaFinal não for nula
+      axios
+        .put(`/cadastro/${idFuncionario}/update-avaliacao`, {
+          avaliacoes: listaCanva,
+        })
+        .then((response) => {
+          console.log('Resposta do servidor:', response.data);
+          onHistorico(true);
+          onAvaliacao(false);
+          // setHistorico(true);
+          // Restante do seu código de requisição e atualização de estado aqui
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar requisição:', error);
+          // Tratar erros, se necessário
+        });
     }
   }
 
   //useEffect para manter a notaFinal atualizada para gravar
   useEffect(() => {
-    const lista = [
-      ...listaCanva,
-      {
-        competencia: competencia,
-        atividades: listaAtividades,
-        senioridade: senioridade,
-        atencao: listaAtencao,
-        melhorias: listaMelhorias,
-        fortes: listaFortes,
-        mes: mouthDate,
-        ano: yearDate,
-        nota: notaFinal,
-      },
-    ];
-    setListaCanva(lista);
-    console.log(lista);
-    onHistorico(true);
-    onAvaliacao(false);
-
-
-    axios
-                .put(`/cadastro/${idFuncionario}/update-avaliacao`, {
-                    avaliacoes: lista,
-                })
-                .then((response) => {
-                    console.log("Resposta do servidor:", response.data)
-                    // Aqui você pode atualizar o estado ou fazer outras ações com base na resposta
-                    setHistorico(true)
-                })
-
-            axios
-                .get("/cadastrados")
-                .then((response) => {
-                    const lista = response.data
-                    const listaFiltrada = lista.filter(
-                        (item) => item.administrador === usuario,
-                    )
-                    setListaCadastro(listaFiltrada)
-
-                    const id = response.data.length
-                        ? lista[response.data.length - 1].id
-                        : 0
-                    console.log(`Este é o id final: ${id}`)
-                    onChangeId(id)
-                })
-                .catch((error) => {
-                    // Tratar erros da segunda requisição, se necessário
-                    console.error("Erro na segunda requisição:", error)
-                })
-
-                .catch((error) => {
-                    console.error("Erro ao enviar requisição:", error)
-                });
+    if (notaFinal !== null) {
+      const lista = [
+        ...listaCanva,
+        {
+          competencia: competencia,
+          atividades: listaAtividades,
+          senioridade: senioridade,
+          atencao: listaAtencao,
+          melhorias: listaMelhorias,
+          fortes: listaFortes,
+          mes: mouthDate,
+          ano: yearDate,
+          nota: notaFinal,
+        },
+      ];
+      setListaCanva(lista);
+    }
   }, [notaFinal]);
 
   //Função para calcular a nota
@@ -229,15 +222,11 @@ export default function Canva({ historico, avaliar2, onHistorico, onAvaliacao, i
     setYearDate(ano);
   }
 
-  console.log(`Esta é a notaFinal ${notaFinal}`);
-  console.log(avaliar2);
-
   return (
     <>
       {avaliar2 && (
         <>
-
-        <h5>Formulário para avaliação</h5>
+          <h5>Formulário para avaliação</h5>
           <input
             type="date"
             value={selectedDate}
