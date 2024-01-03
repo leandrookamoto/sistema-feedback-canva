@@ -78,6 +78,11 @@ export default function Feedback({
     setPage(1);
   }, [listaCadastro]);
 
+  const totalPage = Math.ceil(
+    (listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) /
+      pageSize,
+  );
+
   function orderEmployeeData(data) {
     return [...data].sort((a, b) => {
       const nomeA = a.nome.toUpperCase();
@@ -89,29 +94,15 @@ export default function Feedback({
   }
 
   useEffect(() => {
-    const dadosOrdenados = orderEmployeeData(dadosFuncionario);
-    const isDifferent =
-      JSON.stringify(dadosOrdenados) !== JSON.stringify(dadosFuncionario);
-
-    if (isDifferent) {
-      setDadosFuncionario(dadosOrdenados);
-    }
-  }, [dadosFuncionario]);
-
-  useEffect(() => {
     const offset = (page - 1) * pageSize;
-    const dataToShow =
-      listaFiltrada.length === 0
-        ? listaCadastro.slice(offset, offset + pageSize)
-        : listaFiltrada.slice(offset, offset + pageSize);
+    const listaOrdenada = listaFiltrada.length === 0
+    ? orderEmployeeData(listaCadastro): orderEmployeeData(listaFiltrada);
 
+    let dataToShow = listaOrdenada.slice(offset, offset + pageSize)
+
+    console.table(dataToShow);
     setDadosFuncionario(dataToShow);
   }, [page, pageSize, listaCadastro, listaFiltrada]);
-
-  const totalPage = Math.ceil(
-    (listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) /
-      pageSize,
-  );
 
   const handleChange = (event, value) => {
     setPage(value);
