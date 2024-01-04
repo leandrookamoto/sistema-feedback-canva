@@ -44,16 +44,14 @@ export default function Canva({
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
 
-
-
   //useEffect para manter o listaRender atualizado.
-  useEffect(()=>{
-    if(listaCanva.length>0){
-    let lista = listaCanva;
-    let render = listaCanva[listaCanva.length-1];
-    setListaRender([render])
+  useEffect(() => {
+    if (listaCanva.length > 0) {
+      let lista = listaCanva;
+      let render = listaCanva[listaCanva.length - 1];
+      setListaRender([render]);
     }
-  },[listaCanva])
+  }, [listaCanva]);
 
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
@@ -62,45 +60,53 @@ export default function Canva({
     );
 
     if (objetoEncontrado) {
-
-
       // Verifica se objetoEncontrado.avaliacoes não é nulo ou indefinido
       if (objetoEncontrado.avaliacoes != null) {
         let avaliacoes = [];
 
         try {
-          avaliacoes = [JSON.parse(objetoEncontrado.avaliacoes)];
+          avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
 
           if (avaliacoes.length > 0) {
             console.table(avaliacoes);
             setListaCanva(avaliacoes);
-            setSenioridade(avaliacoes.map((item) => item.senioridade));
+            setSenioridade(avaliacoes[avaliacoes.length-1].senioridade);
+            setMouthDate(avaliacoes[avaliacoes.length-1].mes);
+            setYearDate(avaliacoes[avaliacoes.length-1].ano);
+
             const atividades =
               avaliacoes[avaliacoes.length - 1].atividades || [];
             setAtividades(atividades);
           } else {
-
             setAtividades([]);
-            setListaCanva([]); // Definir lista como um array vazio se avaliacoes estiver vazio
+            setListaCanva([]); 
             setSenioridade('');
+            setMouthDate('');
+            setYearDate(null);
           }
         } catch (error) {
           console.error('Erro ao analisar avaliações:', error);
           setAtividades([]);
           setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
           setSenioridade('');
+          setMouthDate('');
+          setYearDate(null);
         }
       } else {
         console.log('Nenhum dado de avaliações encontrado');
         setAtividades([]);
         setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
         setSenioridade('');
+        setMouthDate('');
+        setYearDate(null);
       }
     } else {
       console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
       setAtividades([]);
       setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
       setSenioridade('');
+      setMouthDate('');
+      setYearDate(null);
     }
   }, []);
 
@@ -210,7 +216,7 @@ export default function Canva({
         const response = await axios.put(
           `/cadastro/${idFuncionario}/update-avaliacao`,
           {
-            avaliacoes: lista,
+            avaliacoes: [...listaCanva, lista],
           },
         );
 
@@ -284,8 +290,24 @@ export default function Canva({
     setYearDate(ano);
   }
 
+  console.log(listaCanva);
+
   return (
     <>
+      <h5>Escolha a data do Feedback</h5>
+      <select className="form-select mb-2" aria-label="Default select example">
+        <option selected>Escolha a data</option>
+        {listaCanva.map((item, index) => (
+          <>
+            <option
+              key={index}
+              value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+            >
+              {item.mes}/{item.ano}
+            </option>
+          </>
+        ))}
+      </select>
       {avaliar2 && (
         <>
           <h5>Formulário para avaliação</h5>
