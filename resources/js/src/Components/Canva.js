@@ -1,6 +1,6 @@
 import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
-import { useState, useEffect, useRef  } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Dialog from './Dialog';
 
 export default function Canva({
@@ -32,6 +32,8 @@ export default function Canva({
   const [listaRender, setListaRender] = useState([]);
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
+  const [openValidaData, setOpenValidaData] = useState(false);
+  
 
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -45,6 +47,8 @@ export default function Canva({
   const descricao =
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
+
+  const validaData = 'Mês e ano já cadastrados!'
 
   //useEffect para manter o listaRender atualizado.
   useEffect(() => {
@@ -62,16 +66,16 @@ export default function Canva({
             item.mes === dataHistorico.mes && item.ano === dataHistorico.ano,
         );
       }
-      setYearDate(render.map(item=>item.ano));
-      setMouthDate(render.map(item=>item.mes));
+      setYearDate(render.map((item) => item.ano));
+      setMouthDate(render.map((item) => item.mes));
       console.table(render);
       setListaRender(render); // Definindo diretamente o resultado do filtro
     }
   }, [listaCanva, dataHistorico]);
 
-  useEffect(()=>{
+  useEffect(() => {
     setAtividades([]);
-  },[avaliar2])
+  }, [avaliar2]);
 
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
@@ -216,42 +220,53 @@ export default function Canva({
 
   //Função para gravar os dados
   async function gravar() {
-    if (
-      !isValidAtencao ||
-      !isValidAtividades ||
-      !isValidFortes ||
-      !isValidMelhorias
-    ) {
-      setOpen(true);
+    const lista = listaCanva.find(
+      (item) => item.mes === mouthDate && item.ano === yearDate,
+    );
+    console.table(lista);
+    console.log('Este é o mounthDate '+mouthDate)
+    console.log('Este é o year '+yearDate );
+
+    if (lista) {
+      setOpenValidaData(true);
     } else {
-      try {
-        const senior = calculateFinalGrade();
-        const lista = {
-          competencia: competencia,
-          atividades: listaAtividades,
-          senioridade: senior,
-          atencao: listaAtencao,
-          melhorias: listaMelhorias,
-          fortes: listaFortes,
-          mes: mouthDate,
-          ano: yearDate,
-        };
+      if (
+        !isValidAtencao ||
+        !isValidAtividades ||
+        !isValidFortes ||
+        !isValidMelhorias
+      ) {
+        setOpen(true);
+      } else {
+        try {
+          const senior = calculateFinalGrade();
+          const lista = {
+            competencia: competencia,
+            atividades: listaAtividades,
+            senioridade: senior,
+            atencao: listaAtencao,
+            melhorias: listaMelhorias,
+            fortes: listaFortes,
+            mes: mouthDate,
+            ano: yearDate,
+          };
 
-        setSenioridade(senior);
-        setListaCanva([...listaCanva, lista]);
+          setSenioridade(senior);
+          setListaCanva([...listaCanva, lista]);
 
-        const response = await axios.put(
-          `/cadastro/${idFuncionario}/update-avaliacao`,
-          {
-            avaliacoes: [...listaCanva, lista],
-          },
-        );
+          const response = await axios.put(
+            `/cadastro/${idFuncionario}/update-avaliacao`,
+            {
+              avaliacoes: [...listaCanva, lista],
+            },
+          );
 
-        onHistorico(true);
-        onAvaliacao(false);
-      } catch (error) {
-        console.error('Erro ao enviar requisição:', error);
-        // Tratar erros, se necessário
+          onHistorico(true);
+          onAvaliacao(false);
+        } catch (error) {
+          console.error('Erro ao enviar requisição:', error);
+          // Tratar erros, se necessário
+        }
       }
     }
   }
@@ -333,10 +348,8 @@ export default function Canva({
 
   return (
     <>
-      
       {avaliar2 && (
         <>
-        
           <h5>Formulário para avaliação</h5>
           <input
             type="date"
@@ -442,24 +455,24 @@ export default function Canva({
       {historico && (
         <section className="canvaContainer container w-100 mb-3">
           <h5>Escolha a data do Feedback</h5>
-      <select
-        className="form-select mb-2"
-        aria-label="Default select example"
-        onChange={handleData}
-      >
-        <option selected>Escolha a data</option>
-        <option value="Última Data">Última Data</option>
-        {listaCanva.map((item, index) => (
-          <>
-            <option
-              key={index}
-              value={JSON.stringify({ mes: item.mes, ano: item.ano })}
-            >
-              {item.mes}/{item.ano}
-            </option>
-          </>
-        ))}
-      </select>
+          <select
+            className="form-select mb-2"
+            aria-label="Default select example"
+            onChange={handleData}
+          >
+            <option selected>Escolha a data</option>
+            <option value="Última Data">Última Data</option>
+            {listaCanva.map((item, index) => (
+              <>
+                <option
+                  key={index}
+                  value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+                >
+                  {item.mes}/{item.ano}
+                </option>
+              </>
+            ))}
+          </select>
           <div className="headerCanva d-flex justify-content-between align-items-center">
             <div>Feedback Canva</div>
             {mouthDate && (
@@ -790,6 +803,12 @@ export default function Canva({
         open={openValidaNota}
         descricao={validaNota}
         handleClose={() => setOpenValidaNota(false)}
+        Title="Atenção"
+      />
+      <Dialog
+        open={openValidaData}
+        descricao={validaData}
+        handleClose={() => setOpenValidaData(false)}
         Title="Atenção"
       />
     </>
