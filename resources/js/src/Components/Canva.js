@@ -50,18 +50,19 @@ export default function Canva({
     if (listaCanva.length > 0) {
       let render = null;
       if (dataHistorico === 'Última Data') {
-        render = [listaCanva[listaCanva.length - 1]]; 
+        render = [listaCanva[listaCanva.length - 1]];
       } else {
         render = listaCanva.filter(
           (item) =>
-            item.mes === dataHistorico.mes && item.ano === dataHistorico.ano
+            item.mes === dataHistorico.mes && item.ano === dataHistorico.ano,
         );
       }
+      setYearDate(render.map(item=>item.ano));
+      setMouthDate(render.map(item=>item.mes));
       console.table(render);
       setListaRender(render); // Definindo diretamente o resultado do filtro
     }
   }, [listaCanva, dataHistorico]);
-  
 
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
