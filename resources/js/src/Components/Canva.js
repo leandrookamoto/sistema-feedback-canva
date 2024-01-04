@@ -29,6 +29,7 @@ export default function Canva({
   const [selectedDate, setSelectedDate] = useState('');
   const [mouthDate, setMouthDate] = useState('');
   const [yearDate, setYearDate] = useState('');
+  const [listaRender, setListaRender] = useState([]);
 
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -43,53 +44,65 @@ export default function Canva({
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
 
-  console.log(listaCanva);
-  console.log(`Esta é a senioridade ${senioridade}`)
 
-    //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
-    useEffect(() => {
-      const objetoEncontrado = listaCadastro.find(
-        (objeto) => objeto.id === idFuncionario,
-      );
-      
-    
-      if (objetoEncontrado) {
-        console.log('Objeto encontrado:', objetoEncontrado);
-        if (objetoEncontrado.avaliacoes) {
-          const avaliacoes = [JSON.parse(objetoEncontrado.avaliacoes)];
-          console.table(avaliacoes);
-          
-          if (Array.isArray(avaliacoes)) {
+
+  //useEffect para manter o listaRender atualizado.
+  useEffect(()=>{
+    if(listaCanva.length>0){
+    let lista = listaCanva;
+    let render = listaCanva[listaCanva.length-1];
+    setListaRender([render])
+    }
+  },[listaCanva])
+
+  //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
+  useEffect(() => {
+    const objetoEncontrado = listaCadastro.find(
+      (objeto) => objeto.id === idFuncionario,
+    );
+
+    if (objetoEncontrado) {
+
+
+      // Verifica se objetoEncontrado.avaliacoes não é nulo ou indefinido
+      if (objetoEncontrado.avaliacoes != null) {
+        let avaliacoes = [];
+
+        try {
+          avaliacoes = [JSON.parse(objetoEncontrado.avaliacoes)];
+
+          if (avaliacoes.length > 0) {
+            console.table(avaliacoes);
             setListaCanva(avaliacoes);
-            setSenioridade(avaliacoes.map(item=>item.senioridade));
-    
-            if (avaliacoes.length > 0) {
-              const atividades = avaliacoes[avaliacoes.length-1].atividades || [];
-              console.log(atividades);
-              setAtividades(atividades);
-            } else {
-              console.log('avaliacoes está vazio');
-              setAtividades([]);
-            }
+            setSenioridade(avaliacoes.map((item) => item.senioridade));
+            const atividades =
+              avaliacoes[avaliacoes.length - 1].atividades || [];
+            setAtividades(atividades);
           } else {
-            console.log('avaliacoes não é um array:', avaliacoes);
-            setListaCanva([]);
+
             setAtividades([]);
+            setListaCanva([]); // Definir lista como um array vazio se avaliacoes estiver vazio
+            setSenioridade('');
           }
-        } else {
-          console.log('Nenhum dado de avaliações encontrado');
-          setListaCanva([]);
+        } catch (error) {
+          console.error('Erro ao analisar avaliações:', error);
           setAtividades([]);
+          setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+          setSenioridade('');
         }
       } else {
-        console.log('Nenhum objeto encontrado com o ID:', idProcurado);
-        setListaCanva([]);
+        console.log('Nenhum dado de avaliações encontrado');
         setAtividades([]);
+        setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
+        setSenioridade('');
       }
-    }, []);
-    
-  
-
+    } else {
+      console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
+      setAtividades([]);
+      setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
+      setSenioridade('');
+    }
+  }, []);
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -134,7 +147,6 @@ export default function Canva({
     const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
     const isValidInput = regex.test(value);
     setIsValidMelhorias(isValidInput);
-    console.log(value);
   }
 
   //Grava e valida as notas para o cálculo
@@ -180,23 +192,28 @@ export default function Canva({
       setOpen(true);
     } else {
       try {
-        const senior = calculateFinalGrade(); 
+        const senior = calculateFinalGrade();
+        const lista = {
+          competencia: competencia,
+          atividades: listaAtividades,
+          senioridade: senior,
+          atencao: listaAtencao,
+          melhorias: listaMelhorias,
+          fortes: listaFortes,
+          mes: mouthDate,
+          ano: yearDate,
+        };
 
-  
-        const response = await axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
-          avaliacoes: {
-            competencia: competencia,
-            atividades: listaAtividades,
-            senioridade: senior,
-            atencao: listaAtencao,
-            melhorias: listaMelhorias,
-            fortes: listaFortes,
-            mes: mouthDate,
-            ano: yearDate,
+        setSenioridade(senior);
+        setListaCanva([...listaCanva, lista]);
+
+        const response = await axios.put(
+          `/cadastro/${idFuncionario}/update-avaliacao`,
+          {
+            avaliacoes: lista,
           },
-        });
-  
-        console.log('Resposta do servidor:', response.data);
+        );
+
         onHistorico(true);
         onAvaliacao(false);
       } catch (error) {
@@ -205,8 +222,6 @@ export default function Canva({
       }
     }
   }
-  
-
 
   //Função para calcular a nota
   function calculateFinalGrade() {
@@ -215,23 +230,22 @@ export default function Canva({
     const final = total / notesValues.length || 0;
     setNotaFinal(final.toFixed(2));
 
-    let senior = ''
+    let senior = '';
     if (final <= 1) {
-       return senior='novato';
+      return (senior = 'novato');
     } else if (final <= 2) {
-       return senior='aprendiz';
+      return (senior = 'aprendiz');
     } else if (final <= 3) {
-       return senior='praticante';;
+      return (senior = 'praticante');
     } else if (final <= 4) {
-       return senior='profissional';
+      return (senior = 'profissional');
     } else if (final <= 5) {
-       return senior='professor';
+      return (senior = 'professor');
     } else if (final <= 6) {
-       return senior='lider';
+      return (senior = 'lider');
     } else {
-       return senior='mestre';
+      return (senior = 'mestre');
     }
-  
   }
 
   //Função para obter somente o mês pelo input date
@@ -502,9 +516,8 @@ export default function Canva({
 
           <div className="row">
             <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
-              {listaCanva.length > 0 &&
-                
-                listaCanva.map(
+              {listaRender.length > 0 &&
+                listaRender.map(
                   (item, index) =>
                     item.competencia && ( // Verifica se a competência existe
                       <div
@@ -518,7 +531,7 @@ export default function Canva({
             </div>
             <div className="customBorder3 col-3">
               <div className="box mt-1">
-                {listaCanva.map((item) =>
+                {listaRender.map((item) =>
                   item.atividades.map((item, index) => (
                     <div
                       className={
@@ -534,7 +547,7 @@ export default function Canva({
               </div>
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='novato' && (
+              {senioridade == 'novato' && (
                 <div
                   className="mb-3"
                   style={{
@@ -547,7 +560,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='aprendiz' && (
+              {senioridade == 'aprendiz' && (
                 <div
                   className="mb-3"
                   style={{
@@ -560,7 +573,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='praticante' && (
+              {senioridade == 'praticante' && (
                 <div
                   className="mb-3"
                   style={{
@@ -573,7 +586,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='profissional' && (
+              {senioridade == 'profissional' && (
                 <div
                   className="mb-3"
                   style={{
@@ -586,7 +599,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='professor' && (
+              {senioridade == 'professor' && (
                 <div
                   className="mb-3"
                   style={{
@@ -599,7 +612,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='lider' && (
+              {senioridade == 'lider' && (
                 <div
                   className="mb-3"
                   style={{
@@ -612,7 +625,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade=='mestre' && (
+              {senioridade == 'mestre' && (
                 <div
                   className="mb-3"
                   style={{
@@ -644,7 +657,7 @@ export default function Canva({
                   <div>Pontos Fortes</div>
                 </div>
                 <div className="customBorder7">
-                  {listaCanva.map((item) =>
+                  {listaRender.map((item) =>
                     item.fortes.map((item, index) => <div>{item}</div>),
                   )}
                 </div>
@@ -667,7 +680,7 @@ export default function Canva({
                   <div>Pontos de atenção</div>
                 </div>
                 <div className="customBorder7">
-                  {listaCanva.map((item) =>
+                  {listaRender.map((item) =>
                     item.atencao.map((item, index) => <div>{item}</div>),
                   )}
                 </div>
@@ -689,7 +702,7 @@ export default function Canva({
                   <div>Ações de melhoria</div>
                 </div>
                 <div className="customBorder7">
-                  {listaCanva.map((item) =>
+                  {listaRender.map((item) =>
                     item.melhorias.map((item, index) => <div>{item}</div>),
                   )}
                 </div>
