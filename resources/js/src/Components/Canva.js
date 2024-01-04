@@ -30,6 +30,7 @@ export default function Canva({
   const [mouthDate, setMouthDate] = useState('');
   const [yearDate, setYearDate] = useState('');
   const [listaRender, setListaRender] = useState([]);
+  const [dataHistorico, setDataHistorico] = useState('Última Data');
 
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -47,11 +48,20 @@ export default function Canva({
   //useEffect para manter o listaRender atualizado.
   useEffect(() => {
     if (listaCanva.length > 0) {
-      let lista = listaCanva;
-      let render = listaCanva[listaCanva.length - 1];
-      setListaRender([render]);
+      let render = null;
+      if (dataHistorico === 'Última Data') {
+        render = [listaCanva[listaCanva.length - 1]]; 
+      } else {
+        render = listaCanva.filter(
+          (item) =>
+            item.mes === dataHistorico.mes && item.ano === dataHistorico.ano
+        );
+      }
+      console.table(render);
+      setListaRender(render); // Definindo diretamente o resultado do filtro
     }
-  }, [listaCanva]);
+  }, [listaCanva, dataHistorico]);
+  
 
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
@@ -70,16 +80,16 @@ export default function Canva({
           if (avaliacoes.length > 0) {
             console.table(avaliacoes);
             setListaCanva(avaliacoes);
-            setSenioridade(avaliacoes[avaliacoes.length-1].senioridade);
-            setMouthDate(avaliacoes[avaliacoes.length-1].mes);
-            setYearDate(avaliacoes[avaliacoes.length-1].ano);
+            setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
+            setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
+            setYearDate(avaliacoes[avaliacoes.length - 1].ano);
 
             const atividades =
               avaliacoes[avaliacoes.length - 1].atividades || [];
             setAtividades(atividades);
           } else {
             setAtividades([]);
-            setListaCanva([]); 
+            setListaCanva([]);
             setSenioridade('');
             setMouthDate('');
             setYearDate(null);
@@ -175,6 +185,11 @@ export default function Canva({
       }
     }
   };
+
+  function handleCompetencia(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setCompetencia(value);
+  }
 
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
@@ -290,13 +305,30 @@ export default function Canva({
     setYearDate(ano);
   }
 
+  function handleData(e) {
+    const meuDado = {};
+    const data =
+      e.currentTarget.value === 'Última Data'
+        ? 'Última Data'
+        : JSON.parse(e.currentTarget.value);
+
+    setDataHistorico(data);
+
+    console.log(data);
+  }
+
   console.log(listaCanva);
 
   return (
     <>
       <h5>Escolha a data do Feedback</h5>
-      <select className="form-select mb-2" aria-label="Default select example">
+      <select
+        className="form-select mb-2"
+        aria-label="Default select example"
+        onChange={handleData}
+      >
         <option selected>Escolha a data</option>
+        <option value="Última Data">Última Data</option>
         {listaCanva.map((item, index) => (
           <>
             <option
@@ -328,7 +360,7 @@ export default function Canva({
               id="exampleFormControlInput1"
               placeholder="Adicione a competência necessária"
               value={competencia}
-              onChange={(e) => setCompetencia(e.currentTarget.value)}
+              onChange={handleCompetencia}
             />
           </div>
           <div className="mb-3">
