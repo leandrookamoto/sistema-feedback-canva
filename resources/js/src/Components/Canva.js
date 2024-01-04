@@ -1,6 +1,6 @@
 import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef  } from 'react';
 import Dialog from './Dialog';
 
 export default function Canva({
@@ -31,6 +31,7 @@ export default function Canva({
   const [yearDate, setYearDate] = useState('');
   const [listaRender, setListaRender] = useState([]);
   const [dataHistorico, setDataHistorico] = useState('Última Data');
+  const montagemInicial = useRef(true);
 
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -47,6 +48,10 @@ export default function Canva({
 
   //useEffect para manter o listaRender atualizado.
   useEffect(() => {
+    if (montagemInicial.current) {
+      montagemInicial.current = false;
+      return;
+    }
     if (listaCanva.length > 0) {
       let render = null;
       if (dataHistorico === 'Última Data') {
@@ -63,6 +68,14 @@ export default function Canva({
       setListaRender(render); // Definindo diretamente o resultado do filtro
     }
   }, [listaCanva, dataHistorico]);
+
+  useEffect(()=>{
+    if (montagemInicial.current) {
+      montagemInicial.current = false;
+      return;
+    }
+    setAtividades([]);
+  },[avaliar2])
 
   //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
@@ -343,6 +356,7 @@ export default function Canva({
       </select>
       {avaliar2 && (
         <>
+        
           <h5>Formulário para avaliação</h5>
           <input
             type="date"
