@@ -335,25 +335,7 @@ export default function Canva({
 
   return (
     <>
-      <h5>Escolha a data do Feedback</h5>
-      <select
-        className="form-select mb-2"
-        aria-label="Default select example"
-        onChange={handleData}
-      >
-        <option selected>Escolha a data</option>
-        <option value="Última Data">Última Data</option>
-        {listaCanva.map((item, index) => (
-          <>
-            <option
-              key={index}
-              value={JSON.stringify({ mes: item.mes, ano: item.ano })}
-            >
-              {item.mes}/{item.ano}
-            </option>
-          </>
-        ))}
-      </select>
+      
       {avaliar2 && (
         <>
         
@@ -461,6 +443,25 @@ export default function Canva({
 
       {historico && (
         <section className="canvaContainer container w-100 mb-3">
+          <h5>Escolha a data do Feedback</h5>
+      <select
+        className="form-select mb-2"
+        aria-label="Default select example"
+        onChange={handleData}
+      >
+        <option selected>Escolha a data</option>
+        <option value="Última Data">Última Data</option>
+        {listaCanva.map((item, index) => (
+          <>
+            <option
+              key={index}
+              value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+            >
+              {item.mes}/{item.ano}
+            </option>
+          </>
+        ))}
+      </select>
           <div className="headerCanva d-flex justify-content-between align-items-center">
             <div>Feedback Canva</div>
             {mouthDate && (
