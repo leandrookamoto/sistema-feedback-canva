@@ -208,14 +208,19 @@ export default function Canva({
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
     const exceptions = ['de', 'e']; // Palavras que devem permanecer em minúsculas
-    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
-      const word = match.toLowerCase();
-      if (exceptions.includes(word)) {
-        return word;
+  
+    const capitalize = (word) => {
+      const lowerCaseWord = word.toLowerCase();
+      if (exceptions.includes(lowerCaseWord)) {
+        return lowerCaseWord;
       } else {
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
-    });
+    };
+  
+    return sentence
+      .toLowerCase()
+      .replace(/[\wÀ-ú']+|-/g, (match) => capitalize(match));
   }
 
   //Função para gravar os dados
