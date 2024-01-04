@@ -1,6 +1,6 @@
 import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from './Dialog';
 
 export default function Canva({
@@ -44,46 +44,52 @@ export default function Canva({
   const validaNota = 'O intervalo de notas é de 1 a 7';
 
   console.log(listaCanva);
+  console.log(`Esta é a senioridade ${senioridade}`)
 
-  //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
-  useEffect(() => {
-    const objetoEncontrado = listaCadastro.find(
-      (objeto) => objeto.id === idFuncionario,
-    );
-
-    if (objetoEncontrado) {
-      console.log('Objeto encontrado:', objetoEncontrado);
-      if (objetoEncontrado.avaliacoes) {
-        const avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-        console.log(avaliacoes);
-        setListaCanva(avaliacoes);
-        setNotaFinal(objetoEncontrado.nota);
-
-        if (Array.isArray(avaliacoes) && avaliacoes.length > 0) {
-          const atividades = avaliacoes[0].atividades || [];
-          console.log(atividades);
-          setAtividades(atividades);
+    //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
+    useEffect(() => {
+      const objetoEncontrado = listaCadastro.find(
+        (objeto) => objeto.id === idFuncionario,
+      );
+      
+    
+      if (objetoEncontrado) {
+        console.log('Objeto encontrado:', objetoEncontrado);
+        if (objetoEncontrado.avaliacoes) {
+          const avaliacoes = [JSON.parse(objetoEncontrado.avaliacoes)];
+          console.table(avaliacoes);
+          
+          if (Array.isArray(avaliacoes)) {
+            setListaCanva(avaliacoes);
+            setSenioridade(avaliacoes.map(item=>item.senioridade));
+    
+            if (avaliacoes.length > 0) {
+              const atividades = avaliacoes[avaliacoes.length-1].atividades || [];
+              console.log(atividades);
+              setAtividades(atividades);
+            } else {
+              console.log('avaliacoes está vazio');
+              setAtividades([]);
+            }
+          } else {
+            console.log('avaliacoes não é um array:', avaliacoes);
+            setListaCanva([]);
+            setAtividades([]);
+          }
         } else {
-          console.log('avaliacoes não é um array ou está vazio:', avaliacoes);
+          console.log('Nenhum dado de avaliações encontrado');
+          setListaCanva([]);
           setAtividades([]);
         }
       } else {
-        console.log('Nenhum dado de avaliações encontrado');
+        console.log('Nenhum objeto encontrado com o ID:', idProcurado);
         setListaCanva([]);
         setAtividades([]);
       }
-    } else {
-      console.log('Nenhum objeto encontrado com o ID:', idProcurado);
-      setListaCanva([]);
-      setAtividades([]);
-    }
-  }, []);
+    }, []);
+    
+  
 
-  useEffect(() => {
-    // Este useEffect monitora as alterações em listaCanva
-    // e executa o que for necessário quando ela mudar
-    console.log('ListaCanva alterada:', listaCanva);
-  }, [listaCanva]);
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -164,7 +170,7 @@ export default function Canva({
   }
 
   //Função para gravar os dados
-  function gravar() {
+  async function gravar() {
     if (
       !isValidAtencao ||
       !isValidAtividades ||
@@ -173,47 +179,34 @@ export default function Canva({
     ) {
       setOpen(true);
     } else {
-      calculateFinalGrade();
-      // Chame o useEffect explicitamente para a gravação quando a notaFinal for atualizada
-      // O useEffect atualizará a listaCanva somente se a notaFinal não for nula
-      axios
-        .put(`/cadastro/${idFuncionario}/update-avaliacao`, {
-          avaliacoes: listaCanva,
-        })
-        .then((response) => {
-          console.log('Resposta do servidor:', response.data);
-          onHistorico(true);
-          onAvaliacao(false);
-          // setHistorico(true);
-          // Restante do seu código de requisição e atualização de estado aqui
-        })
-        .catch((error) => {
-          console.error('Erro ao enviar requisição:', error);
-          // Tratar erros, se necessário
+      try {
+        const senior = calculateFinalGrade(); 
+
+  
+        const response = await axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
+          avaliacoes: {
+            competencia: competencia,
+            atividades: listaAtividades,
+            senioridade: senior,
+            atencao: listaAtencao,
+            melhorias: listaMelhorias,
+            fortes: listaFortes,
+            mes: mouthDate,
+            ano: yearDate,
+          },
         });
+  
+        console.log('Resposta do servidor:', response.data);
+        onHistorico(true);
+        onAvaliacao(false);
+      } catch (error) {
+        console.error('Erro ao enviar requisição:', error);
+        // Tratar erros, se necessário
+      }
     }
   }
+  
 
-  //useEffect para manter a notaFinal atualizada para gravar
-  useEffect(() => {
-    if (notaFinal !== null) {
-      const lista = [
-        ...listaCanva,
-        {
-          competencia: competencia,
-          atividades: listaAtividades,
-          senioridade: senioridade,
-          atencao: listaAtencao,
-          melhorias: listaMelhorias,
-          fortes: listaFortes,
-          mes: mouthDate,
-          ano: yearDate,
-          nota: notaFinal,
-        },
-      ];
-      setListaCanva(lista);
-    }
-  }, [notaFinal]);
 
   //Função para calcular a nota
   function calculateFinalGrade() {
@@ -221,6 +214,24 @@ export default function Canva({
     const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
     const final = total / notesValues.length || 0;
     setNotaFinal(final.toFixed(2));
+
+    let senior = ''
+    if (final <= 1) {
+       return senior='novato';
+    } else if (final <= 2) {
+       return senior='aprendiz';
+    } else if (final <= 3) {
+       return senior='praticante';;
+    } else if (final <= 4) {
+       return senior='profissional';
+    } else if (final <= 5) {
+       return senior='professor';
+    } else if (final <= 6) {
+       return senior='lider';
+    } else {
+       return senior='mestre';
+    }
+  
   }
 
   //Função para obter somente o mês pelo input date
@@ -523,7 +534,7 @@ export default function Canva({
               </div>
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal == 1 && (
+              {senioridade=='novato' && (
                 <div
                   className="mb-3"
                   style={{
@@ -536,7 +547,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 1 && notaFinal <= 2 && (
+              {senioridade=='aprendiz' && (
                 <div
                   className="mb-3"
                   style={{
@@ -549,7 +560,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 2 && notaFinal <= 3 && (
+              {senioridade=='praticante' && (
                 <div
                   className="mb-3"
                   style={{
@@ -562,7 +573,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 3 && notaFinal <= 4 && (
+              {senioridade=='profissional' && (
                 <div
                   className="mb-3"
                   style={{
@@ -575,7 +586,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 4 && notaFinal <= 5 && (
+              {senioridade=='professor' && (
                 <div
                   className="mb-3"
                   style={{
@@ -588,7 +599,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 5 && notaFinal <= 6 && (
+              {senioridade=='lider' && (
                 <div
                   className="mb-3"
                   style={{
@@ -601,7 +612,7 @@ export default function Canva({
               )}
             </div>
             <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
-              {notaFinal > 6 && notaFinal <= 7 && (
+              {senioridade=='mestre' && (
                 <div
                   className="mb-3"
                   style={{
