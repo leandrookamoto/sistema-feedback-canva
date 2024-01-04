@@ -70,10 +70,6 @@ export default function Canva({
   }, [listaCanva, dataHistorico]);
 
   useEffect(()=>{
-    if (montagemInicial.current) {
-      montagemInicial.current = false;
-      return;
-    }
     setAtividades([]);
   },[avaliar2])
 
@@ -98,9 +94,9 @@ export default function Canva({
             setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
             setYearDate(avaliacoes[avaliacoes.length - 1].ano);
 
-            const atividades =
-              avaliacoes[avaliacoes.length - 1].atividades || [];
-            setAtividades(atividades);
+            // const atividades =
+            //   avaliacoes[avaliacoes.length - 1].atividades || [];
+            // setAtividades(atividades);
           } else {
             setAtividades([]);
             setListaCanva([]);
@@ -207,11 +203,13 @@ export default function Canva({
 
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
+    const exceptions = ['de', 'e']; // Palavras que devem permanecer em minúsculas
     return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
-      if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
-        return match.toLowerCase();
+      const word = match.toLowerCase();
+      if (exceptions.includes(word)) {
+        return word;
       } else {
-        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+        return word.charAt(0).toUpperCase() + word.slice(1);
       }
     });
   }
