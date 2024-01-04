@@ -120,6 +120,7 @@ export default function Feedback({
     setListaFiltrada(listaCadastro); // Redefinindo lista filtrada para lista completa
     setAvaliar(false);
     setAvaliar2(false);
+    setHistorico(false);
   }
 
   //Seleciona pelo clique no card
