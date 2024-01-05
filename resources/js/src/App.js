@@ -108,42 +108,35 @@ export default function App() {
   }
 
   //Função para cadastrar os funcionários
-  function gravar() {
-    //Gravação de dados caso seja uma edição
-    if (dadosFuncionario.id) {
-      try {
-        // Faz a solicitação PUT para a rota do Laravel usando Axios
-        axios.put(`/funcionario/${dadosFuncionario.id}`, {
+  async function gravar() {
+    try {
+      if (dadosFuncionario.id) {
+        // Edição de funcionário existente
+        await axios.put(`/funcionario/${dadosFuncionario.id}`, {
           nome: nome,
           email: email,
           setor: setor,
-          // Adicione outros campos conforme necessário
         });
-
-        // Limpa os campos após a atualização
-        setNome('');
-        setEmail('');
-        setSetor('');
-        setDadosFuncionario({});
-
-        // Atualiza a interface ou exibe uma mensagem de sucesso
-        console.log('Funcionário atualizado com sucesso!');
-      } catch (error) {
-        console.error('Erro ao atualizar funcionário:', error);
-        // Lida com possíveis erros
-      }
-    } else {
-      // Validação dos inputs
-      if (!nome || !email || !setor) {
-        //Variável para a abertura do Dialog/Modal/Popup
-        setOpen(true);
-        // alert('Favor colocar todos os dados!');
-
-        //Valida se o e-mail é válido!
-      } else if (!isValid) {
-        //Variável para abertura do Dialog que avisa de que é preciso um email válido.
-        setOpenEmail(true);
       } else {
+        // Validação dos inputs e cadastro de novo funcionário
+        if (!nome || !email || !setor) {
+          setOpen(true); // Variável para a abertura do Dialog/Modal/Popup
+          return; // Sai da função se os campos não estiverem preenchidos
+        }
+  
+        if (!isValid) {
+          setOpenEmail(true); // Variável para abertura do Dialog de aviso sobre o email inválido
+          return; // Sai da função se o email não for válido
+        }
+  
+        const emailJaExiste = listaCadastro.some((item) => item.email === email);
+  
+        if (emailJaExiste) {
+          console.log('O e-mail já existe na lista!');
+          setOpenCadastro(true);
+          return; // Sai da função se o email já estiver na lista
+        }
+  
         const novoCadastro = {
           nome: nome,
           email: email,
@@ -151,65 +144,35 @@ export default function App() {
           administrador: usuario,
           id: newId,
         };
-
-        // Verifica se o e-mail já existe na lista
-        const emailJaExiste =
-          listaCadastro.length > 0 &&
-          email !== '' &&
-          listaCadastro.some((item) => item.email === email);
-
-        if (emailJaExiste) {
-          console.log('O e-mail já existe na lista!');
-          setOpenCadastro(true);
-        } else {
-          const lista = [...listaCadastro, novoCadastro];
-          setListaCadastro(lista);
-          setNewId(newId + 1);
-
-          // Essa requisição é necessária para manter o id para as requisições de updates atualizadas!
-          axios
-            .post('/cadastrar-usuario', {
-              nome: nome,
-              email: email,
-              setor: setor,
-              administrador: usuario,
-            })
-            .then((response) => {
-              console.log('Usuário cadastrado com sucesso:', response.data);
-              setCadastroSucesso(true);
-              // Lidar com a resposta do servidor após o cadastro ser realizado com sucesso
-            });
-          axios
-            .get('/cadastrados')
-            .then((response) => {
-              const lista = response.data;
-              const listaFiltrada = lista.filter(
-                (item) => item.administrador === usuario,
-              );
-              setListaCadastro(listaFiltrada);
-
-              const id = response.data.length
-                ? lista[response.data.length - 1].id
-                : 0;
-              console.log(`Este é o id final: ${id}`);
-              setIdFuncionario(id);
-            })
-            .catch((error) => {
-              // Tratar erros da segunda requisição, se necessário
-              console.error('Erro na segunda requisição:', error);
-            })
-
-            .catch((error) => {
-              console.error('Erro ao cadastrar usuário:', error);
-              // Lidar com erros que ocorreram durante o cadastro
-            });
-        }
+  
+        // Cadastro do novo funcionário
+        await axios.post('/cadastrar-usuario', novoCadastro);
+  
+        setListaCadastro([...listaCadastro, novoCadastro]);
+        setNewId(newId + 1);
       }
+  
+      // Atualização da lista após edição ou cadastro
+      const response = await axios.get('/cadastrados');
+      const lista = response.data;
+      const listaFiltrada = lista.filter((item) => item.administrador === usuario);
+      setListaCadastro(listaFiltrada);
+  
+      const id = lista.length ? lista[lista.length - 1].id : 0;
+      setIdFuncionario(id);
+  
+      // Limpa os campos após a atualização ou cadastro
       setNome('');
       setEmail('');
       setSetor('');
+      setDadosFuncionario({});
+      console.log('Atualização realizada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gravar:', error);
+      // Lidar com possíveis erros
     }
   }
+  
 
   //Funções para renderização dos componentes
   function handleCadastrar() {
