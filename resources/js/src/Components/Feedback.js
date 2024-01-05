@@ -1,7 +1,7 @@
 import Card from './Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
 
@@ -11,12 +11,12 @@ export default function Feedback({
   onChangeListaCadastro,
   onChangeNewId,
   onChangeDadosFuncionario,
+  dados,
 }) {
   //Variável para gravação de estado para a função pesquisar
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [dadosFuncionario, setDadosFuncionario] = useState([]);
   const [idFuncionario, setIdFuncionario] = useState(null);
-  const [filter, setFilter] = useState('');
   const [funcionarioEscolhido, setFuncionarioEscolhido] = useState(false);
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
@@ -32,10 +32,13 @@ export default function Feedback({
   const estiloIcone = {
     position: 'absolute',
     top: '50%',
-    left: '10px', // Ajuste a posição do ícone conforme necessário
+    left: '10px',
     transform: 'translateY(-50%)',
     color: 'gray',
   };
+
+  //Const para evitar a montagem inicial do useEffect
+  const montagemInicial = useRef(true);
 
   // useEffect para a ordenação por nome
   useEffect(() => {
@@ -50,6 +53,37 @@ export default function Feedback({
       setDadosFuncionario(dadosOrdenados);
     }
   }, [dadosFuncionario]);
+
+  // UseEffect para renderizar o funcionário direto após a gravação ou edição do mesmo
+  useEffect(() => {
+    if (montagemInicial.current) {
+      montagemInicial.current = false;
+      return;
+    }
+
+   
+     
+    let lista = []; // Inicialize como um array vazio
+
+    axios.get('/cadastrados')
+      .then(response => {
+        lista = response.data;
+    
+        const listaFiltrada2 = lista.filter((item) => item.administrador === usuario);
+        const novaListaFiltrada = listaFiltrada2.filter((item) =>
+          item.email.includes(dados.email),
+        );
+    
+        console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
+        setListaFiltrada(novaListaFiltrada);
+        setPage(1);
+      })
+      .catch(error => {
+        console.error('Erro ao obter os dados:', error);
+        // Lidar com possíveis erros
+      });
+    
+  }, [dados]);
 
   //Lógica para o controle da paginação
   const [page, setPage] = useState(1);
