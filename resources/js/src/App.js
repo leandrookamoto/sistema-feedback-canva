@@ -15,7 +15,7 @@ import Feedback from './Components/Feedback';
 export default function App() {
   //Variáveis para mudança de tela
   const [cadastrar, setCadastrar] = useState(false);
-  const [homeRender, setHomeRender] = useState(false);
+  const [homeRender, setHomeRender] = useState(true);
   const [feedback, setFeedback] = useState(false);
 
   //Variáveis para gravação de estado
@@ -26,11 +26,11 @@ export default function App() {
   const [setor, setSetor] = useState('');
   const [listaCadastro, setListaCadastro] = useState([]);
   const [newId, setNewId] = useState(0);
-  const [mouthDate, setMouthDate] = useState('');
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [isValid, setIsValid] = useState(true);
   const [historico, setHistorico] = useState('');
   const [emailUsuario, setEmailUsuario] = useState('');
+  const [dadosFuncionario, setDadosFuncionario] = useState({});
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -98,7 +98,8 @@ export default function App() {
       });
   }, []);
 
-  function handleEmailChange() {
+  //Grava o email no setEmail (variável email)
+  function handleEmailChange(event) {
     const emailValue = event.target.value;
     setEmail(emailValue.toLowerCase());
 
@@ -108,76 +109,101 @@ export default function App() {
 
   //Função para cadastrar os funcionários
   function gravar() {
-    // Validação dos inputs
-    if (!nome || !email || !setor) {
-      //Variável para a abertura do Dialog/Modal/Popup
-      setOpen(true);
-      // alert('Favor colocar todos os dados!');
+    //Gravação de dados caso seja uma edição
+    if (dadosFuncionario.id) {
+      try {
+        // Faz a solicitação PUT para a rota do Laravel usando Axios
+        axios.put(`/funcionario/${dadosFuncionario.id}`, {
+          nome: nome,
+          email: email,
+          setor: setor,
+          // Adicione outros campos conforme necessário
+        });
 
-      //Valida se o e-mail é válido!
-    } else if (!isValid) {
-      //Variável para abertura do Dialog que avisa de que é preciso um email válido.
-      setOpenEmail(true);
+        // Limpa os campos após a atualização
+        setNome('');
+        setEmail('');
+        setSetor('');
+        setDadosFuncionario({});
+
+        // Atualiza a interface ou exibe uma mensagem de sucesso
+        console.log('Funcionário atualizado com sucesso!');
+      } catch (error) {
+        console.error('Erro ao atualizar funcionário:', error);
+        // Lida com possíveis erros
+      }
     } else {
-      const novoCadastro = {
-        nome: nome,
-        email: email,
-        setor: setor,
-        administrador: usuario,
-        id: newId,
-      };
+      // Validação dos inputs
+      if (!nome || !email || !setor) {
+        //Variável para a abertura do Dialog/Modal/Popup
+        setOpen(true);
+        // alert('Favor colocar todos os dados!');
 
-      // Verifica se o e-mail já existe na lista
-      const emailJaExiste =
-        listaCadastro.length > 0 &&
-        email !== '' &&
-        listaCadastro.some((item) => item.email === email);
-
-      if (emailJaExiste) {
-        console.log('O e-mail já existe na lista!');
-        setOpenCadastro(true);
+        //Valida se o e-mail é válido!
+      } else if (!isValid) {
+        //Variável para abertura do Dialog que avisa de que é preciso um email válido.
+        setOpenEmail(true);
       } else {
-        const lista = [...listaCadastro, novoCadastro];
-        setListaCadastro(lista);
-        setNewId(newId + 1);
+        const novoCadastro = {
+          nome: nome,
+          email: email,
+          setor: setor,
+          administrador: usuario,
+          id: newId,
+        };
 
-        // Essa requisição é necessária para manter o id para as requisições de updates atualizadas!
-        axios
-          .post('/cadastrar-usuario', {
-            nome: nome,
-            email: email,
-            setor: setor,
-            administrador: usuario,
-          })
-          .then((response) => {
-            console.log('Usuário cadastrado com sucesso:', response.data);
-            setCadastroSucesso(true);
-            // Lidar com a resposta do servidor após o cadastro ser realizado com sucesso
-          });
-        axios
-          .get('/cadastrados')
-          .then((response) => {
-            const lista = response.data;
-            const listaFiltrada = lista.filter(
-              (item) => item.administrador === usuario,
-            );
-            setListaCadastro(listaFiltrada);
+        // Verifica se o e-mail já existe na lista
+        const emailJaExiste =
+          listaCadastro.length > 0 &&
+          email !== '' &&
+          listaCadastro.some((item) => item.email === email);
 
-            const id = response.data.length
-              ? lista[response.data.length - 1].id
-              : 0;
-            console.log(`Este é o id final: ${id}`);
-            setIdFuncionario(id);
-          })
-          .catch((error) => {
-            // Tratar erros da segunda requisição, se necessário
-            console.error('Erro na segunda requisição:', error);
-          })
+        if (emailJaExiste) {
+          console.log('O e-mail já existe na lista!');
+          setOpenCadastro(true);
+        } else {
+          const lista = [...listaCadastro, novoCadastro];
+          setListaCadastro(lista);
+          setNewId(newId + 1);
 
-          .catch((error) => {
-            console.error('Erro ao cadastrar usuário:', error);
-            // Lidar com erros que ocorreram durante o cadastro
-          });
+          // Essa requisição é necessária para manter o id para as requisições de updates atualizadas!
+          axios
+            .post('/cadastrar-usuario', {
+              nome: nome,
+              email: email,
+              setor: setor,
+              administrador: usuario,
+            })
+            .then((response) => {
+              console.log('Usuário cadastrado com sucesso:', response.data);
+              setCadastroSucesso(true);
+              // Lidar com a resposta do servidor após o cadastro ser realizado com sucesso
+            });
+          axios
+            .get('/cadastrados')
+            .then((response) => {
+              const lista = response.data;
+              const listaFiltrada = lista.filter(
+                (item) => item.administrador === usuario,
+              );
+              setListaCadastro(listaFiltrada);
+
+              const id = response.data.length
+                ? lista[response.data.length - 1].id
+                : 0;
+              console.log(`Este é o id final: ${id}`);
+              setIdFuncionario(id);
+            })
+            .catch((error) => {
+              // Tratar erros da segunda requisição, se necessário
+              console.error('Erro na segunda requisição:', error);
+            })
+
+            .catch((error) => {
+              console.error('Erro ao cadastrar usuário:', error);
+              // Lidar com erros que ocorreram durante o cadastro
+            });
+        }
       }
       setNome('');
       setEmail('');
@@ -189,11 +215,13 @@ export default function App() {
   function handleCadastrar() {
     setCadastrar(true);
     setFeedback(false);
+    setHomeRender(false);
   }
 
   function handleCadastrados() {
     setCadastrar(false);
     setFeedback(true);
+    setHomeRender(false);
   }
 
   //Função para padronizar a digitação dos inputs
@@ -213,7 +241,24 @@ export default function App() {
     setNome(newName);
   }
 
-  
+  // Função para renderizar home
+  function handleHome() {
+    setHomeRender(true);
+    setCadastrar(false);
+    setFeedback(false);
+  }
+
+  //Função para extrair os dados do funcionário no componente feedback e jogá-lo para o CadastrarComponent
+  function handleDadosFuncionario(e) {
+    const dado = e;
+    setDadosFuncionario(e);
+    setNome(e.nome);
+    setEmail(e.email);
+    setSetor(e.setor);
+    setCadastrar(true);
+    setFeedback(false);
+    setHomeRender(false);
+  }
 
   return (
     <main>
@@ -223,6 +268,7 @@ export default function App() {
         <Sidebar
           onClickCadastrar={handleCadastrar}
           onClickCadastrados={handleCadastrados}
+          onClickHome={handleHome}
         />
 
         <div className="m-3" style={{ width: '70%' }}>
@@ -244,7 +290,15 @@ export default function App() {
             />
           )}
 
-          {feedback && <Feedback listaCadastro={listaCadastro} usuario={usuario} onChangeNewId={e=>setNewId(e)} onChangeListaCadastro={e=>setListaCadastro(e)}/>}
+          {feedback && (
+            <Feedback
+              listaCadastro={listaCadastro}
+              usuario={usuario}
+              onChangeNewId={(e) => setNewId(e)}
+              onChangeListaCadastro={(e) => setListaCadastro(e)}
+              onChangeDadosFuncionario={(e) => handleDadosFuncionario(e)}
+            />
+          )}
         </div>
       </section>
       <Dialog

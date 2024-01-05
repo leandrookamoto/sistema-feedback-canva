@@ -6,8 +6,4 @@ export default function FuncionariosCadastrados(){
     const [page, setPage] = useState(1);
     var pageSize = 12;
 
-
-  
-
-  
 }

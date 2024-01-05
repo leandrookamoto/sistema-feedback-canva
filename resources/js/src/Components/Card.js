@@ -14,6 +14,8 @@ export default function Card({
   botao4,
   voltar,
   onClickBotao1,
+  editar,
+  botao5
 }) {
   return (
     <>
@@ -149,6 +151,15 @@ export default function Card({
                           onClick={voltar}
                         >
                           {botao4}
+                        </button>
+                      )}
+                      {botao5 && (
+                        <button
+                          type="button"
+                          className="btn btn-primary ml-3 mt-3"
+                          onClick={editar}
+                        >
+                          {botao5}
                         </button>
                       )}
                     </div>

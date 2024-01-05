@@ -10,6 +10,7 @@ export default function Feedback({
   usuario,
   onChangeListaCadastro,
   onChangeNewId,
+  onChangeDadosFuncionario,
 }) {
   //Variável para gravação de estado para a função pesquisar
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -75,10 +76,12 @@ export default function Feedback({
 
   useEffect(() => {
     const offset = (page - 1) * pageSize;
-    const listaOrdenada = listaFiltrada.length === 0
-    ? orderEmployeeData(listaCadastro): orderEmployeeData(listaFiltrada);
+    const listaOrdenada =
+      listaFiltrada.length === 0
+        ? orderEmployeeData(listaCadastro)
+        : orderEmployeeData(listaFiltrada);
 
-    let dataToShow = listaOrdenada.slice(offset, offset + pageSize)
+    let dataToShow = listaOrdenada.slice(offset, offset + pageSize);
 
     console.table(dataToShow);
     setDadosFuncionario(dataToShow);
@@ -152,10 +155,8 @@ export default function Feedback({
       const listaFiltrada2 = lista.filter(
         (item) => item.administrador === usuario,
       );
-      const id = response.data.length
-              ? lista[response.data.length - 1].id
-              : 0;
-            console.log(`Este é o id final: ${id}`);
+      const id = response.data.length ? lista[response.data.length - 1].id : 0;
+      console.log(`Este é o id final: ${id}`);
 
       // Atualiza o estado dadosFuncionario com a lista filtrada recebida
       setDadosFuncionario(listaFiltrada2);
@@ -173,18 +174,24 @@ export default function Feedback({
 
   //Função para renderizar a avaliação
   function onClickBotao1() {
-    setAvaliar(current=>!current);
-    setAvaliar2(current=>!current);
+    setAvaliar((current) => !current);
+    setAvaliar2((current) => !current);
     setHistorico(false);
   }
 
   //Função para renderizar o Histórico
-  function historicoBotao(){
-    setHistorico(current=>!current);
+  function historicoBotao() {
+    setHistorico((current) => !current);
     setAvaliar(false);
     setAvaliar2(false);
   }
 
+  //Função para editar o funcionário
+  function editar() {
+    const dado = listaFiltrada.find((item) => item.id === idFuncionario);
+    onChangeDadosFuncionario(dado);
+    console.log(dado);
+  }
 
   return (
     <>
@@ -245,6 +252,8 @@ export default function Feedback({
                 apagarBotao={apagar}
                 botao4="Voltar"
                 voltar={voltar}
+                botao5="Editar"
+                editar={editar}
               />
             </div>
           ))}
@@ -258,8 +267,8 @@ export default function Feedback({
           idFuncionario={idFuncionario}
           onChangeId={(e) => setIdFuncionario(e)}
           listaCadastro={listaCadastro}
-          onHistorico={e=>setHistorico(e)}
-          onAvaliacao={e=>setAvaliar2(e)}
+          onHistorico={(e) => setHistorico(e)}
+          onAvaliacao={(e) => setAvaliar2(e)}
         />
       )}
     </>

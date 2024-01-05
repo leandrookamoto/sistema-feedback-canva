@@ -60,6 +60,37 @@ class CadastroController extends Controller
          ], 404);
      }
      }
+
+     public function update(Request $request, $id) {
+      if (Cadastro::where('id', $id)->exists()) {
+          $funcionario = Cadastro::find($id);
+  
+          // Verifica cada campo no request e atualiza se estiver presente
+          if ($request->has('nome')) {
+              $funcionario->nome = $request->nome;
+          }
+          if ($request->has('email')) {
+              $funcionario->email = $request->email;
+          }
+          if ($request->has('setor')) {
+              $funcionario->setor = $request->setor;
+          }
+          // Adicione outros campos conforme necessário
+  
+          $funcionario->save();
+  
+          return response()->json([
+              "message" => "records updated successfully"
+          ], 200);
+      } else {
+          return response()->json([
+              "message" => "Description not found"
+          ], 404);
+      }
+  }
+  
+
+     
  
      public function deleteFuncionario ($id) {
         if(Cadastro::where('id', $id)->exists()) {
