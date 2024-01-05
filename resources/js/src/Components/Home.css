@@ -1,16 +1,10 @@
-.cardHome {
-    width: 30vw; 
-    height: 30vh; 
-    background-color: rgb(246, 244, 244);
-    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-    margin-bottom: 10px; 
-    border-radius: 20px;
-  }
+
 
   .ag-format-container {
     width: 100%;
     height: 100%;
     margin: 0 auto;
+    
   }
 
   .ag-courses_box {
@@ -23,6 +17,7 @@
     -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     padding: 50px 0;
+   
   }
 
   .ag-courses_box {
@@ -40,6 +35,8 @@
   .ag-courses_item {
     -ms-flex-preferred-size: calc(33.33333% - 30px);
     flex-basis: calc(33.33333% - 30px);
+    box-shadow: 10px 5px 5px black;
+    border: 1px solid lightgray;
   
     margin: 0 15px 30px;
   
@@ -50,7 +47,7 @@
   .ag-courses-item_link {
     display: block;
     padding: 30px 20px;
-    background-color: #121212;
+    background-color: white;
     text-decoration: none; 
   
     overflow: hidden;
@@ -60,7 +57,7 @@
   .ag-courses-item_link:hover,
   .ag-courses-item_link:hover .ag-courses-item_date {
     text-decoration: none;
-    color: #FFF;
+    color: #000;
   }
   .ag-courses-item_link:hover .ag-courses-item_bg {
     -webkit-transform: scale(10);
@@ -73,10 +70,14 @@
     overflow: hidden;
     font-weight: bold;
     font-size: 30px;
-    color: #FFF;
+    color: lightgray;
     z-index: 2;
     position: relative;
     /* Adicionando esta linha para remover sublinhado */
+  }
+
+  .ag-courses-item_title:hover{
+    color: white;
   }
   
   .ag-courses-item_date-box {
@@ -97,7 +98,7 @@
   .ag-courses-item_bg {
     height: 128px;
     width: 128px;
-    background-color: #f9b234;
+    background-color: black;
   
     z-index: 1;
     position: absolute;
@@ -108,13 +109,13 @@
   
     -webkit-transition: all .5s ease;
     -o-transition: all .5s ease;
-    transition: all .5s ease;
+    transition: all 2s ease;
   }
   .ag-courses_item:nth-child(2n) .ag-courses-item_bg {
-    background-color: #3ecd5e;
+    background-color: #4682B4 
   }
   .ag-courses_item:nth-child(3n) .ag-courses-item_bg {
-    background-color: #e44002;
+    background-color:  #1E352A;
   }
   .ag-courses_item:nth-child(4n) .ag-courses-item_bg {
     background-color: #952aff;
