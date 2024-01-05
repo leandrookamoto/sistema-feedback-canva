@@ -1,7 +1,30 @@
 import Chart from './Chart';
 import './Home.css';
+import { useState, useEffect } from 'react';
 
 export default function Home({ usuario, listaCadastro }) {
+  useEffect(() => {
+    const lista = listaCadastro.map((item) => item.avaliacoes);
+    let novaLista = lista.filter((item) => Array.isArray(JSON.parse(item)));
+
+    let arrayDeObjetos = [];
+
+    for (let i = 0; i < novaLista.length; i++) {
+      const item = novaLista[i];
+      // Faça o que precisar com os itens que são arrays válidos
+      console.log('novaLista', JSON.parse(item));
+
+      // Adiciona cada item (array) como um objeto ao arrayDeObjetos
+      arrayDeObjetos.push(JSON.parse(item));
+    }
+
+    // const novaLista2 = arrayDeObjetos.map(item=>JSON.parse(item.dados));
+
+  
+    console.table(arrayDeObjetos);
+  }, [listaCadastro]);
+
+  //Data para a configuração do Chart.js
   const data = {
     labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
     datasets: [
@@ -13,21 +36,14 @@ export default function Home({ usuario, listaCadastro }) {
       },
       {
         label: 'Metas',
+        /*Aqui a meta é automaticamente preenchido de acordo com o número dos
+        feedbacks de cima e de acordo com o número de funcionários cadastrados*/
         data: Array(listaCadastro.length).fill(listaCadastro.length),
         borderColor: 'red',
         backgroundColor: 'red',
       },
     ],
   };
-
-  const lista = listaCadastro.map(item=>item.avaliacoes);
-  const novaLista = lista.filter(item => Array.isArray(JSON.parse(item)));
-  for (let i = 0; i < novaLista.length; i++) {
-    const item = novaLista[i];
-    // Faça o que precisar com os itens que são arrays válidos
-    console.log(JSON.parse(item)); // Exemplo: aqui está sendo feito o parse novamente para exibir no console
-  }
-  console.log('Esta é a lista',novaLista);
 
   return (
     <>
