@@ -13,7 +13,7 @@ export default function Home({ usuario, listaCadastro }) {
       },
       {
         label: 'Metas',
-        data: [22, 22, 22, 22, 22, 22],
+        data: Array(listaCadastro.length).fill(listaCadastro.length),
         borderColor: 'red',
         backgroundColor: 'red',
       },
