@@ -264,7 +264,7 @@ export default function App() {
         <div className="m-3" style={{ width: '70%' }}>
           {/* <Chart data={data} /> */}
           {/* Aqui é a renderização da Home */}
-          {homeRender && <Home usuario={usuario} />}
+          {homeRender && <Home usuario={usuario} listaCadastro={listaCadastro}/>}
 
           {/* Aqui é a renderização do Cadastro */}
           {cadastrar && (
