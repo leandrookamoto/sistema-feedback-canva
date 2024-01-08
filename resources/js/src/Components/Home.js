@@ -32,7 +32,7 @@ export default function Home({ usuario, listaCadastro }) {
     datasets: [
       {
         label: 'Feedbacks realizados',
-        data: Array(50).fill(avaliacoesRealizadas.length),
+        data: [15,20,22,19,17,23],
         borderColor: 'blue',
         backgroundColor: 'blue',
       },

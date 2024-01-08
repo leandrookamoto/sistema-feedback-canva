@@ -10,7 +10,7 @@ export default function Canva({
   onAvaliacao,
   idFuncionario,
   listaCadastro,
-  usuario
+  usuario,
 }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
@@ -33,7 +33,6 @@ export default function Canva({
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
   const [openValidaData, setOpenValidaData] = useState(false);
-  
 
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
@@ -48,7 +47,7 @@ export default function Canva({
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
 
-  const validaData = 'Mês e ano já cadastrados!'
+  const validaData = 'Mês e ano já cadastrados!';
 
   //useEffect para manter o listaRender atualizado.
   useEffect(() => {
@@ -80,22 +79,27 @@ export default function Canva({
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
-    axios.get('/cadastrados')
-      .then(response => {
+    axios
+      .get('/cadastrados')
+      .then((response) => {
         const lista = response.data;
-        const listaFiltrada2 = lista.filter((item) => item.administrador === usuario);
-        
+        const listaFiltrada2 = lista.filter(
+          (item) => item.administrador === usuario,
+        );
+
         console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
-  
-        const objetoEncontrado = listaFiltrada2.find((objeto) => objeto.id === idFuncionario);
-  
+
+        const objetoEncontrado = listaFiltrada2.find(
+          (objeto) => objeto.id === idFuncionario,
+        );
+
         if (objetoEncontrado) {
           if (objetoEncontrado.avaliacoes != null) {
             let avaliacoes = [];
-  
+
             try {
               avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-  
+
               if (avaliacoes.length > 0) {
                 console.table(avaliacoes);
                 setListaCanva(avaliacoes);
@@ -134,13 +138,11 @@ export default function Canva({
           setYearDate(null);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Erro ao obter os dados:', error);
         // Lidar com possíveis erros
       });
   }, [avaliar2, historico]);
-  
-
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -216,7 +218,7 @@ export default function Canva({
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
     const exceptions = ['de', 'e']; // Palavras que devem permanecer em minúsculas
-  
+
     const capitalize = (word) => {
       const lowerCaseWord = word.toLowerCase();
       if (exceptions.includes(lowerCaseWord)) {
@@ -225,7 +227,7 @@ export default function Canva({
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
     };
-  
+
     return sentence
       .toLowerCase()
       .replace(/[\wÀ-ú']+|-/g, (match) => capitalize(match));
@@ -237,8 +239,8 @@ export default function Canva({
       (item) => item.mes === mouthDate && item.ano === yearDate,
     );
     console.table(lista);
-    console.log('Este é o mounthDate '+mouthDate)
-    console.log('Este é o year '+yearDate );
+    console.log('Este é o mounthDate ' + mouthDate);
+    console.log('Este é o year ' + yearDate);
 
     if (lista) {
       setOpenValidaData(true);
@@ -357,7 +359,49 @@ export default function Canva({
     console.log(data);
   }
 
-  console.log('listaCanva',listaCanva);
+  console.log('listaRender', listaRender);
+
+// Função para apagar primeiro gráfico
+function apagarPrimeiro() {
+  const primeiroRemovido = listaCanva[0]; // Armazena o primeiro elemento antes de removê-lo
+  const listaAtualizada = listaCanva.slice(1); // Cria uma nova lista sem o primeiro elemento
+
+  try {
+    const response = axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
+      avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
+    });
+
+    console.log(response.data); // Confirmação de atualização da API
+
+    setListaCanva(listaAtualizada);
+    setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+  } catch (error) {
+    console.error('Houve um erro ao atualizar:', error);
+    // Tratar o erro adequadamente
+  }
+}
+
+// Função para apagar último gráfico
+function apagarUltimo() {
+  const ultimoRemovido = listaCanva[listaCanva.length - 1]; // Armazena o último elemento antes de removê-lo
+  const listaAtualizada = listaCanva.slice(0, -1); // Cria uma nova lista sem o último elemento
+
+  try {
+    const response = axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
+      avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
+    });
+
+    console.log(response.data); // Confirmação de atualização da API
+
+    setListaCanva(listaAtualizada);
+    setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+  } catch (error) {
+    console.error('Houve um erro ao atualizar:', error);
+    // Tratar o erro adequadamente
+  }
+}
+
+
 
   return (
     <>
@@ -466,343 +510,360 @@ export default function Canva({
       )}
 
       {historico && (
-        <section className="canvaContainer container w-100 mb-3">
-          <h5>Escolha a data do Feedback</h5>
-          <select
-            className="form-select mb-2"
-            aria-label="Default select example"
-            onChange={handleData}
-          >
-            <option selected>Escolha a data</option>
-            <option value="Última Data">Última Data</option>
-            {listaCanva.map((item, index) => (
-              <>
-                <option
-                  key={index}
-                  value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+        <section>
+          <div className="canvaContainer container w-100 mb-3">
+            <h5>Escolha a data do Feedback</h5>
+            <select
+              className="form-select mb-2"
+              aria-label="Default select example"
+              onChange={handleData}
+            >
+              <option selected>Escolha a data</option>
+              <option value="Última Data">Última Data</option>
+              {listaCanva.map((item, index) => (
+                <>
+                  <option
+                    key={index}
+                    value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+                  >
+                    {item.mes}/{item.ano}
+                  </option>
+                </>
+              ))}
+            </select>
+            <div className="headerCanva d-flex justify-content-between align-items-center">
+              <div>Feedback Canva</div>
+              {mouthDate && (
+                <div style={{ fontSize: '15px' }}>
+                  Data: {mouthDate}/{yearDate}
+                </div>
+              )}
+            </div>
+            <div className="row">
+              <div className="customBorder col-2 d-flex justify-content-center align-items-center">
+                Competência
+              </div>
+              <div className="customBorder col-3 d-flex justify-content-center align-items-center">
+                Atividades
+              </div>
+              <div
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#fefdd9' }}
+              >
+                <div style={{ fontSize: '15px' }}>1</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
                 >
-                  {item.mes}/{item.ano}
-                </option>
-              </>
-            ))}
-          </select>
-          <div className="headerCanva d-flex justify-content-between align-items-center">
-            <div>Feedback Canva</div>
-            {mouthDate && (
-              <div style={{ fontSize: '15px' }}>
-                Data: {mouthDate}/{yearDate}
+                  Novato
+                </div>
               </div>
-            )}
-          </div>
-          <div className="row">
-            <div className="customBorder col-2 d-flex justify-content-center align-items-center">
-              Competência
-            </div>
-            <div className="customBorder col-3 d-flex justify-content-center align-items-center">
-              Atividades
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#fefdd9' }}
-            >
-              <div style={{ fontSize: '15px' }}>1</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#fff3d5' }}
               >
-                Novato
+                <div style={{ fontSize: '15px' }}>2</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Aprendiz
+                </div>
               </div>
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#fff3d5' }}
-            >
-              <div style={{ fontSize: '15px' }}>2</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#fee2d5' }}
               >
-                Aprendiz
+                <div style={{ fontSize: '15px' }}>3</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Praticante
+                </div>
               </div>
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#fee2d5' }}
-            >
-              <div style={{ fontSize: '15px' }}>3</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#fad4df' }}
               >
-                Praticante
+                <div style={{ fontSize: '15px' }}>4</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Profissional
+                </div>
               </div>
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#fad4df' }}
-            >
-              <div style={{ fontSize: '15px' }}>4</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#f2caff' }}
               >
-                Profissional
+                <div style={{ fontSize: '15px' }}>5</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Professor
+                </div>
               </div>
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#f2caff' }}
-            >
-              <div style={{ fontSize: '15px' }}>5</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#d9c9ff' }}
               >
-                Professor
+                <div style={{ fontSize: '15px' }}>6</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Líder
+                </div>
               </div>
-            </div>
-            <div
-              className="customBorder col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#d9c9ff' }}
-            >
-              <div style={{ fontSize: '15px' }}>6</div>
               <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
+                className="customBorder2 col d-flex justify-content-center flex-column align-items-center"
+                style={{ backgroundColor: '#d4e4fe' }}
               >
-                Líder
+                <div style={{ fontSize: '15px' }}>7</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    marginTop: '-5px',
+                  }}
+                >
+                  Mestre
+                </div>
               </div>
             </div>
-            <div
-              className="customBorder2 col d-flex justify-content-center flex-column align-items-center"
-              style={{ backgroundColor: '#d4e4fe' }}
-            >
-              <div style={{ fontSize: '15px' }}>7</div>
-              <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  marginTop: '-5px',
-                }}
-              >
-                Mestre
-              </div>
-            </div>
-          </div>
 
-          <div className="row">
-            <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
-              {listaRender.length > 0 &&
-                listaRender.map(
-                  (item, index) =>
-                    item.competencia && ( // Verifica se a competência existe
+            <div className="row">
+              <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
+                {listaRender.length > 0 &&
+                  listaRender.map(
+                    (item, index) =>
+                      item.competencia && ( // Verifica se a competência existe
+                        <div
+                          key={index}
+                          className="post-it d-flex justify-content-center align-items-center"
+                        >
+                          {item.competencia}
+                        </div>
+                      ),
+                  )}
+              </div>
+              <div className="customBorder3 col-3">
+                <div className="box mt-1">
+                  {listaRender.map((item) =>
+                    item.atividades.map((item, index) => (
                       <div
-                        key={index}
-                        className="post-it d-flex justify-content-center align-items-center"
+                        className={
+                          listaAtividades.length <= 3
+                            ? 'd-flex justify-content-center align-items-center post-it2'
+                            : 'd-flex justify-content-center align-items-center post-it'
+                        }
                       >
-                        {item.competencia}
+                        {item}
                       </div>
-                    ),
-                )}
-            </div>
-            <div className="customBorder3 col-3">
-              <div className="box mt-1">
-                {listaRender.map((item) =>
-                  item.atividades.map((item, index) => (
-                    <div
-                      className={
-                        listaAtividades.length <= 3
-                          ? 'd-flex justify-content-center align-items-center post-it2'
-                          : 'd-flex justify-content-center align-items-center post-it'
-                      }
-                    >
-                      {item}
-                    </div>
-                  )),
+                    )),
+                  )}
+                </div>
+              </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'novato' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
                 )}
               </div>
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'novato' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'aprendiz' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'praticante' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'profissional' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'professor' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'lider' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
-            <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
-              {senioridade == 'mestre' && (
-                <div
-                  className="mb-3"
-                  style={{
-                    borderRadius: '100%',
-                    width: '45px',
-                    height: '45px',
-                    backgroundColor: 'red',
-                  }}
-                ></div>
-              )}
-            </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'aprendiz' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'praticante' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'profissional' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'professor' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'lider' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
+                {senioridade == 'mestre' && (
+                  <div
+                    className="mb-3"
+                    style={{
+                      borderRadius: '100%',
+                      width: '45px',
+                      height: '45px',
+                      backgroundColor: 'red',
+                    }}
+                  ></div>
+                )}
+              </div>
 
-            <div className="row w-100">
-              <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                <div>
-                  <div className="d-flex justify-content-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="30"
-                      height="30"
-                      fill="currentColor"
-                      className="bi bi-emoji-smile"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                      <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
-                    </svg>
+              <div className="row w-100">
+                <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                  <div>
+                    <div className="d-flex justify-content-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        fill="currentColor"
+                        className="bi bi-emoji-smile"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                        <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                      </svg>
+                    </div>
+                    <div>Pontos Fortes</div>
                   </div>
-                  <div>Pontos Fortes</div>
-                </div>
-                <div className="customBorder7">
-                  {listaRender.map((item) =>
-                    item.fortes.map((item, index) => <div>{item}</div>),
-                  )}
-                </div>
-              </div>
-              <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                <div>
-                  <div className="d-flex justify-content-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="30"
-                      height="30"
-                      fill="currentColor"
-                      className="bi bi-emoji-frown"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                      <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
-                    </svg>
+                  <div className="customBorder7">
+                    {listaRender.map((item) =>
+                      item.fortes.map((item, index) => <div>{item}</div>),
+                    )}
                   </div>
-                  <div>Pontos de atenção</div>
                 </div>
-                <div className="customBorder7">
-                  {listaRender.map((item) =>
-                    item.atencao.map((item, index) => <div>{item}</div>),
-                  )}
-                </div>
-              </div>
-              <div className="customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                <div>
-                  <div className="d-flex justify-content-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="30"
-                      height="30"
-                      fill="currentColor"
-                      className="bi bi-check-circle-fill"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                    </svg>
+                <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                  <div>
+                    <div className="d-flex justify-content-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        fill="currentColor"
+                        className="bi bi-emoji-frown"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                        <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                      </svg>
+                    </div>
+                    <div>Pontos de atenção</div>
                   </div>
-                  <div>Ações de melhoria</div>
+                  <div className="customBorder7">
+                    {listaRender.map((item) =>
+                      item.atencao.map((item, index) => <div>{item}</div>),
+                    )}
+                  </div>
                 </div>
-                <div className="customBorder7">
-                  {listaRender.map((item) =>
-                    item.melhorias.map((item, index) => <div>{item}</div>),
-                  )}
+                <div className="customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                  <div>
+                    <div className="d-flex justify-content-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        fill="currentColor"
+                        className="bi bi-check-circle-fill"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                      </svg>
+                    </div>
+                    <div>Ações de melhoria</div>
+                  </div>
+                  <div className="customBorder7">
+                    {listaRender.map((item) =>
+                      item.melhorias.map((item, index) => <div>{item}</div>),
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            className="btn btn-primary mt-1"
+            style={{ marginRight: '10px' }}
+            onClick={apagarPrimeiro}
+          >
+            Apagar Primeiro Canva
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary mt-1"
+            onClick={apagarUltimo}
+          >
+            Apagar Último Canva
+          </button>
         </section>
       )}
 
