@@ -47,6 +47,7 @@ export default function App() {
   const sucessoCadastro = 'Cadastro realizado com sucesso!';
   const sucessoEdicao = 'Edição realizada com sucesso!';
 
+  //UseEffects
   //Primeira requisição para a recuperação dos dados dos usuários ao inicializar o programa
   useEffect(() => {
     axios
@@ -101,6 +102,7 @@ export default function App() {
       });
   }, []);
 
+  //Funções principais
   //Função para cadastrar os funcionários
   async function gravar() {
     try {
@@ -191,26 +193,7 @@ export default function App() {
     }
   }
 
-  //Funções para renderização dos componentes
-  //Função para renderização do componente de cadastro
-  function handleCadastrar() {
-    setCadastrar(true);
-    setFeedback(false);
-    setHomeRender(false);
-  }
-  //Função para renderização do componente de feedback
-  function handleCadastrados() {
-    setCadastrar(false);
-    setFeedback(true);
-    setHomeRender(false);
-  }
-  // Função para renderização do componente Home
-  function handleHome() {
-    setHomeRender(true);
-    setCadastrar(false);
-    setFeedback(false);
-  }
-
+  //Funções auxiliares
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
     return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
@@ -230,7 +213,6 @@ export default function App() {
   function handleEmailChange(event) {
     const emailValue = event.target.value;
     setEmail(emailValue.toLowerCase());
-
     // Verifica se o e-mail tem um formato válido usando validator.js
     setIsValid(validator.isEmail(emailValue));
   }
@@ -245,6 +227,26 @@ export default function App() {
     setCadastrar(true);
     setFeedback(false);
     setHomeRender(false);
+  }
+
+  //Funções para renderização dos componentes
+  //Função para renderização do componente de cadastro
+  function handleCadastrar() {
+    setCadastrar(true);
+    setFeedback(false);
+    setHomeRender(false);
+  }
+  //Função para renderização do componente de feedback
+  function handleCadastrados() {
+    setCadastrar(false);
+    setFeedback(true);
+    setHomeRender(false);
+  }
+  // Função para renderização do componente Home
+  function handleHome() {
+    setHomeRender(true);
+    setCadastrar(false);
+    setFeedback(false);
   }
 
   return (

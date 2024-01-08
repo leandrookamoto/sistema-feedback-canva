@@ -5,8 +5,7 @@ export default function Sidebar({
   onClickCadastrados,
   onClickHome,
 }) {
-  //Funções para mudança de tela
-
+  // Todos as props são enviados para o App.js
   return (
     <section className="sidebar d-flex flex-column">
       <div className=" d-flex justify-content-center">

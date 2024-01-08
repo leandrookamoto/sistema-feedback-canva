@@ -6,6 +6,7 @@ import Pagination from './Pagination';
 import Canva from './Canva';
 import Dialog from './Dialog';
 
+// As props são enviadas para o App.js
 export default function Feedback({
   listaCadastro,
   usuario,
@@ -34,7 +35,6 @@ export default function Feedback({
     position: 'relative',
     display: 'inline-block',
   };
-
   const estiloIcone = {
     position: 'absolute',
     top: '50%',
@@ -43,11 +43,22 @@ export default function Feedback({
     color: 'gray',
   };
 
+  //Lógica para o controle da paginação
+  const [page, setPage] = useState(1);
+  var pageSize = 3;
+
+  //Const para a formação da paginação
+  const totalPage = Math.ceil(
+    (listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) /
+      pageSize,
+  );
+
   //Const para evitar a montagem inicial do useEffect
   const montagemInicial = useRef(true);
   //Const para evitar que o usuário apague
   const apagarRef = useRef(true);
 
+  //useEffects
   // useEffect para a ordenação por nome
   useEffect(() => {
     if (montagemInicial.current) {
@@ -55,26 +66,21 @@ export default function Feedback({
       return;
     }
     const dadosOrdenados = orderEmployeeData(dadosFuncionario);
-
     // Verifique se os dados ordenados são diferentes dos dados originais antes de atualizar o estado
     const isDifferent =
       JSON.stringify(dadosOrdenados) !== JSON.stringify(dadosFuncionario);
-
     // Atualize o estado apenas se os dados ordenados forem diferentes dos dados originais
     if (isDifferent) {
       setDadosFuncionario(dadosOrdenados);
     }
   }, [dadosFuncionario]);
-
-  // UseEffect para renderizar o funcionário direto após a gravação ou edição do mesmo
+  // UseEffect para renderizar manter os dados atualizados após a gravação ou edição do mesmo
   useEffect(() => {
     if (montagemInicial.current) {
       montagemInicial.current = false;
       return;
     }
-
     let lista = [];
-
     axios
       .get('/cadastrados')
       .then((response) => {
@@ -86,7 +92,6 @@ export default function Feedback({
         const novaListaFiltrada = listaFiltrada2.filter((item) =>
           item.email.includes(dados.email),
         );
-
         console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
         setListaFiltrada(novaListaFiltrada);
         setPage(1);
@@ -96,30 +101,10 @@ export default function Feedback({
         // Lidar com possíveis erros
       });
   }, [dados]);
-
-  //Lógica para o controle da paginação
-  const [page, setPage] = useState(1);
-  var pageSize = 3;
-
   useEffect(() => {
     setPage(1);
   }, [listaCadastro]);
-
-  const totalPage = Math.ceil(
-    (listaFiltrada.length === 0 ? listaCadastro.length : listaFiltrada.length) /
-      pageSize,
-  );
-
-  function orderEmployeeData(data) {
-    return [...data].sort((a, b) => {
-      const nomeA = a.nome.toUpperCase();
-      const nomeB = b.nome.toUpperCase();
-      if (nomeA < nomeB) return -1;
-      if (nomeA > nomeB) return 1;
-      return 0;
-    });
-  }
-
+  //useEffect para manter a lista da paginação atualizada
   useEffect(() => {
     const offset = (page - 1) * pageSize;
     const listaOrdenada =
@@ -128,56 +113,16 @@ export default function Feedback({
         : orderEmployeeData(listaFiltrada);
 
     let dataToShow = listaOrdenada.slice(offset, offset + pageSize);
-
     console.table(dataToShow);
     setDadosFuncionario(dataToShow);
   }, [page, pageSize, listaCadastro, listaFiltrada]);
 
-  const handleChange = (event, value) => {
-    setPage(value);
-  };
-
-  //Função Capitalize
-  //Função para padronizar a digitação dos inputs
-  function capitalizeWords(sentence) {
-    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
-      if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
-        return match.toLowerCase();
-      } else {
-        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
-      }
-    });
-  }
-
-  //Função de pesquisa
-  function pesquisar(e) {
-    const nova = capitalizeWords(e.currentTarget.value).trim();
-    const mail = e.currentTarget.value.trim().toLowerCase();
-    console.log(nova);
-    const novaListaFiltrada = listaCadastro.filter(
-      (item) => item.nome.includes(nova) || item.email.includes(mail),
-    );
-    console.log(listaFiltrada);
-    setListaFiltrada(novaListaFiltrada);
-    setPage(1);
-  }
-
-  //Função para voltar a tela do início da seleção dos funcionários
-  function voltar() {
-    setFuncionarioEscolhido(false);
-    setDadosFuncionario(listaCadastro);
-    setListaFiltrada(listaCadastro); // Redefinindo lista filtrada para lista completa
-    setAvaliar(false);
-    setAvaliar2(false);
-    setHistorico(false);
-  }
-
+  //Funções principais
   //Seleciona pelo clique no card
   function selecionarFuncionario(id) {
     const funcionarioSelecionado = listaCadastro.find(
       (funcionario) => funcionario.id === id,
     );
-
     if (funcionarioSelecionado) {
       setDadosFuncionario([funcionarioSelecionado]);
       setIdFuncionario(id);
@@ -188,7 +133,6 @@ export default function Feedback({
       console.error(`Funcionário com o ID ${id} não encontrado.`);
     }
   }
-
   //Função para apagar funcionário
   async function apagar() {
     //Impede que ocorra que o usuário apague acidentalmente
@@ -198,7 +142,6 @@ export default function Feedback({
       return;
     }
     setValidacaoApagar(true);
-
     if (validacaoApagar) {
       //If para apagar dentro do Dialog
       try {
@@ -215,13 +158,11 @@ export default function Feedback({
           ? lista[response.data.length - 1].id
           : 0;
         console.log(`Este é o id final: ${id}`);
-
         // Atualiza o estado dadosFuncionario com a lista filtrada recebida
         setDadosFuncionario(listaFiltrada2);
         setListaFiltrada(listaFiltrada2);
         onChangeListaCadastro(listaFiltrada2);
         onChangeNewId(id);
-
         // Agora que as operações assíncronas foram concluídas, atualiza a variável de controle
         setFuncionarioEscolhido(false);
         setValidacaoApagar(false);
@@ -232,14 +173,68 @@ export default function Feedback({
       }
     }
   }
+  //Função para editar o funcionário
+  function editar() {
+    const dado = listaFiltrada.find((item) => item.id === idFuncionario);
+    onChangeDadosFuncionario(dado);
+    console.log(dado);
+  }
+  //Função de pesquisa
+  function pesquisar(e) {
+    const nova = capitalizeWords(e.currentTarget.value).trim();
+    const mail = e.currentTarget.value.trim().toLowerCase();
+    console.log(nova);
+    const novaListaFiltrada = listaCadastro.filter(
+      (item) => item.nome.includes(nova) || item.email.includes(mail),
+    );
+    console.log(listaFiltrada);
+    setListaFiltrada(novaListaFiltrada);
+    setPage(1);
+  }
+  //Função para voltar a tela do início da seleção dos funcionários
+  function voltar() {
+    setFuncionarioEscolhido(false);
+    setDadosFuncionario(listaCadastro);
+    setListaFiltrada(listaCadastro); // Redefinindo lista filtrada para lista completa
+    setAvaliar(false);
+    setAvaliar2(false);
+    setHistorico(false);
+  }
 
+  //Funções auxiliares
+  //Função auxiliar para a ordenação dos funcionários por nome
+  function orderEmployeeData(data) {
+    return [...data].sort((a, b) => {
+      const nomeA = a.nome.toUpperCase();
+      const nomeB = b.nome.toUpperCase();
+      if (nomeA < nomeB) return -1;
+      if (nomeA > nomeB) return 1;
+      return 0;
+    });
+  }
+  //Função Capitalize
+  //Função para padronizar a digitação dos inputs
+  function capitalizeWords(sentence) {
+    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
+      if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
+        return match.toLowerCase();
+      } else {
+        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+      }
+    });
+  }
+  //Função para a mudança de página
+  function handleChange(event, value) {
+    setPage(value);
+  }
+
+  //Funções de renderizações dos componentes
   //Função para renderizar a avaliação
   function onClickBotao1() {
     setAvaliar((current) => !current);
     setAvaliar2((current) => !current);
     setHistorico(false);
   }
-
   //Função para renderizar o Histórico
   function historicoBotao() {
     setHistorico((current) => !current);
@@ -247,19 +242,12 @@ export default function Feedback({
     setAvaliar2(false);
   }
 
-  //Função para editar o funcionário
-  function editar() {
-    const dado = listaFiltrada.find((item) => item.id === idFuncionario);
-    onChangeDadosFuncionario(dado);
-    console.log(dado);
-  }
-
   return (
     <>
+      {/* Renderização inicial do componente feedback */}
       {!funcionarioEscolhido && (
         <>
           <h5>Escolha o funcionário</h5>
-
           <div style={estiloInput}>
             <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
             <input
@@ -276,6 +264,7 @@ export default function Feedback({
             />
           </div>
 
+          {/* Renderização da lista de funcionários */}
           {dadosFuncionario.map((item) => (
             <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
               <Card
@@ -287,7 +276,6 @@ export default function Feedback({
               />
             </div>
           ))}
-
           <Pagination
             page={page}
             handleChange={handleChange}
@@ -298,6 +286,7 @@ export default function Feedback({
 
       {funcionarioEscolhido && (
         <>
+          {/* Renderização dos dados do funcionário após a escolha pelo card */}
           {dadosFuncionario.map((item) => (
             <div key={item.id}>
               <Card
@@ -322,6 +311,7 @@ export default function Feedback({
       )}
 
       {(avaliar || historico) && (
+        // Renderização do formulário de avaliação ou do quadro canva
         <Canva
           historico={historico}
           avaliar2={avaliar2}
@@ -333,6 +323,7 @@ export default function Feedback({
           usuario={usuario}
         />
       )}
+      {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}
       <Dialog
         open={validacaoApagar}
         descricao={confirmaApagar}
