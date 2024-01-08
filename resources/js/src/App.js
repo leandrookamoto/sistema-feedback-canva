@@ -33,7 +33,6 @@ export default function App() {
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
 
-
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
   const [open, setOpen] = useState(false);
@@ -101,15 +100,6 @@ export default function App() {
         console.error('Erro na segunda requisição:', error);
       });
   }, []);
-
-  //Grava o email no setEmail (variável email)
-  function handleEmailChange(event) {
-    const emailValue = event.target.value;
-    setEmail(emailValue.toLowerCase());
-
-    // Verifica se o e-mail tem um formato válido usando validator.js
-    setIsValid(validator.isEmail(emailValue));
-  }
 
   //Função para cadastrar os funcionários
   async function gravar() {
@@ -202,16 +192,23 @@ export default function App() {
   }
 
   //Funções para renderização dos componentes
+  //Função para renderização do componente de cadastro
   function handleCadastrar() {
     setCadastrar(true);
     setFeedback(false);
     setHomeRender(false);
   }
-
+  //Função para renderização do componente de feedback
   function handleCadastrados() {
     setCadastrar(false);
     setFeedback(true);
     setHomeRender(false);
+  }
+  // Função para renderização do componente Home
+  function handleHome() {
+    setHomeRender(true);
+    setCadastrar(false);
+    setFeedback(false);
   }
 
   //Função para padronizar a digitação dos inputs
@@ -224,18 +221,18 @@ export default function App() {
       }
     });
   }
-
   //Função para gravar o nome e padronizar a escrita
   function handleChangeName(event) {
     const newName = capitalizeWords(event.currentTarget.value);
     setNome(newName);
   }
+  //Grava o email no setEmail (variável email)
+  function handleEmailChange(event) {
+    const emailValue = event.target.value;
+    setEmail(emailValue.toLowerCase());
 
-  // Função para renderizar home
-  function handleHome() {
-    setHomeRender(true);
-    setCadastrar(false);
-    setFeedback(false);
+    // Verifica se o e-mail tem um formato válido usando validator.js
+    setIsValid(validator.isEmail(emailValue));
   }
 
   //Função para extrair os dados do funcionário no componente feedback e jogá-lo para o CadastrarComponent
@@ -262,9 +259,10 @@ export default function App() {
         />
 
         <div className="m-3" style={{ width: '70%' }}>
-          {/* <Chart data={data} /> */}
           {/* Aqui é a renderização da Home */}
-          {homeRender && <Home usuario={usuario} listaCadastro={listaCadastro}/>}
+          {homeRender && (
+            <Home usuario={usuario} listaCadastro={listaCadastro} />
+          )}
 
           {/* Aqui é a renderização do Cadastro */}
           {cadastrar && (
@@ -280,6 +278,7 @@ export default function App() {
             />
           )}
 
+          {/* Aqui é a renderização do componente do feedback */}
           {feedback && (
             <Feedback
               listaCadastro={listaCadastro}
@@ -288,11 +287,11 @@ export default function App() {
               onChangeListaCadastro={(e) => setListaCadastro(e)}
               onChangeDadosFuncionario={(e) => handleDadosFuncionario(e)}
               dados={dados}
-            
             />
           )}
         </div>
       </section>
+      {/* Aqui são as renderizações dos Dialogs de avisos */}
       <Dialog
         open={openCadastro}
         descricao={mesmoFuncionario}

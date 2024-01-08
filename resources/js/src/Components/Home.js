@@ -3,7 +3,10 @@ import './Home.css';
 import { useState, useEffect } from 'react';
 
 export default function Home({ usuario, listaCadastro }) {
+  //Constante responsável pela gravação do estado das avaliações realizadas para análise de metas
   const [avaliacoesRealizadas, setAvaliacoesRealizadas] = useState([]);
+
+  //useEffect responsável pela retirada das informações do banco de dados através do props listaCadastro
   useEffect(() => {
     const lista = listaCadastro.map((item) => item.avaliacoes);
     let novaLista = lista.filter((item) => Array.isArray(JSON.parse(item)));
@@ -12,27 +15,22 @@ export default function Home({ usuario, listaCadastro }) {
 
     for (let i = 0; i < novaLista.length; i++) {
       const item = novaLista[i];
-      // Faça o que precisar com os itens que são arrays válidos
-      console.log('novaLista', JSON.parse(item));
-
       // Adiciona cada item (array) como um objeto ao arrayDeObjetos
+      //Aqui faz o parse, pois os dados vem como JSON.stringfy do banco de dados
       arrayDeObjetos.push(JSON.parse(item));
 
+      //gravação do local
       setAvaliacoesRealizadas(arrayDeObjetos);
     }
-
-    // const novaLista2 = arrayDeObjetos.map(item=>JSON.parse(item.dados));
-
-    console.table(arrayDeObjetos);
-  }, [listaCadastro]);
-
+  },[]);
+  
   //Data para a configuração do Chart.js
   const data = {
     labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
     datasets: [
       {
         label: 'Feedbacks realizados',
-        data: [15,20,22,19,17,23],
+        data: [15, 20, 22, 19, 17, 23],
         borderColor: 'blue',
         backgroundColor: 'blue',
       },
@@ -47,6 +45,7 @@ export default function Home({ usuario, listaCadastro }) {
     ],
   };
 
+
   return (
     <>
       <section>
@@ -56,3 +55,4 @@ export default function Home({ usuario, listaCadastro }) {
     </>
   );
 }
+

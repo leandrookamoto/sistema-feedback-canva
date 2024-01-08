@@ -4,6 +4,7 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
+import Dialog from './Dialog';
 
 export default function Feedback({
   listaCadastro,
@@ -13,7 +14,7 @@ export default function Feedback({
   onChangeDadosFuncionario,
   dados,
 }) {
-  //Variável para gravação de estado para a função pesquisar
+  //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [dadosFuncionario, setDadosFuncionario] = useState([]);
   const [idFuncionario, setIdFuncionario] = useState(null);
@@ -21,7 +22,12 @@ export default function Feedback({
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
   const [avaliar2, setAvaliar2] = useState(false);
+
+  //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
+
+  //Descrição do Dialog
+  const confirmaApagar = 'Tem certeza?';
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -39,9 +45,15 @@ export default function Feedback({
 
   //Const para evitar a montagem inicial do useEffect
   const montagemInicial = useRef(true);
+  //Const para evitar que o usuário apague
+  const apagarRef = useRef(true);
 
   // useEffect para a ordenação por nome
   useEffect(() => {
+    if (montagemInicial.current) {
+      montagemInicial.current = false;
+      return;
+    }
     const dadosOrdenados = orderEmployeeData(dadosFuncionario);
 
     // Verifique se os dados ordenados são diferentes dos dados originais antes de atualizar o estado
@@ -61,28 +73,28 @@ export default function Feedback({
       return;
     }
 
-   
-     
-    let lista = []; 
+    let lista = [];
 
-    axios.get('/cadastrados')
-      .then(response => {
+    axios
+      .get('/cadastrados')
+      .then((response) => {
         lista = response.data;
-    
-        const listaFiltrada2 = lista.filter((item) => item.administrador === usuario);
+
+        const listaFiltrada2 = lista.filter(
+          (item) => item.administrador === usuario,
+        );
         const novaListaFiltrada = listaFiltrada2.filter((item) =>
           item.email.includes(dados.email),
         );
-    
+
         console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
         setListaFiltrada(novaListaFiltrada);
         setPage(1);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Erro ao obter os dados:', error);
         // Lidar com possíveis erros
       });
-    
   }, [dados]);
 
   //Lógica para o controle da paginação
@@ -179,30 +191,45 @@ export default function Feedback({
 
   //Função para apagar funcionário
   async function apagar() {
-    try {
-      // Lógica para apagar o funcionário selecionado
-      await axios.delete(`/deleteFuncionario/${idFuncionario}`);
+    //Impede que ocorra que o usuário apague acidentalmente
+    if (apagarRef.current) {
+      apagarRef.current = false;
+      setValidacaoApagar(true);
+      return;
+    }
+    setValidacaoApagar(true);
 
-      // Faz a requisição para obter a lista de funcionários atualizada
-      const response = await axios.get('/cadastrados');
-      const lista = response.data;
-      const listaFiltrada2 = lista.filter(
-        (item) => item.administrador === usuario,
-      );
-      const id = response.data.length ? lista[response.data.length - 1].id : 0;
-      console.log(`Este é o id final: ${id}`);
+    if (validacaoApagar) {
+      //If para apagar dentro do Dialog
+      try {
+        // Lógica para apagar o funcionário selecionado
+        await axios.delete(`/deleteFuncionario/${idFuncionario}`);
 
-      // Atualiza o estado dadosFuncionario com a lista filtrada recebida
-      setDadosFuncionario(listaFiltrada2);
-      setListaFiltrada(listaFiltrada2);
-      onChangeListaCadastro(listaFiltrada2);
-      onChangeNewId(id);
+        // Faz a requisição para obter a lista de funcionários atualizada
+        const response = await axios.get('/cadastrados');
+        const lista = response.data;
+        const listaFiltrada2 = lista.filter(
+          (item) => item.administrador === usuario,
+        );
+        const id = response.data.length
+          ? lista[response.data.length - 1].id
+          : 0;
+        console.log(`Este é o id final: ${id}`);
 
-      // Agora que as operações assíncronas foram concluídas, atualiza a variável de controle
-      setFuncionarioEscolhido(false);
-    } catch (error) {
-      // Tratar erros caso a deleção ou a requisição GET falhem
-      console.error('Erro ao apagar o funcionário ou obter a lista:', error);
+        // Atualiza o estado dadosFuncionario com a lista filtrada recebida
+        setDadosFuncionario(listaFiltrada2);
+        setListaFiltrada(listaFiltrada2);
+        onChangeListaCadastro(listaFiltrada2);
+        onChangeNewId(id);
+
+        // Agora que as operações assíncronas foram concluídas, atualiza a variável de controle
+        setFuncionarioEscolhido(false);
+        setValidacaoApagar(false);
+        apagarRef.current = true;
+      } catch (error) {
+        // Tratar erros caso a deleção ou a requisição GET falhem
+        console.error('Erro ao apagar o funcionário ou obter a lista:', error);
+      }
     }
   }
 
@@ -306,6 +333,17 @@ export default function Feedback({
           usuario={usuario}
         />
       )}
+      <Dialog
+        open={validacaoApagar}
+        descricao={confirmaApagar}
+        // Função de apagar apesar do nome
+        handleClose={apagar}
+        button="Sim"
+        button2="Não"
+        //Função para fechar o Dialog
+        handleButton={() => setValidacaoApagar(false)}
+        Title="Cadastro"
+      />
     </>
   );
 }
