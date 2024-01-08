@@ -9,8 +9,8 @@ export default function Canva({
   onHistorico,
   onAvaliacao,
   idFuncionario,
-  onChangeId,
   listaCadastro,
+  usuario
 }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
@@ -77,62 +77,70 @@ export default function Canva({
     setAtividades([]);
   }, [avaliar2]);
 
-  //useEffect para  recuperação dos dados do banco de dados e setando para o listaAtividades e listaCanva
+  //useEffect para  recuperação e manutenção dos dados atualizados
+  // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
-    const objetoEncontrado = listaCadastro.find(
-      (objeto) => objeto.id === idFuncionario,
-    );
-
-    if (objetoEncontrado) {
-      // Verifica se objetoEncontrado.avaliacoes não é nulo ou indefinido
-      if (objetoEncontrado.avaliacoes != null) {
-        let avaliacoes = [];
-
-        try {
-          avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-
-          if (avaliacoes.length > 0) {
-            console.table(avaliacoes);
-            setListaCanva(avaliacoes);
-            setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
-            setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
-            setYearDate(avaliacoes[avaliacoes.length - 1].ano);
-
-            // const atividades =
-            //   avaliacoes[avaliacoes.length - 1].atividades || [];
-            // setAtividades(atividades);
+    axios.get('/cadastrados')
+      .then(response => {
+        const lista = response.data;
+        const listaFiltrada2 = lista.filter((item) => item.administrador === usuario);
+        
+        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
+  
+        const objetoEncontrado = listaFiltrada2.find((objeto) => objeto.id === idFuncionario);
+  
+        if (objetoEncontrado) {
+          if (objetoEncontrado.avaliacoes != null) {
+            let avaliacoes = [];
+  
+            try {
+              avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
+  
+              if (avaliacoes.length > 0) {
+                console.table(avaliacoes);
+                setListaCanva(avaliacoes);
+                setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
+                setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
+                setYearDate(avaliacoes[avaliacoes.length - 1].ano);
+              } else {
+                setAtividades([]);
+                setListaCanva([]);
+                setSenioridade('');
+                setMouthDate('');
+                setYearDate(null);
+              }
+            } catch (error) {
+              console.error('Erro ao analisar avaliações:', error);
+              setAtividades([]);
+              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+              setSenioridade('');
+              setMouthDate('');
+              setYearDate(null);
+            }
           } else {
+            console.log('Nenhum dado de avaliações encontrado');
             setAtividades([]);
-            setListaCanva([]);
+            setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
             setSenioridade('');
             setMouthDate('');
             setYearDate(null);
           }
-        } catch (error) {
-          console.error('Erro ao analisar avaliações:', error);
+        } else {
+          console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
           setAtividades([]);
-          setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+          setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
           setSenioridade('');
           setMouthDate('');
           setYearDate(null);
         }
-      } else {
-        console.log('Nenhum dado de avaliações encontrado');
-        setAtividades([]);
-        setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
-        setSenioridade('');
-        setMouthDate('');
-        setYearDate(null);
-      }
-    } else {
-      console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
-      setAtividades([]);
-      setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
-      setSenioridade('');
-      setMouthDate('');
-      setYearDate(null);
-    }
-  }, []);
+      })
+      .catch(error => {
+        console.error('Erro ao obter os dados:', error);
+        // Lidar com possíveis erros
+      });
+  }, [avaliar2, historico]);
+  
+
 
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
   function handleAtividades(e) {
@@ -349,7 +357,7 @@ export default function Canva({
     console.log(data);
   }
 
-  console.log(listaCanva);
+  console.log('listaCanva',listaCanva);
 
   return (
     <>

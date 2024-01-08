@@ -63,7 +63,7 @@ export default function Feedback({
 
    
      
-    let lista = []; // Inicialize como um array vazio
+    let lista = []; 
 
     axios.get('/cadastrados')
       .then(response => {
@@ -303,6 +303,7 @@ export default function Feedback({
           listaCadastro={listaCadastro}
           onHistorico={(e) => setHistorico(e)}
           onAvaliacao={(e) => setAvaliar2(e)}
+          usuario={usuario}
         />
       )}
     </>
