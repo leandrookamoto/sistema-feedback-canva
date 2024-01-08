@@ -5,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+//As props são enviadas para os componentes App.js, Feedback.js e Canva.js
 export default function AlertDialog({
   explicacao = 'Explicação',
   descricao,

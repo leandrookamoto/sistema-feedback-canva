@@ -1,5 +1,6 @@
 import './card.css';
 
+//As props são enviadas para o componentes Feedback.js onde são renderizadas também
 export default function Card({
   nome,
   email,

@@ -33,22 +33,20 @@ export default function Canva({
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
   const [openValidaData, setOpenValidaData] = useState(false);
-
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
   const [isValidFortes, setIsValidFortes] = useState(true);
   const [isValidAtencao, setIsValidAtencao] = useState(true);
   const [isValidMelhorias, setIsValidMelhorias] = useState(true);
   const [openValidaNota, setOpenValidaNota] = useState(false);
-
   //Constante para abertura do Dialog/Modal
   const [open, setOpen] = useState(false);
   const descricao =
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
-
   const validaData = 'Mês e ano já cadastrados!';
 
+  //useEffects
   //useEffect para manter o listaRender atualizado.
   useEffect(() => {
     if (montagemInicial.current) {
@@ -71,11 +69,10 @@ export default function Canva({
       setListaRender(render); // Definindo diretamente o resultado do filtro
     }
   }, [listaCanva, dataHistorico]);
-
+  //useEffect para resetar a const atividades
   useEffect(() => {
     setAtividades([]);
   }, [avaliar2]);
-
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
@@ -86,17 +83,13 @@ export default function Canva({
         const listaFiltrada2 = lista.filter(
           (item) => item.administrador === usuario,
         );
-
         console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
-
         const objetoEncontrado = listaFiltrada2.find(
           (objeto) => objeto.id === idFuncionario,
         );
-
         if (objetoEncontrado) {
           if (objetoEncontrado.avaliacoes != null) {
             let avaliacoes = [];
-
             try {
               avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
 
@@ -144,95 +137,7 @@ export default function Canva({
       });
   }, [avaliar2, historico]);
 
-  //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
-  function handleAtividades(e) {
-    const value = capitalizeWords(e.currentTarget.value);
-    setAtividades(value);
-    const newActivities = value
-      .split(/,| e /)
-      .map((activity) => activity.trim());
-    setListaAtividades(newActivities.filter((activity) => activity !== ''));
-    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-    const isValidInput = regex.test(value);
-    setIsValidAtividades(isValidInput);
-  }
-
-  function handleFortes(e) {
-    const value = capitalizeWords(e.currentTarget.value);
-    setFortes(value);
-    const newFortes = value.split(/,| e /).map((activity) => activity.trim());
-    setListaFortes(newFortes.filter((forte) => forte !== ''));
-    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-    const isValidInput = regex.test(value);
-    setIsValidFortes(isValidInput);
-  }
-
-  function handleAtencao(e) {
-    const value = capitalizeWords(e.currentTarget.value);
-    setAtencao(value);
-    const newAtencao = value.split(/,| e /).map((activity) => activity.trim());
-    setListaAtencao(newAtencao.filter((atencao) => atencao !== ''));
-    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-    const isValidInput = regex.test(value);
-    setIsValidAtencao(isValidInput);
-  }
-
-  function handleMelhorias(e) {
-    const value = capitalizeWords(e.currentTarget.value);
-    setMelhorias(value);
-    const newMelhorias = value
-      .split(/,| e /)
-      .map((activity) => activity.trim());
-    setListaMelhorias(newMelhorias.filter((melhorias) => melhorias !== ''));
-    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
-    const isValidInput = regex.test(value);
-    setIsValidMelhorias(isValidInput);
-  }
-
-  //Grava e valida as notas para o cálculo
-  const handleNoteChange = (item, e) => {
-    const value = e.target.value.trim(); // Remover espaços em branco extras
-
-    if (value === '') {
-      setNotes({ ...notes, [item]: '' });
-    } else {
-      const numericValue = parseFloat(value);
-
-      if (!isNaN(numericValue)) {
-        if (numericValue >= 1 && numericValue <= 7) {
-          setNotes({ ...notes, [item]: numericValue });
-        } else {
-          setOpenValidaNota(true);
-        }
-      } else {
-        setOpenValidaNota(true);
-      }
-    }
-  };
-
-  function handleCompetencia(e) {
-    const value = capitalizeWords(e.currentTarget.value);
-    setCompetencia(value);
-  }
-
-  //Função para padronizar a digitação dos inputs
-  function capitalizeWords(sentence) {
-    const exceptions = ['de', 'e']; // Palavras que devem permanecer em minúsculas
-
-    const capitalize = (word) => {
-      const lowerCaseWord = word.toLowerCase();
-      if (exceptions.includes(lowerCaseWord)) {
-        return lowerCaseWord;
-      } else {
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      }
-    };
-
-    return sentence
-      .toLowerCase()
-      .replace(/[\wÀ-ú']+|-/g, (match) => capitalize(match));
-  }
-
+  //Funções principais
   //Função para gravar os dados
   async function gravar() {
     const lista = listaCanva.find(
@@ -285,14 +190,144 @@ export default function Canva({
       }
     }
   }
+  // Função para apagar primeiro gráfico
+  function apagarPrimeiro() {
+    const primeiroRemovido = listaCanva[0]; // Armazena o primeiro elemento antes de removê-lo
+    const listaAtualizada = listaCanva.slice(1); // Cria uma nova lista sem o primeiro elemento
 
+    try {
+      const response = axios.put(
+        `/cadastro/${idFuncionario}/update-avaliacao`,
+        {
+          avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
+        },
+      );
+
+      console.log(response.data); // Confirmação de atualização da API
+
+      setListaCanva(listaAtualizada);
+      setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+    } catch (error) {
+      console.error('Houve um erro ao atualizar:', error);
+      // Tratar o erro adequadamente
+    }
+  }
+  // Função para apagar último gráfico
+  function apagarUltimo() {
+    const ultimoRemovido = listaCanva[listaCanva.length - 1]; // Armazena o último elemento antes de removê-lo
+    const listaAtualizada = listaCanva.slice(0, -1); // Cria uma nova lista sem o último elemento
+
+    try {
+      const response = axios.put(
+        `/cadastro/${idFuncionario}/update-avaliacao`,
+        {
+          avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
+        },
+      );
+
+      console.log(response.data); // Confirmação de atualização da API
+
+      setListaCanva(listaAtualizada);
+      setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+    } catch (error) {
+      console.error('Houve um erro ao atualizar:', error);
+      // Tratar o erro adequadamente
+    }
+  }
+
+  //Funções auxiliares
+  //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
+  function handleAtividades(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setAtividades(value);
+    const newActivities = value
+      .split(/,| e /)
+      .map((activity) => activity.trim());
+    setListaAtividades(newActivities.filter((activity) => activity !== ''));
+    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
+    const isValidInput = regex.test(value);
+    setIsValidAtividades(isValidInput);
+  }
+  //Função para formatar a const fortes
+  function handleFortes(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setFortes(value);
+    const newFortes = value.split(/,| e /).map((activity) => activity.trim());
+    setListaFortes(newFortes.filter((forte) => forte !== ''));
+    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
+    const isValidInput = regex.test(value);
+    setIsValidFortes(isValidInput);
+  }
+  //Função para formatar a const atencao
+  function handleAtencao(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setAtencao(value);
+    const newAtencao = value.split(/,| e /).map((activity) => activity.trim());
+    setListaAtencao(newAtencao.filter((atencao) => atencao !== ''));
+    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
+    const isValidInput = regex.test(value);
+    setIsValidAtencao(isValidInput);
+  }
+  //Função para formatar a const melhorias
+  function handleMelhorias(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setMelhorias(value);
+    const newMelhorias = value
+      .split(/,| e /)
+      .map((activity) => activity.trim());
+    setListaMelhorias(newMelhorias.filter((melhorias) => melhorias !== ''));
+    const regex = /^[\p{L}\w\s]+(,\s*[\p{L}\w\s]+)*$/u;
+    const isValidInput = regex.test(value);
+    setIsValidMelhorias(isValidInput);
+  }
+  //Grava e valida as notas para o cálculo
+  const handleNoteChange = (item, e) => {
+    const value = e.target.value.trim(); // Remover espaços em branco extras
+
+    if (value === '') {
+      setNotes({ ...notes, [item]: '' });
+    } else {
+      const numericValue = parseFloat(value);
+
+      if (!isNaN(numericValue)) {
+        if (numericValue >= 1 && numericValue <= 7) {
+          setNotes({ ...notes, [item]: numericValue });
+        } else {
+          setOpenValidaNota(true);
+        }
+      } else {
+        setOpenValidaNota(true);
+      }
+    }
+  };
+  //Função para formatar a const competencia
+  function handleCompetencia(e) {
+    const value = capitalizeWords(e.currentTarget.value);
+    setCompetencia(value);
+  }
+  //Função para padronizar a digitação dos inputs
+  function capitalizeWords(sentence) {
+    const exceptions = ['de', 'e']; // Palavras que devem permanecer em minúsculas
+
+    const capitalize = (word) => {
+      const lowerCaseWord = word.toLowerCase();
+      if (exceptions.includes(lowerCaseWord)) {
+        return lowerCaseWord;
+      } else {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }
+    };
+
+    return sentence
+      .toLowerCase()
+      .replace(/[\wÀ-ú']+|-/g, (match) => capitalize(match));
+  }
   //Função para calcular a nota
   function calculateFinalGrade() {
     const notesValues = Object.values(notes).map((note) => parseFloat(note));
     const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
     const final = total / notesValues.length || 0;
     setNotaFinal(final.toFixed(2));
-
     let senior = '';
     if (final <= 1) {
       return (senior = 'novato');
@@ -310,7 +345,6 @@ export default function Canva({
       return (senior = 'mestre');
     }
   }
-
   //Função para obter somente o mês pelo input date
   function obterNomeDoMes(dataString) {
     const meses = [
@@ -327,84 +361,35 @@ export default function Canva({
       'Novembro',
       'Dezembro',
     ];
-
     const partesData = dataString.split('-');
     const ano = parseInt(partesData[0]);
     const mesIndex = parseInt(partesData[1]) - 1; // Subtrai 1 para considerar o índice do array
     const dia = parseInt(partesData[2]);
-
     const data = new Date(ano, mesIndex, dia); // Cria uma nova data com o ano, mês e dia
-
     const nomeMes = meses[data.getMonth()]; // Obtém o nome do mês correspondente ao índice do array de meses
-
     return { nomeMes, ano };
   }
-
+  //Função para obter o nome do mês
   function handleChangeMonth(e) {
     setSelectedDate(e.currentTarget.value);
     const { nomeMes, ano } = obterNomeDoMes(e.currentTarget.value);
     setMouthDate(nomeMes);
     setYearDate(ano);
   }
-
+  //Função para controle da renderização ao escolher a data do feedback
   function handleData(e) {
     const meuDado = {};
     const data =
       e.currentTarget.value === 'Última Data'
         ? 'Última Data'
         : JSON.parse(e.currentTarget.value);
-
     setDataHistorico(data);
-
     console.log(data);
   }
 
-  console.log('listaRender', listaRender);
-
-// Função para apagar primeiro gráfico
-function apagarPrimeiro() {
-  const primeiroRemovido = listaCanva[0]; // Armazena o primeiro elemento antes de removê-lo
-  const listaAtualizada = listaCanva.slice(1); // Cria uma nova lista sem o primeiro elemento
-
-  try {
-    const response = axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
-      avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
-    });
-
-    console.log(response.data); // Confirmação de atualização da API
-
-    setListaCanva(listaAtualizada);
-    setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
-  } catch (error) {
-    console.error('Houve um erro ao atualizar:', error);
-    // Tratar o erro adequadamente
-  }
-}
-
-// Função para apagar último gráfico
-function apagarUltimo() {
-  const ultimoRemovido = listaCanva[listaCanva.length - 1]; // Armazena o último elemento antes de removê-lo
-  const listaAtualizada = listaCanva.slice(0, -1); // Cria uma nova lista sem o último elemento
-
-  try {
-    const response = axios.put(`/cadastro/${idFuncionario}/update-avaliacao`, {
-      avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
-    });
-
-    console.log(response.data); // Confirmação de atualização da API
-
-    setListaCanva(listaAtualizada);
-    setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
-  } catch (error) {
-    console.error('Houve um erro ao atualizar:', error);
-    // Tratar o erro adequadamente
-  }
-}
-
-
-
   return (
     <>
+      {/* Renderização do formulário de avaliação que é controlado pelo componente Feedback */}
       {avaliar2 && (
         <>
           <h5>Formulário para avaliação</h5>
@@ -509,6 +494,7 @@ function apagarUltimo() {
         </>
       )}
 
+      {/* Renderização do componente Canva que é controlado pelo componente Feedback */}
       {historico && (
         <section>
           <div className="canvaContainer container w-100 mb-3">

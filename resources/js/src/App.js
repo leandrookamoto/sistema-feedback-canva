@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import Input from './Components/Input';
 import './index.css';
 import { useState, useEffect } from 'react';
-import Chart from './Components/Chart';
 import './App.css';
 import Sidebar from './Components/Sidebar';
 import Home from './Components/Home';
