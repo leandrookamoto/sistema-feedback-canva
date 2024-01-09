@@ -305,10 +305,10 @@ export default function Feedback({
                 historicoBotao={historicoBotao}
                 botao3="Apagar"
                 apagarBotao={apagar}
-                botao4="Voltar"
-                voltar={voltar}
-                botao5="Editar"
-                editar={editar}
+                botao4="Editar"
+                voltar={editar}
+                botao5="Voltar"
+                editar={voltar}
               />
             </div>
           ))}
