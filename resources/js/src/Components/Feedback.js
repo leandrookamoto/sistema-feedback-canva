@@ -101,9 +101,14 @@ export default function Feedback({
         // Lidar com possíveis erros
       });
   }, [dados]);
+  //useEffect para atualização da paginação
   useEffect(() => {
     setPage(1);
   }, [listaCadastro]);
+  //useEffect para atualização do avaliar
+  useEffect(()=>{
+    setAvaliar(avaliar2);
+  },[avaliar2])
   //useEffect para manter a lista da paginação atualizada
   useEffect(() => {
     const offset = (page - 1) * pageSize;
@@ -321,6 +326,7 @@ export default function Feedback({
           onHistorico={(e) => setHistorico(e)}
           onAvaliacao={(e) => setAvaliar2(e)}
           usuario={usuario}
+          avaliar={avaliar}
         />
       )}
       {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}

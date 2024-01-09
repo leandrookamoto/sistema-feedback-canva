@@ -66,12 +66,19 @@ export default function Canva({
       setYearDate(render.map((item) => item.ano));
       setMouthDate(render.map((item) => item.mes));
       console.table(render);
-      setListaRender(render); // Definindo diretamente o resultado do filtro
+      setListaRender(render); // Definindo disretamente o resultado do filtro
     }
   }, [listaCanva, dataHistorico]);
   //useEffect para resetar a const atividades
   useEffect(() => {
-    setAtividades([]);
+    setAtividades('');
+    setListaAtividades([]);
+    setCompetencia('');
+    setFortes('');
+    setAtencao('');
+    setMelhorias('');
+    setMouthDate('');
+    setSelectedDate('');
   }, [avaliar2]);
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
