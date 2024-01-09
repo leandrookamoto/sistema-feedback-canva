@@ -49,57 +49,136 @@ export default function App() {
   //UseEffects
   //Primeira requisição para a recuperação dos dados dos usuários ao inicializar o programa
   useEffect(() => {
-    axios
-      .get('/user')
-      .then((response) => {
-        const usuarioLogado = response.data.name;
-        const emailUsuario2 = response.data.email;
+    const fetchData = async () => {
+      try {
+        // Primeira requisição
+        const responseUser = await axios.get('/user');
+        const usuarioLogado = responseUser.data.name;
         setUsuario(usuarioLogado);
-        setEmailUsuario(emailUsuario2);
-        console.log('Este é o email ' + emailUsuario2);
-
-        // Segunda requisição feita após o sucesso da primeira
-        axios
-          .get('/cadastrados')
-          .then((response) => {
-            const lista = response.data;
-            const listaFiltrada = lista.filter(
-              (item) => item.administrador === usuarioLogado,
-            );
-            setListaCadastro(listaFiltrada);
-
-            const id = response.data.length
-              ? lista[response.data.length - 1].id
-              : 0;
-            setNewId(id);
-          })
-          .catch((error) => {
-            // Tratar erros da segunda requisição, se necessário
-            console.error('Erro na segunda requisição:', error);
-          });
-      })
-      .catch((error) => {
-        // Tratar erros da primeira requisição, se necessário
-        console.error('Erro na primeira requisição:', error);
-      });
-
-    axios
-      .get('/colaboradores-atestado')
-      .then((response) => {
-        setListaAtestado(response.data);
-        // const listaFiltrada = lista.filter(item => item.administrador === usuarioLogado);
-        // setListaCadastro(listaFiltrada);
-
-        // const id = response.data.length?lista[response.data.length-1].id:0;
-        // console.log(`Este é o id final: ${id}`)
-        // setNewId(id);
-      })
-
-      .catch((error) => {
-        // Tratar erros da segunda requisição, se necessário
-        console.error('Erro na segunda requisição:', error);
-      });
+  
+        // Segunda requisição para obter a lista original
+        const responseListaOriginal = await axios.get('/cadastrados');
+        const listaOriginal = responseListaOriginal.data;
+        setListaCadastro(listaOriginal);
+  
+        // Terceira requisição para obter a lista dos colaboradores do outro banco de dados
+        const responseColaboradoresAtestado = await axios.get('/colaboradores-atestado');
+        const listaAtestado = responseColaboradoresAtestado.data;
+  
+        // Verificar se os colaboradores do segundo banco de dados já existem na lista original
+        const funcionariosNaoCadastrados = listaAtestado.filter((colaboradorAtestado) => {
+          return !listaOriginal.some((funcionario) => funcionario.nome === colaboradorAtestado.nome);
+        });
+  
+        // Cadastrar os funcionários não encontrados na lista original
+        for (const item of funcionariosNaoCadastrados) {
+          try {
+            const novoUsuario = {
+              nome: item.nome,
+              email: 'cadastrar@email.com',
+              setor: item.setor,
+              administrador: 'Leandro Okamoto',
+            };
+            await axios.post('/cadastrar-usuario', novoUsuario);
+            console.log('Usuário cadastrado com sucesso:', novoUsuario);
+          } catch (error) {
+            console.error('Erro ao cadastrar usuário:', error);
+          }
+        }
+  
+        // Atualizar a lista original após os cadastros
+        const updatedListaOriginal = await axios.get('/cadastrados');
+        setListaCadastro(updatedListaOriginal.data);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
+    };
+  
+    fetchData();
   }, []);
+  
+  // useEffect(() => {
+  //   axios
+  //     .get('/user')
+  //     .then((response) => {
+  //       const usuarioLogado = response.data.name;
+  //       const emailUsuario2 = response.data.email;
+  //       setUsuario(usuarioLogado);
+  //       setEmailUsuario(emailUsuario2);
+  //       console.log('Este é o email ' + emailUsuario2);
+
+  //       // Segunda requisição feita após o sucesso da primeira
+  //       axios
+  //         .get('/cadastrados')
+  //         .then((response) => {
+  //           const lista = response.data;
+  //           const listaFiltrada = lista.filter(
+  //             (item) => item.administrador === usuarioLogado,
+  //           );
+  //           setListaCadastro(listaFiltrada);
+  //           console.log('Lista',lista);
+
+  //           const id = response.data.length
+  //             ? lista[response.data.length - 1].id
+  //             : 0;
+  //           setNewId(id);
+  //           //Requisição do outro banco de dados
+  //           axios
+  //             .get('/colaboradores-atestado')
+  //             .then((response) => {
+  //               const lista = response.data;
+  //               const cadastrarNovoUsuario = async (item) => {
+  //                 try {
+  //                   const listaNova = {
+  //                     nome: item.nome,
+  //                     email: 'cadastrar@email.com',
+  //                     setor: item.setor,
+  //                     administrador: 'Leandro Okamoto',
+  //                   };
+  //                   // Realiza a requisição para cadastrar um novo usuário
+  //                   const responseCadastro = await axios.post(
+  //                     '/cadastrar-usuario',
+  //                     listaNova,
+  //                   );
+  //                   console.log(
+  //                     'Usuário cadastrado com sucesso:',
+  //                     responseCadastro.data,
+  //                   );
+  //                   // Você pode realizar outras operações após o cadastro, se necessário
+  //                 } catch (error) {
+  //                   console.error('Erro na requisição:', error);
+  //                 }
+  //               };
+  //               if (lista.length > 0) {
+  //                 // Itera sobre cada item da listaAtestado e faz a requisição POST separadamente
+  //                 for (const item of lista) {
+  //                   cadastrarNovoUsuario(item); //está dando erro aqui!
+  //                 }
+  //               }
+  //               // const listaFiltrada = lista.filter(item => item.administrador === usuarioLogado);
+  //               // setListaCadastro(listaFiltrada);
+
+  //               // const id = response.data.length?lista[response.data.length-1].id:0;
+  //               // console.log(`Este é o id final: ${id}`)
+  //               // setNewId(id);
+  //             })
+
+  //             .catch((error) => {
+  //               // Tratar erros da segunda requisição, se necessário
+  //               console.error('Erro na segunda requisição:', error);
+  //             });
+  //         })
+  //         .catch((error) => {
+  //           // Tratar erros da segunda requisição, se necessário
+  //           console.error('Erro na segunda requisição:', error);
+  //         });
+  //     })
+
+  //     .catch((error) => {
+  //       // Tratar erros da primeira requisição, se necessário
+  //       console.error('Erro na primeira requisição:', error);
+  //     });
+  // }, []);
 
   //Funções principais
   //Função para cadastrar os funcionários
