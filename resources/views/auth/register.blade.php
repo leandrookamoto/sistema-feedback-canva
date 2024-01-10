@@ -28,6 +28,11 @@
                 <x-label for="password_confirmation" value="{{ __('Confirme o Password') }}" />
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
             </div>
+
+            <div class="mt-4">
+                <x-label for="setor" value="{{ __('Setor') }}" />
+                <x-input id="setor" class="block mt-1 w-full" type="text" name="setor" :value="old('setor')" required autofocus autocomplete="setor" />
+            </div>
             
 
             @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())

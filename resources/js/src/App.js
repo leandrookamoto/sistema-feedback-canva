@@ -55,6 +55,7 @@ export default function App() {
         const responseUser = await axios.get('/user');
         const usuarioLogado = responseUser.data.name;
         setUsuario(usuarioLogado);
+        console.log('setor', responseUser.data.setor)
   
         // Segunda requisição para obter a lista original
         const responseListaOriginal = await axios.get('/cadastrados');

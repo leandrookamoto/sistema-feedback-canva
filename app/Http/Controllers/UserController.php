@@ -25,6 +25,7 @@ class UserController extends Controller
             return response()->json([
                 'name' => $user->name,
                 'email' => $user->email,
+                'setor' => $user->setor,
             ]);
         } else {
             // Retorna uma resposta adequada caso não haja usuário autenticado
