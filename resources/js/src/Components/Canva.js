@@ -63,8 +63,11 @@ export default function Canva({
             item.mes === dataHistorico.mes && item.ano === dataHistorico.ano,
         );
       }
+
+      console.log('render', render);
       setYearDate(render.map((item) => item.ano));
       setMouthDate(render.map((item) => item.mes));
+      setSenioridade(render.map((item) => item.senioridade));
       console.table(render);
       setListaRender(render); // Definindo disretamente o resultado do filtro
     }
@@ -235,7 +238,7 @@ export default function Canva({
       console.log(response.data); // Confirmação de atualização da API
 
       setListaCanva(listaAtualizada);
-      setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+      setListaRender([listaAtualizada[listaAtualizada.length - 2]]); // Mantém somente o último elemento na listaRender
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente

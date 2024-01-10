@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+        <img src='./img/logo.jpg' />
         </x-slot>
 
         <x-validation-errors class="mb-4" />
@@ -28,6 +28,7 @@
                 <x-label for="password_confirmation" value="{{ __('Confirme o Password') }}" />
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
             </div>
+            
 
             @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
                 <div class="mt-4">
