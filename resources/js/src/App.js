@@ -192,14 +192,18 @@ export default function App() {
   //Funções auxiliares
   //Função para padronizar a digitação dos inputs
   function capitalizeWords(sentence) {
-    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
+    return sentence.replace(/\b[\p{L}\w']+\b/gu, (match) => {
       if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
         return match.toLowerCase();
       } else {
-        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+        const firstLetter = match.charAt(0).toUpperCase();
+        const restOfWord = match.slice(1).toLowerCase();
+        return firstLetter + restOfWord;
       }
     });
   }
+  
+  
   //Função para gravar o nome e padronizar a escrita
   function handleChangeName(event) {
     const newName = capitalizeWords(event.currentTarget.value);
