@@ -29,9 +29,13 @@
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
             </div>
 
-            <div class="mt-4">
+            <div class="mt-4" >
                 <x-label for="setor" value="{{ __('Setor') }}" />
-                <x-input id="setor" class="block mt-1 w-full" type="text" name="setor" :value="old('setor')" required autofocus autocomplete="setor" />
+                <select id="setor" name="setor" class="block mt-1 w-full" required autofocus style='border-color: #d1d5db; border-radius:7px;'>
+                    <option>Escolha o setor</option>    
+                    <option value="Setor A">Setor A</option>
+                    <option value="Setor B">Setor B</option>
+                </select>
             </div>
             
 
