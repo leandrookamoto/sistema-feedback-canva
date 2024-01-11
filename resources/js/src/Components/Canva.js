@@ -11,6 +11,7 @@ export default function Canva({
   idFuncionario,
   listaCadastro,
   usuario,
+  setorChefe
 }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
@@ -87,11 +88,11 @@ export default function Canva({
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
     axios
-      .get('/cadastrados')
+      .get(`/cadastrados/${setorChefe}`)
       .then((response) => {
         const lista = response.data;
         const listaFiltrada2 = lista.filter(
-          (item) => item.administrador === usuario,
+          (item) => item.setor === setorChefe,
         );
         console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
         const objetoEncontrado = listaFiltrada2.find(

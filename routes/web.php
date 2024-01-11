@@ -47,7 +47,7 @@ Route::middleware([
 
     Route::post('/cadastrar-usuario', [CadastroController::class, 'createCadastro'])->name('cadastrar.usuario');
 
-    Route::get('/cadastrados', [CadastroController::class, 'getAllCadastro']);
+    Route::get('/cadastrados/{setor}', [CadastroController::class, 'getAllCadastro']);
 
     Route::put('/cadastro/{id}/update-avaliacao', [CadastroController::class, 'updateAvaliacao']);
 

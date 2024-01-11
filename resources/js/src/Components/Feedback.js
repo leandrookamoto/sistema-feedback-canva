@@ -14,6 +14,7 @@ export default function Feedback({
   onChangeNewId,
   onChangeDadosFuncionario,
   dados,
+  setorChefe
 }) {
   //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -82,18 +83,19 @@ export default function Feedback({
     }
     let lista = [];
     axios
-      .get('/cadastrados')
+      .get(`/cadastrados/${setorChefe}`)
       .then((response) => {
         lista = response.data;
 
         const listaFiltrada2 = lista.filter(
-          (item) => item.administrador === usuario,
+          (item) => item.setor === setorChefe,
         );
+
         const novaListaFiltrada = listaFiltrada2.filter((item) =>
           item.email.includes(dados.email),
         );
         console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
-        setListaFiltrada(novaListaFiltrada);
+        setListaFiltrada(listaFiltrada2);
         setPage(1);
       })
       .catch((error) => {
@@ -154,7 +156,7 @@ export default function Feedback({
         await axios.delete(`/deleteFuncionario/${idFuncionario}`);
 
         // Faz a requisição para obter a lista de funcionários atualizada
-        const response = await axios.get('/cadastrados');
+        const response = await axios.get(`/cadastrados/${setorChefe}`);
         const lista = response.data;
         const listaFiltrada2 = lista.filter(
           (item) => item.administrador === usuario,
@@ -327,6 +329,7 @@ export default function Feedback({
           onAvaliacao={(e) => setAvaliar2(e)}
           usuario={usuario}
           avaliar={avaliar}
+          setorChefe={setorChefe}
         />
       )}
       {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}

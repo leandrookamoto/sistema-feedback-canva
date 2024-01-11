@@ -31,6 +31,8 @@ export default function App() {
   const [emailUsuario, setEmailUsuario] = useState('');
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
+  const [setorChefe, setSetorChefe] = useState('');
+  const [listaCadastroTemporario, setListaCadastroTemporario] = useState([]);
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -51,44 +53,39 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Primeira requisição
         const responseUser = await axios.get('/user');
         const usuarioLogado = responseUser.data.name;
         setUsuario(usuarioLogado);
-        console.log('setor', responseUser.data.setor)
+        setSetorChefe(responseUser.data.setor);
   
-        // Segunda requisição para obter a lista original
-        const responseListaOriginal = await axios.get('/cadastrados');
+        const responseListaOriginal = await axios.get('/cadastrados/'+responseUser.data.setor);
         const listaOriginal = responseListaOriginal.data;
-        setListaCadastro(listaOriginal);
+        setListaCadastro(listaOriginal); //parte que está atrapa
   
-        // Terceira requisição para obter a lista dos colaboradores do outro banco de dados
         const responseColaboradoresAtestado = await axios.get('/colaboradores-atestado');
-        const listaAtestado = responseColaboradoresAtestado.data;
+        const listaAtestado2 = responseColaboradoresAtestado.data;
+        const listaAtestado = listaAtestado2.filter(item => item.setor === responseUser.data.setor);
   
-        // Verificar se os colaboradores do segundo banco de dados já existem na lista original
         const funcionariosNaoCadastrados = listaAtestado.filter((colaboradorAtestado) => {
           return !listaOriginal.some((funcionario) => funcionario.nome === colaboradorAtestado.nome);
         });
   
-        // Cadastrar os funcionários não encontrados na lista original
-        for (const item of funcionariosNaoCadastrados) {
+        await Promise.all(funcionariosNaoCadastrados.map(async (item) => {
           try {
             const novoUsuario = {
               nome: item.nome,
               email: 'cadastrar@email.com',
               setor: item.setor,
-              administrador: 'Leandro Okamoto',
+              administrador: usuarioLogado,
             };
             await axios.post('/cadastrar-usuario', novoUsuario);
             console.log('Usuário cadastrado com sucesso:', novoUsuario);
           } catch (error) {
             console.error('Erro ao cadastrar usuário:', error);
           }
-        }
+        }));
   
-        // Atualizar a lista original após os cadastros
-        const updatedListaOriginal = await axios.get('/cadastrados');
+        const updatedListaOriginal = await axios.get('/cadastrados'+responseUser.data.setor);
         setListaCadastro(updatedListaOriginal.data);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
@@ -97,6 +94,7 @@ export default function App() {
   
     fetchData();
   }, []);
+  
 
   //Funções principais
   //Função para cadastrar os funcionários
@@ -202,8 +200,7 @@ export default function App() {
       }
     });
   }
-  
-  
+
   //Função para gravar o nome e padronizar a escrita
   function handleChangeName(event) {
     const newName = capitalizeWords(event.currentTarget.value);
@@ -289,6 +286,7 @@ export default function App() {
               onChangeListaCadastro={(e) => setListaCadastro(e)}
               onChangeDadosFuncionario={(e) => handleDadosFuncionario(e)}
               dados={dados}
+              setorChefe={setorChefe}
             />
           )}
         </div>

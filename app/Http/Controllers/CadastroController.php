@@ -8,10 +8,16 @@ use App\Models\Atestado;
 
 class CadastroController extends Controller
 {
-    public function getAllCadastro() {
-        $cadastro = Cadastro::get()->toJson(JSON_PRETTY_PRINT);
-     return response($cadastro, 200);
-     }
+    public function getAllCadastro($setor)
+    {
+        $resultado = Cadastro::where('setor', $setor)->get();
+    
+        if ($resultado) {
+            return response()->json($resultado);
+        } else {
+            return response()->json([], 404); // Retorna uma resposta vazia com código de status 404 (não encontrado)
+        }
+    }
 
      public function getAllColaboradoresAtestado() {
       $atestado = Atestado::get()->toJson(JSON_PRETTY_PRINT);
