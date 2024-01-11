@@ -14,7 +14,8 @@ export default function Feedback({
   onChangeNewId,
   onChangeDadosFuncionario,
   dados,
-  setorChefe
+  setorChefe,
+  avalDoFuncionario
 }) {
   //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -24,6 +25,7 @@ export default function Feedback({
   const [avaliar, setAvaliar] = useState(false);
   const [historico, setHistorico] = useState(false);
   const [avaliar2, setAvaliar2] = useState(false);
+  const [compararAval, setCompararAval] = useState(false);
 
   //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
@@ -330,6 +332,7 @@ export default function Feedback({
           usuario={usuario}
           avaliar={avaliar}
           setorChefe={setorChefe}
+          avalDoFuncionario={avalDoFuncionario}
         />
       )}
       {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}

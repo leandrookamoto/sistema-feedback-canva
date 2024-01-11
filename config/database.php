@@ -73,6 +73,16 @@ return [
             // outras configurações...
         ],
 
+        'mysql3' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_3', '127.0.0.1'),
+            'port' => env('DB_PORT_3', '3306'),
+            'database' => env('DB_DATABASE_3', 'database3'),
+            'username' => env('DB_USERNAME_3', 'root'),
+            'password' => env('DB_PASSWORD_3', ''),
+            // outras configurações...
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

@@ -55,4 +55,6 @@ Route::middleware([
 
     Route::put('/funcionario/{id}', [CadastroController::class, 'update']);
 
+    Route::get('/funcionarios/{setor}', [CadastroController::class, 'getAllFuncionarios']);
+
 });

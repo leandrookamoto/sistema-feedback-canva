@@ -32,7 +32,7 @@ export default function App() {
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
   const [setorChefe, setSetorChefe] = useState('');
-  const [listaCadastroTemporario, setListaCadastroTemporario] = useState([]);
+  const [avalDoFuncionario,setAvalDoFuncionario] = useState([]);
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -55,16 +55,20 @@ export default function App() {
       try {
         const responseUser = await axios.get('/user');
         const usuarioLogado = responseUser.data.name;
+        const setor = responseUser.data.setor;
         setUsuario(usuarioLogado);
-        setSetorChefe(responseUser.data.setor);
+        setSetorChefe(setor);
   
-        const responseListaOriginal = await axios.get('/cadastrados/'+responseUser.data.setor);
+        const responseListaOriginal = await axios.get('/cadastrados/'+setor);
         const listaOriginal = responseListaOriginal.data;
-        setListaCadastro(listaOriginal); //parte que está atrapa
+        setListaCadastro(listaOriginal); 
+
+        const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
+        setAvalDoFuncionario(canvaFuncionario.data);
   
         const responseColaboradoresAtestado = await axios.get('/colaboradores-atestado');
         const listaAtestado2 = responseColaboradoresAtestado.data;
-        const listaAtestado = listaAtestado2.filter(item => item.setor === responseUser.data.setor);
+        const listaAtestado = listaAtestado2.filter(item => item.setor === setor);
   
         const funcionariosNaoCadastrados = listaAtestado.filter((colaboradorAtestado) => {
           return !listaOriginal.some((funcionario) => funcionario.nome === colaboradorAtestado.nome);
@@ -85,7 +89,7 @@ export default function App() {
           }
         }));
   
-        const updatedListaOriginal = await axios.get('/cadastrados'+responseUser.data.setor);
+        const updatedListaOriginal = await axios.get('/cadastrados'+setor);
         setListaCadastro(updatedListaOriginal.data);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
@@ -287,6 +291,7 @@ export default function App() {
               onChangeDadosFuncionario={(e) => handleDadosFuncionario(e)}
               dados={dados}
               setorChefe={setorChefe}
+              avalDoFuncionario={avalDoFuncionario}
             />
           )}
         </div>

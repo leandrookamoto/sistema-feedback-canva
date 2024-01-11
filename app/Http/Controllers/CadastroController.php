@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cadastro;
 use App\Models\Atestado;
+use App\Models\Funcionario;
 
 class CadastroController extends Controller
 {
@@ -23,6 +24,20 @@ class CadastroController extends Controller
       $atestado = Atestado::get()->toJson(JSON_PRETTY_PRINT);
    return response($atestado, 200);
    }
+
+   public function getAllFuncionarios($setor) {
+    if (!isset($setor)) {
+        return response()->json(['error' => 'Parâmetro $setor não definido.'], 400);
+    }
+
+    $resultado = Funcionario::where('setor', $setor)->get();
+   
+        if ($resultado) {
+            return response()->json($resultado);
+        } else {
+            return response()->json([], 404); 
+        }
+ }
  
      public function createCadastro(Request $request)
     {

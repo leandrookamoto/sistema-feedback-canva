@@ -11,7 +11,8 @@ export default function Canva({
   idFuncionario,
   listaCadastro,
   usuario,
-  setorChefe
+  setorChefe,
+  avalDoFuncionario
 }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
@@ -217,7 +218,14 @@ export default function Canva({
       console.log(response.data); // Confirmação de atualização da API
 
       setListaCanva(listaAtualizada);
-      setListaRender([listaAtualizada[listaAtualizada.length - 1]]); // Mantém somente o último elemento na listaRender
+      if (listaAtualizada.length == 0) {
+        setListaRender([]); 
+        setSenioridade('');
+        setMouthDate('');
+        setYearDate('');
+      }else{
+        setListaRender([listaAtualizada[listaAtualizada.length - 1]]);
+      }
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
@@ -225,7 +233,7 @@ export default function Canva({
   }
   // Função para apagar último gráfico
   function apagarUltimo() {
-    const ultimoRemovido = listaCanva[listaCanva.length - 1]; // Armazena o último elemento antes de removê-lo
+    const ultimoRemovido = listaCanva[listaCanva.length - 2]; // Armazena o último elemento antes de removê-lo
     const listaAtualizada = listaCanva.slice(0, -1); // Cria uma nova lista sem o último elemento
 
     try {
@@ -239,7 +247,14 @@ export default function Canva({
       console.log(response.data); // Confirmação de atualização da API
 
       setListaCanva(listaAtualizada);
-      setListaRender([listaAtualizada[listaAtualizada.length - 2]]); // Mantém somente o último elemento na listaRender
+      if (listaAtualizada.length == 0) {
+        setListaRender([]); // Mantém somente o último elemento na listaRender
+        setSenioridade('');
+        setMouthDate('');
+        setYearDate('');
+      }else{
+        setListaRender([listaAtualizada[listaAtualizada.length - 1]]);
+      }
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
