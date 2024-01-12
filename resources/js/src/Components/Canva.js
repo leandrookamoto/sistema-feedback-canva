@@ -2,6 +2,7 @@ import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
 import { useState, useEffect, useRef } from 'react';
 import Dialog from './Dialog';
+import emailjs from '@emailjs/browser';
 
 export default function Canva({
   historico,
@@ -35,6 +36,12 @@ export default function Canva({
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
   const [openValidaData, setOpenValidaData] = useState(false);
+  const [nomeFuncionario, setNomeFuncionario] = useState('');
+  const [emailFuncionario, setEmailFuncionario] = useState('');
+
+  //Constante para esconder o formulário de solicitação de feedback;
+  const envio = false;
+
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
   const [isValidFortes, setIsValidFortes] = useState(true);
@@ -46,12 +53,17 @@ export default function Canva({
   const [dadosCanvaDoFuncionario, setDadosCanvaDoFuncionario] = useState([]);
   const [seniorDoFuncionario, setSeniorDoFuncionario] = useState('');
 
+  //Contantes para envio do e-mail
+  const assunto = `${usuario} solicita o seu feedback pelo programa Feedback Canva`;
+
   //Constante para abertura do Dialog/Modal
   const [open, setOpen] = useState(false);
+  const [openEmail, setOpenEmail] = useState(false);
   const descricao =
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
   const validaData = 'Mês e ano já cadastrados!';
+  const sucessoEmail = 'Sua solicitação de feedback foi enviada com sucesso!';
 
   //useEffects
   //useEffect para manter o listaRender atualizado e avalDoFuncionario.
@@ -62,7 +74,7 @@ export default function Canva({
     }
 
     //Lógica para puxar os dados para comparação dos canvas
-    console.log('avalDoFuncionario', avalDoFuncionario);
+
     const canvaDoFuncionario = avalDoFuncionario
       .map((item) => item.avaliacoes)
       .join();
@@ -70,20 +82,24 @@ export default function Canva({
     const canvaDoFuncionarioParse = canvaDoFuncionario
       ? JSON.parse(canvaDoFuncionario)
       : [];
-    console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
+
     //Recuperação do funcionário selecionado atual
     const listaNomeAtual = listaCadastro.filter(
       (item) => item.id === idFuncionario,
     );
+    setNomeFuncionario(listaNomeAtual.map((item) => item.nome).join());
+    setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
+
     //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
     const canvaParseData = canvaDoFuncionarioParse.filter(
       (item) =>
         item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
     );
-    console.log('avalDoFuncionario', avalDoFuncionario.map(item=>item.nome));
-    console.log('listaNomeAtual', listaNomeAtual.map(item=>item.nome));
-    
-    if (avalDoFuncionario.map(item=>item.nome).join() == listaNomeAtual.map(item=>item.nome).join()) {
+
+    if (
+      avalDoFuncionario.map((item) => item.nome).join() ==
+      listaNomeAtual.map((item) => item.nome).join()
+    ) {
       setDadosCanvaDoFuncionario(canvaParseData);
       setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade));
     }
@@ -99,7 +115,6 @@ export default function Canva({
         );
       }
 
-      console.log('listaCanva', listaCanva);
       setYearDate(render.map((item) => item.ano));
       setMouthDate(render.map((item) => item.mes));
       setSenioridade(render.map((item) => item.senioridade));
@@ -137,9 +152,8 @@ export default function Canva({
             let avaliacoes = [];
             try {
               avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-
+              //Lógica para gravar a parte de avaliações com o funcionário já selecionado pelo id
               if (avaliacoes.length > 0) {
-                console.table(avaliacoes);
                 setListaCanva(avaliacoes);
                 setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
                 setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
@@ -150,6 +164,45 @@ export default function Canva({
                 setSenioridade('');
                 setMouthDate('');
                 setYearDate(null);
+              }
+
+              //Lógica para puxar os dados para comparação dos canvas
+              console.log('avalDoFuncionario', avalDoFuncionario);
+              const canvaDoFuncionario = avalDoFuncionario
+                .map((item) => item.avaliacoes)
+                .join();
+
+              console.log('listaCanva', objetoEncontrado);
+              const canvaDoFuncionarioParse = canvaDoFuncionario
+                ? JSON.parse(canvaDoFuncionario)
+                : [];
+              console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
+              //Recuperação do funcionário selecionado atual
+              const listaNomeAtual = listaCadastro.filter(
+                (item) => item.id === idFuncionario,
+              );
+              setNomeFuncionario(
+                listaNomeAtual.map((item) => item.nome).join(),
+              );
+              setEmailFuncionario(
+                listaNomeAtual.map((item) => item.email).join(),
+              );
+
+              //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
+              const canvaParseData = canvaDoFuncionarioParse.filter(
+                (item) =>
+                  item.ano === avaliacoes[avaliacoes.length-1].ano &&
+                  item.mes === avaliacoes[avaliacoes.length-1].mes,
+              );
+
+              if (
+                avalDoFuncionario.map((item) => item.nome).join() ==
+                listaNomeAtual.map((item) => item.nome).join()
+              ) {
+                setDadosCanvaDoFuncionario(canvaParseData);
+                setSeniorDoFuncionario(
+                  canvaParseData.map((item) => item.senioridade),
+                );
               }
             } catch (error) {
               console.error('Erro ao analisar avaliações:', error);
@@ -264,6 +317,7 @@ export default function Canva({
       }
     }
   }
+
   // Função para apagar primeiro gráfico
   function apagarPrimeiro() {
     const primeiroRemovido = listaCanva[0]; // Armazena o primeiro elemento antes de removê-lo
@@ -322,6 +376,29 @@ export default function Canva({
       // Tratar o erro adequadamente
     }
   }
+  //Função para envio do e-mail
+  const sendEmail = () => {
+    const templateParams = {
+      email: emailFuncionario,
+      assunto: assunto,
+      nome: nomeFuncionario,
+    };
+
+    emailjs
+      .send(
+        'service_3qsan9n',
+        'template_6yt5ty9',
+        templateParams,
+        'eX61PTky11yxk4MAJ',
+      )
+      .then((response) => {
+        console.log('Email enviado com sucesso', response);
+        setOpenEmail(true);
+      })
+      .catch((error) => {
+        console.log('Erro ao enviar email', error);
+      });
+  };
 
   //Funções auxiliares
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
@@ -1279,10 +1356,12 @@ export default function Canva({
               <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
                 Solicitar feedback para o funcionário
               </h2>
+
               <button
                 type="button"
                 className="btn btn-primary mt-1"
                 style={{ marginRight: '10px' }}
+                onClick={sendEmail}
               >
                 Solicitar feedback para o funcionário
               </button>
@@ -1307,6 +1386,12 @@ export default function Canva({
         open={openValidaData}
         descricao={validaData}
         handleClose={() => setOpenValidaData(false)}
+        Title="Atenção"
+      />
+      <Dialog
+        open={openEmail}
+        descricao={sucessoEmail}
+        handleClose={() => setOpenEmail(false)}
         Title="Atenção"
       />
     </>
