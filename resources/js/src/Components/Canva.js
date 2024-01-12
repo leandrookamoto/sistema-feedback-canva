@@ -66,7 +66,7 @@ export default function Canva({
   const sucessoEmail = 'Sua solicitação de feedback foi enviada com sucesso!';
 
   //useEffects
-  //useEffect para manter o listaRender atualizado e avalDoFuncionario.
+  //useEffect para manter o listaRender atualizado e avalDoFuncionario que vem do App.js
   useEffect(() => {
     if (montagemInicial.current) {
       montagemInicial.current = false;
@@ -78,6 +78,8 @@ export default function Canva({
     const canvaDoFuncionario = avalDoFuncionario
       .map((item) => item.avaliacoes)
       .join();
+
+    console.log('canvaDoFuncionario', canvaDoFuncionario);
 
     const canvaDoFuncionarioParse = canvaDoFuncionario
       ? JSON.parse(canvaDoFuncionario)
@@ -91,10 +93,20 @@ export default function Canva({
     setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
 
     //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
-    const canvaParseData = canvaDoFuncionarioParse.filter(
-      (item) =>
-        item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
-    );
+    const canvaParseData =
+      dataHistorico !== 'Última Data'
+        ? canvaDoFuncionarioParse.filter(
+            (item) =>
+              item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
+          )
+        : canvaDoFuncionarioParse.filter(
+            (item) =>
+              item.ano ===
+                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1]
+                  .ano &&
+              item.mes ===
+                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1].mes,
+          );
 
     if (
       avalDoFuncionario.map((item) => item.nome).join() ==
@@ -137,35 +149,6 @@ export default function Canva({
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
     comparaCanvas();
-
-    // if (idFuncionario) {
-    //   //Lógica para puxar os dados para comparação dos canvas
-    //   console.log('avalDoFuncionario', avalDoFuncionario);
-    //   const canvaDoFuncionario = avalDoFuncionario
-    //     .map((item) => item.avaliacoes)
-    //     .join();
-
-    //   const canvaDoFuncionarioParse = canvaDoFuncionario
-    //     ? JSON.parse(canvaDoFuncionario)
-    //     : [];
-    //   console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
-    //   //Recuperação do funcionário selecionado atual
-    //   const listaNomeAtual = listaCadastro.filter(
-    //     (item) => item.id === idFuncionario,
-    //   );
-    //   //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
-    //   const canvaParseData = canvaDoFuncionarioParse.filter(
-    //     (item) =>
-    //       item.ano === listaNomeAtual[listaNomeAtual.length - 1].ano && item.mes === listaNomeAtual[listaNomeAtual.length - 1].mes,
-    //   );
-    //   console.log('canvaParseData', canvaParseData);
-    //   console.log('listaNomeAtual', listaNomeAtual);
-    //   let lista = [];
-    //   if (avalDoFuncionario.nome === listaNomeAtual.nome) {
-    //     setDadosCanvaDoFuncionario(canvaParseData);
-    //     setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade));
-    //   }
-    // }
   }, [avaliar2, historico]);
 
   //Funções principais
@@ -451,12 +434,10 @@ export default function Canva({
               }
 
               //Lógica para puxar os dados para comparação dos canvas
-              console.log('avalDoFuncionario', avalDoFuncionario);
               const canvaDoFuncionario = avalDoFuncionario
                 .map((item) => item.avaliacoes)
                 .join();
 
-              console.log('listaCanva', objetoEncontrado);
               const canvaDoFuncionarioParse = canvaDoFuncionario
                 ? JSON.parse(canvaDoFuncionario)
                 : [];
