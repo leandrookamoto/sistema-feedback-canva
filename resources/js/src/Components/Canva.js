@@ -136,103 +136,7 @@ export default function Canva({
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
-    axios
-      .get(`/cadastrados/${setorChefe}`)
-      .then((response) => {
-        const lista = response.data;
-        const listaFiltrada2 = lista.filter(
-          (item) => item.setor === setorChefe,
-        );
-        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
-        const objetoEncontrado = listaFiltrada2.find(
-          (objeto) => objeto.id === idFuncionario,
-        );
-        if (objetoEncontrado) {
-          if (objetoEncontrado.avaliacoes != null) {
-            let avaliacoes = [];
-            try {
-              avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-              //Lógica para gravar a parte de avaliações com o funcionário já selecionado pelo id
-              if (avaliacoes.length > 0) {
-                setListaCanva(avaliacoes);
-                setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
-                setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
-                setYearDate(avaliacoes[avaliacoes.length - 1].ano);
-              } else {
-                setAtividades([]);
-                setListaCanva([]);
-                setSenioridade('');
-                setMouthDate('');
-                setYearDate(null);
-              }
-
-              //Lógica para puxar os dados para comparação dos canvas
-              console.log('avalDoFuncionario', avalDoFuncionario);
-              const canvaDoFuncionario = avalDoFuncionario
-                .map((item) => item.avaliacoes)
-                .join();
-
-              console.log('listaCanva', objetoEncontrado);
-              const canvaDoFuncionarioParse = canvaDoFuncionario
-                ? JSON.parse(canvaDoFuncionario)
-                : [];
-              console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
-              //Recuperação do funcionário selecionado atual
-              const listaNomeAtual = listaCadastro.filter(
-                (item) => item.id === idFuncionario,
-              );
-              setNomeFuncionario(
-                listaNomeAtual.map((item) => item.nome).join(),
-              );
-              setEmailFuncionario(
-                listaNomeAtual.map((item) => item.email).join(),
-              );
-
-              //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
-              const canvaParseData = canvaDoFuncionarioParse.filter(
-                (item) =>
-                  item.ano === avaliacoes[avaliacoes.length-1].ano &&
-                  item.mes === avaliacoes[avaliacoes.length-1].mes,
-              );
-
-              if (
-                avalDoFuncionario.map((item) => item.nome).join() ==
-                listaNomeAtual.map((item) => item.nome).join()
-              ) {
-                setDadosCanvaDoFuncionario(canvaParseData);
-                setSeniorDoFuncionario(
-                  canvaParseData.map((item) => item.senioridade),
-                );
-              }
-            } catch (error) {
-              console.error('Erro ao analisar avaliações:', error);
-              setAtividades([]);
-              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
-              setSenioridade('');
-              setMouthDate('');
-              setYearDate(null);
-            }
-          } else {
-            console.log('Nenhum dado de avaliações encontrado');
-            setAtividades([]);
-            setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
-            setSenioridade('');
-            setMouthDate('');
-            setYearDate(null);
-          }
-        } else {
-          console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
-          setAtividades([]);
-          setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
-          setSenioridade('');
-          setMouthDate('');
-          setYearDate(null);
-        }
-      })
-      .catch((error) => {
-        console.error('Erro ao obter os dados:', error);
-        // Lidar com possíveis erros
-      });
+    comparaCanvas();
 
     // if (idFuncionario) {
     //   //Lógica para puxar os dados para comparação dos canvas
@@ -335,7 +239,7 @@ export default function Canva({
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
-        setListaRender([]);
+        setListaCanva([]);
         setSenioridade('');
         setMouthDate('');
         setYearDate('');
@@ -346,6 +250,8 @@ export default function Canva({
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
+
+    comparaCanvas();
   }
   // Função para apagar último gráfico
   function apagarUltimo() {
@@ -364,7 +270,7 @@ export default function Canva({
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
-        setListaRender([]); // Mantém somente o último elemento na listaRender
+        setListaCanva([]); // Mantém somente o último elemento na listaRender
         setSenioridade('');
         setMouthDate('');
         setYearDate('');
@@ -375,6 +281,8 @@ export default function Canva({
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
+
+    comparaCanvas();
   }
   //Função para envio do e-mail
   const sendEmail = () => {
@@ -509,6 +417,106 @@ export default function Canva({
     } else {
       return (senior = 'mestre');
     }
+  }
+  //Função de comparação entre os canvas do gestor e funcionário
+  function comparaCanvas() {
+    axios
+      .get(`/cadastrados/${setorChefe}`)
+      .then((response) => {
+        const lista = response.data;
+        const listaFiltrada2 = lista.filter(
+          (item) => item.setor === setorChefe,
+        );
+        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
+        const objetoEncontrado = listaFiltrada2.find(
+          (objeto) => objeto.id === idFuncionario,
+        );
+        if (objetoEncontrado) {
+          if (objetoEncontrado.avaliacoes != null) {
+            let avaliacoes = [];
+            try {
+              avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
+              //Lógica para gravar a parte de avaliações com o funcionário já selecionado pelo id
+              if (avaliacoes.length > 0) {
+                setListaCanva(avaliacoes);
+                setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
+                setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
+                setYearDate(avaliacoes[avaliacoes.length - 1].ano);
+              } else {
+                setAtividades([]);
+                setListaCanva([]);
+                setSenioridade('');
+                setMouthDate('');
+                setYearDate(null);
+              }
+
+              //Lógica para puxar os dados para comparação dos canvas
+              console.log('avalDoFuncionario', avalDoFuncionario);
+              const canvaDoFuncionario = avalDoFuncionario
+                .map((item) => item.avaliacoes)
+                .join();
+
+              console.log('listaCanva', objetoEncontrado);
+              const canvaDoFuncionarioParse = canvaDoFuncionario
+                ? JSON.parse(canvaDoFuncionario)
+                : [];
+              console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
+              //Recuperação do funcionário selecionado atual
+              const listaNomeAtual = listaCadastro.filter(
+                (item) => item.id === idFuncionario,
+              );
+              setNomeFuncionario(
+                listaNomeAtual.map((item) => item.nome).join(),
+              );
+              setEmailFuncionario(
+                listaNomeAtual.map((item) => item.email).join(),
+              );
+
+              //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
+              const canvaParseData = canvaDoFuncionarioParse.filter(
+                (item) =>
+                  item.ano === avaliacoes[avaliacoes.length - 1].ano &&
+                  item.mes === avaliacoes[avaliacoes.length - 1].mes,
+              );
+
+              if (
+                avalDoFuncionario.map((item) => item.nome).join() ==
+                listaNomeAtual.map((item) => item.nome).join()
+              ) {
+                setDadosCanvaDoFuncionario(canvaParseData);
+                setSeniorDoFuncionario(
+                  canvaParseData.map((item) => item.senioridade),
+                );
+              }
+            } catch (error) {
+              console.error('Erro ao analisar avaliações:', error);
+              setAtividades([]);
+              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+              setSenioridade('');
+              setMouthDate('');
+              setYearDate(null);
+            }
+          } else {
+            console.log('Nenhum dado de avaliações encontrado');
+            setAtividades([]);
+            setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
+            setSenioridade('');
+            setMouthDate('');
+            setYearDate(null);
+          }
+        } else {
+          console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
+          setAtividades([]);
+          setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
+          setSenioridade('');
+          setMouthDate('');
+          setYearDate(null);
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao obter os dados:', error);
+        // Lidar com possíveis erros
+      });
   }
   //Função para obter somente o mês pelo input date
   function obterNomeDoMes(dataString) {
