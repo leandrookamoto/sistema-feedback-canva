@@ -10,12 +10,14 @@ import CadastrarComponent from './Components/CadastrarComponent';
 import validator from 'validator';
 import Dialog from './Components/Dialog';
 import Feedback from './Components/Feedback';
+import Pendentes from './Components/Pendentes';
 
 export default function App() {
   //Variáveis para mudança de tela
   const [cadastrar, setCadastrar] = useState(false);
   const [homeRender, setHomeRender] = useState(true);
   const [feedback, setFeedback] = useState(false);
+  const [pendentes, setPendentes]= useState(false);
 
   //Variáveis para gravação de estado
   const [usuario, setUsuario] = useState('');
@@ -116,6 +118,7 @@ export default function App() {
         setCadastrar(false);
         setFeedback(true);
         setHomeRender(false);
+        setPendentes(false);
       } else {
         // Validação dos inputs e cadastro de novo funcionário
         if (!nome || !email || !setor) {
@@ -152,6 +155,7 @@ export default function App() {
           setCadastrar(false);
           setFeedback(true);
           setHomeRender(false);
+          setPendentes(false);
           setNome('');
           setEmail('');
           setSetor('');
@@ -228,6 +232,7 @@ export default function App() {
     setCadastrar(true);
     setFeedback(false);
     setHomeRender(false);
+    setPendentes(false);
   }
 
   //Funções para renderização dos componentes
@@ -236,18 +241,28 @@ export default function App() {
     setCadastrar(true);
     setFeedback(false);
     setHomeRender(false);
+    setPendentes(false);
   }
   //Função para renderização do componente de feedback
   function handleCadastrados() {
     setCadastrar(false);
     setFeedback(true);
     setHomeRender(false);
+    setPendentes(false);
   }
   // Função para renderização do componente Home
   function handleHome() {
     setHomeRender(true);
     setCadastrar(false);
     setFeedback(false);
+    setPendentes(false);
+  }
+  // Função para renderização do componente Home
+  function handlePendentes() {
+    setHomeRender(false);
+    setCadastrar(false);
+    setFeedback(false);
+    setPendentes(true);
   }
 
   return (
@@ -259,6 +274,7 @@ export default function App() {
           onClickCadastrar={handleCadastrar}
           onClickCadastrados={handleCadastrados}
           onClickHome={handleHome}
+          onClickPendentes={handlePendentes}
         />
 
         <div className="m-3" style={{ width: '70%' }}>
@@ -293,6 +309,10 @@ export default function App() {
               setorChefe={setorChefe}
               avalDoFuncionario={avalDoFuncionario}
             />
+          )}
+          {/* Aqui é a renderização do componente do feedback */}
+          {pendentes && (
+            <Pendentes />
           )}
         </div>
       </section>
