@@ -184,6 +184,12 @@ const steps = [
 export default function Pendentes() {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
+  const data = ['Janeiro','Fevereiro','Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const [novaData, setNovaData] = useState('');
+  const anoAtual = new Date().getFullYear();
+  const [ano, setAno] = useState(anoAtual);
+
+  console.log('ano', ano);
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -226,8 +232,94 @@ export default function Pendentes() {
   const handleReset = () => {
     setActiveStep(0);
   };
+
+    const handleData=(e)=>{
+        setNovaData(e.currentTarget.value);
+    }
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
+       
+        <div className="container w-100 mb-3">
+            <h5>Escolha a data do Feedback</h5>
+            <div className="container text-center">
+            <div className="row align-items-start mb-1">
+            <div
+                className={
+                anoAtual - 2 === ano
+                    ? 'col border p-1 bg-dark text-white'
+                    : 'col border p-1'
+                }
+                style={{ cursor: 'pointer' }}
+                onClick={() => setAno(anoAtual - 2)}
+            >
+                {anoAtual - 2}
+            </div>
+            <div
+                className={
+                anoAtual - 1 === ano
+                    ? 'col border p-1 bg-dark text-white'
+                    : 'col border p-1'
+                }
+                style={{ cursor: 'pointer' }}
+                onClick={() => setAno(anoAtual - 1)}
+            >
+                {anoAtual - 1}
+            </div>
+            <div
+                className={
+                anoAtual === ano
+                    ? 'col border p-1 bg-dark text-white'
+                    : 'col border p-1'
+                }
+                style={{ cursor: 'pointer' }}
+                onClick={() => setAno(anoAtual)}
+            >
+                {anoAtual}
+            </div>
+            <div
+                className={
+                anoAtual + 1 === ano
+                    ? 'col border p-1 bg-dark text-white'
+                    : 'col border p-1'
+                }
+                style={{ cursor: 'pointer' }}
+                onClick={() => setAno(anoAtual + 1)}
+            >
+                {anoAtual + 1}
+            </div>
+            <div
+                className={
+                anoAtual + 2 === ano
+                    ? 'col border p-1 bg-dark text-white'
+                    : 'col border p-1'
+                }
+                style={{ cursor: 'pointer' }}
+                onClick={() => setAno(anoAtual + 2)}
+            >
+                {anoAtual + 2}
+            </div>
+            </div>
+
+        </div>
+            <select
+              className="form-select mb-2"
+              aria-label="Default select example"
+              onChange={handleData}
+            >
+              <option selected>Escolha a data</option>
+              <option value="Última Data">Última Data</option>
+              {data.map((item, index) => (
+                <>
+                  <option
+                    key={index}
+                    value={item}
+                  >
+                    {item}
+                  </option>
+                </>
+              ))}
+            </select>
+            </div>
       <Stepper
         alternativeLabel
         activeStep={activeStep}
@@ -257,7 +349,7 @@ export default function Pendentes() {
       {activeStep === steps.length ? (
         <React.Fragment>
           <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
+            Todos os funcionários que estão o com feedback completo.
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Box sx={{ flex: '1 1 auto' }} />
@@ -266,7 +358,6 @@ export default function Pendentes() {
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
               color="inherit"
