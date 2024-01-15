@@ -9,12 +9,12 @@ import Check from '@mui/icons-material/Check';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PersonIcon from '@mui/icons-material/Person';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-
+import Card from './Card';
 import Box from '@mui/material/Box';
 import StepConnector, {
   stepConnectorClasses,
 } from '@mui/material/StepConnector';
-import { useState } from 'react';
+import { useState, useEffect, useRef  } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
@@ -143,8 +143,8 @@ function ColorlibStepIcon(props) {
 
   const icons = {
     1: <PlayArrowIcon />,
-    2: <PersonIcon  />,
-    3: <AssignmentIcon  />,
+    2: <PersonIcon />,
+    3: <AssignmentIcon />,
   };
 
   return (
@@ -175,21 +175,146 @@ ColorlibStepIcon.propTypes = {
   icon: PropTypes.node,
 };
 
-const steps = [
-  'Início',
-  'Feedback funcionário',
-  'Plano de Ação',
-];
+const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
-export default function Pendentes() {
+export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
-  const data = ['Janeiro','Fevereiro','Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const data = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
   const [novaData, setNovaData] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
+  const [mes, setMes] = useState('');
+
+  //Constantes para comparação das avaliações (se tem) e datas
+  let listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
+    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+    return !obj2 || obj1.nome !== obj2.nome;
+  });
+
+  const [listaRender, setListaRender] = useState(listaFuncionarioNaoCadastrado);
+
+
+  let nomesDiferentes = [];
+  const listaCadastrados = listaCadastro.filter((obj1) => {
+    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+    if (!obj2 || obj1.nome !== obj2.nome) {
+      nomesDiferentes.push(obj1);
+      return false;
+    }
+    return true;
+  });
+
+  const comparaCadastrados = listaCadastrados.map((objeto) => {
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        return objeto;
+      }
+    }
+    return objeto;
+  });
+
+  console.log('comparaCadastrados', comparaCadastrados);
 
   console.log('ano', ano);
+  console.log('mes', mes);
+
+  const listaAdicional = comparaCadastrados.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        Array.isArray(avaliacoesArray) &&
+        avaliacoesArray.every(
+          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
+  const listaAdicionalRef = useRef(listaAdicional);
+
+  console.log('listaFuncionarioNaoCadastrado', listaFuncionarioNaoCadastrado);
+
+
+  useEffect(() => {
+    const lista = [
+      ...listaFuncionarioNaoCadastrado,
+      ...listaAdicional,
+    ];
+  
+    const orderedList = orderEmployeeData(lista);
+  
+    setListaRender(orderedList);
+  }, [mes]);
+  
+  let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
+  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
+  console.log('listaFuncionarioNaoCadastrado', listaFuncionarioNaoCadastrado);
+
+  console.log('listaCadastro', listaCadastro);
+  console.log('avalDoFuncionario', avalDoFuncionario);
+  console.log(
+    'comparacaoAvaliacoesListaCadastro',
+    comparacaoAvaliacoesListaCadastro,
+  );
+
+
+   //Função auxiliar para a ordenação dos funcionários por nome
+   function orderEmployeeData(data) {
+    return [...data].sort((a, b) => {
+      const nomeA = a.nome.toUpperCase();
+      const nomeB = b.nome.toUpperCase();
+      if (nomeA < nomeB) return -1;
+      if (nomeA > nomeB) return 1;
+      return 0;
+    });
+  }
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -233,93 +358,88 @@ export default function Pendentes() {
     setActiveStep(0);
   };
 
-    const handleData=(e)=>{
-        setNovaData(e.currentTarget.value);
-    }
+  const handleData = (e) => {
+    setMes(e.currentTarget.value);
+  };
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
-       
-        <div className="container w-100 mb-3">
-            <h5>Escolha a data do Feedback</h5>
-            <div className="container text-center">
-            <div className="row align-items-start mb-1">
+      <div className="container w-100 mb-3">
+        <h5>Escolha a data</h5>
+        <div className="container text-center">
+          <div className="row align-items-start mb-1">
             <div
-                className={
+              className={
                 anoAtual - 2 === ano
-                    ? 'col border p-1 bg-dark text-white'
-                    : 'col border p-1'
-                }
-                style={{ cursor: 'pointer' }}
-                onClick={() => setAno(anoAtual - 2)}
+                  ? 'col border p-1 bg-dark text-white'
+                  : 'col border p-1'
+              }
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAno(anoAtual - 2)}
             >
-                {anoAtual - 2}
+              {anoAtual - 2}
             </div>
             <div
-                className={
+              className={
                 anoAtual - 1 === ano
-                    ? 'col border p-1 bg-dark text-white'
-                    : 'col border p-1'
-                }
-                style={{ cursor: 'pointer' }}
-                onClick={() => setAno(anoAtual - 1)}
+                  ? 'col border p-1 bg-dark text-white'
+                  : 'col border p-1'
+              }
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAno(anoAtual - 1)}
             >
-                {anoAtual - 1}
+              {anoAtual - 1}
             </div>
             <div
-                className={
+              className={
                 anoAtual === ano
-                    ? 'col border p-1 bg-dark text-white'
-                    : 'col border p-1'
-                }
-                style={{ cursor: 'pointer' }}
-                onClick={() => setAno(anoAtual)}
+                  ? 'col border p-1 bg-dark text-white'
+                  : 'col border p-1'
+              }
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAno(anoAtual)}
             >
-                {anoAtual}
+              {anoAtual}
             </div>
             <div
-                className={
+              className={
                 anoAtual + 1 === ano
-                    ? 'col border p-1 bg-dark text-white'
-                    : 'col border p-1'
-                }
-                style={{ cursor: 'pointer' }}
-                onClick={() => setAno(anoAtual + 1)}
+                  ? 'col border p-1 bg-dark text-white'
+                  : 'col border p-1'
+              }
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAno(anoAtual + 1)}
             >
-                {anoAtual + 1}
+              {anoAtual + 1}
             </div>
             <div
-                className={
+              className={
                 anoAtual + 2 === ano
-                    ? 'col border p-1 bg-dark text-white'
-                    : 'col border p-1'
-                }
-                style={{ cursor: 'pointer' }}
-                onClick={() => setAno(anoAtual + 2)}
+                  ? 'col border p-1 bg-dark text-white'
+                  : 'col border p-1'
+              }
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAno(anoAtual + 2)}
             >
-                {anoAtual + 2}
+              {anoAtual + 2}
             </div>
-            </div>
-
+          </div>
         </div>
-            <select
-              className="form-select mb-2"
-              aria-label="Default select example"
-              onChange={handleData}
-            >
-              <option selected>Escolha a data</option>
-              <option value="Última Data">Última Data</option>
-              {data.map((item, index) => (
-                <>
-                  <option
-                    key={index}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                </>
-              ))}
-            </select>
-            </div>
+        <select
+          className="form-select mb-2"
+          aria-label="Default select example"
+          onChange={handleData}
+        >
+          <option selected>Escolha a data</option>
+          <option value="Última Data">Última Data</option>
+          {data.map((item, index) => (
+            <>
+              <option key={index} value={item}>
+                {item}
+              </option>
+            </>
+          ))}
+        </select>
+      </div>
       <Stepper
         alternativeLabel
         activeStep={activeStep}
@@ -358,6 +478,44 @@ export default function Pendentes() {
         </React.Fragment>
       ) : (
         <React.Fragment>
+          <Typography sx={{ mt: 1, mb: 1 }}>
+            {/* Renderização do Inicio */}
+            {activeStep === 0 && <>Início do processo</>}
+            {/* Renderização do Feedback */}
+            {activeStep === 1 && <>Faltando feedback do funcionário</>}
+            {/* Renderização do Plano de Ação */}
+            {activeStep === 2 && <>Faltando o plano de ação do funcionário</>}
+          </Typography>
+
+          <Typography sx={{ mt: 1, mb: 1 }}>
+            {/* Renderização do Inicio */}
+            {activeStep === 0 && (
+              <>
+                {/* Renderização da lista de funcionários */}
+                {listaRender.map((item) => {
+                  console.log('Dados do funcionário:', item); // Adicione esta linha
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => selecionarFuncionario(item.id)}
+                    >
+                      <Card
+                        nome={item.nome}
+                        email={item.email}
+                        setor={item.setor}
+                        chefe={item.administrador}
+                        botao1="Selecionar"
+                      />
+                    </div>
+                  );
+                })}
+              </>
+            )}
+            {/* Renderização do Feedback */}
+            {activeStep === 1 && <>Faltando feedback do funcionário</>}
+            {/* Renderização do Plano de Ação */}
+            {activeStep === 2 && <>Faltando o plano de ação do funcionário</>}
+          </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
               color="inherit"

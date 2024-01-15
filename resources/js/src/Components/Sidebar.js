@@ -4,7 +4,7 @@ export default function Sidebar({
   onClickCadastrar,
   onClickCadastrados,
   onClickHome,
-  onClickPendentes
+  onClickPendentes,
 }) {
   // Todos as props são enviados para o App.js
   return (

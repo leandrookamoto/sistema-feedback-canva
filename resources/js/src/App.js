@@ -17,11 +17,10 @@ export default function App() {
   const [cadastrar, setCadastrar] = useState(false);
   const [homeRender, setHomeRender] = useState(true);
   const [feedback, setFeedback] = useState(false);
-  const [pendentes, setPendentes]= useState(false);
+  const [pendentes, setPendentes] = useState(false);
 
   //Variáveis para gravação de estado
   const [usuario, setUsuario] = useState('');
-  const [listaAtestado, setListaAtestado] = useState([]);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [setor, setSetor] = useState('');
@@ -29,12 +28,10 @@ export default function App() {
   const [newId, setNewId] = useState(0);
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [isValid, setIsValid] = useState(true);
-  const [historico, setHistorico] = useState('');
-  const [emailUsuario, setEmailUsuario] = useState('');
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
   const [setorChefe, setSetorChefe] = useState('');
-  const [avalDoFuncionario,setAvalDoFuncionario] = useState([]);
+  const [avalDoFuncionario, setAvalDoFuncionario] = useState([]);
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -60,47 +57,57 @@ export default function App() {
         const setor = responseUser.data.setor;
         setUsuario(usuarioLogado);
         setSetorChefe(setor);
-  
-        const responseListaOriginal = await axios.get('/cadastrados/'+setor);
+
+        const responseListaOriginal = await axios.get('/cadastrados/' + setor);
         const listaOriginal = responseListaOriginal.data;
-        setListaCadastro(listaOriginal); 
+        setListaCadastro(listaOriginal);
 
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
+        //Setando os dados do canva que o funcionário fez
         setAvalDoFuncionario(canvaFuncionario.data);
-  
-        const responseColaboradoresAtestado = await axios.get('/colaboradores-atestado');
+
+        const responseColaboradoresAtestado = await axios.get(
+          '/colaboradores-atestado',
+        );
         const listaAtestado2 = responseColaboradoresAtestado.data;
-        const listaAtestado = listaAtestado2.filter(item => item.setor === setor);
-  
-        const funcionariosNaoCadastrados = listaAtestado.filter((colaboradorAtestado) => {
-          return !listaOriginal.some((funcionario) => funcionario.nome === colaboradorAtestado.nome);
-        });
-  
-        await Promise.all(funcionariosNaoCadastrados.map(async (item) => {
-          try {
-            const novoUsuario = {
-              nome: item.nome,
-              email: 'cadastrar@email.com',
-              setor: item.setor,
-              administrador: usuarioLogado,
-            };
-            await axios.post('/cadastrar-usuario', novoUsuario);
-            console.log('Usuário cadastrado com sucesso:', novoUsuario);
-          } catch (error) {
-            console.error('Erro ao cadastrar usuário:', error);
-          }
-        }));
-  
-        const updatedListaOriginal = await axios.get('/cadastrados'+setor);
+        const listaAtestado = listaAtestado2.filter(
+          (item) => item.setor === setor,
+        );
+
+        const funcionariosNaoCadastrados = listaAtestado.filter(
+          (colaboradorAtestado) => {
+            return !listaOriginal.some(
+              (funcionario) => funcionario.nome === colaboradorAtestado.nome,
+            );
+          },
+        );
+
+        await Promise.all(
+          funcionariosNaoCadastrados.map(async (item) => {
+            try {
+              const novoUsuario = {
+                nome: item.nome,
+                email: 'cadastrar@email.com',
+                setor: item.setor,
+                administrador: usuarioLogado,
+              };
+              await axios.post('/cadastrar-usuario', novoUsuario);
+              console.log('Usuário cadastrado com sucesso:', novoUsuario);
+            } catch (error) {
+              console.error('Erro ao cadastrar usuário:', error);
+            }
+          }),
+        );
+
+        const updatedListaOriginal = await axios.get('/cadastrados' + setor);
         setListaCadastro(updatedListaOriginal.data);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
 
   //Funções principais
   //Função para cadastrar os funcionários
@@ -312,7 +319,10 @@ export default function App() {
           )}
           {/* Aqui é a renderização do componente do feedback */}
           {pendentes && (
-            <Pendentes />
+            <Pendentes
+              listaCadastro={listaCadastro}
+              avalDoFuncionario={avalDoFuncionario}
+            />
           )}
         </div>
       </section>
