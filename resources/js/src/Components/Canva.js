@@ -73,6 +73,7 @@ export default function Canva({
       return;
     }
 
+    //Comparação entre os canvas
     let canvaDoFuncionario = [];
 
     try {
@@ -444,7 +445,7 @@ export default function Canva({
                 console.log('Erro ao fazer o parse', error);
               }
               const canvaDoFuncionarioParse = canvaDoFuncionario;
-
+          
               console.log('canvaDoFuncionario', canvaDoFuncionario);
               console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
               //Recuperação do funcionário selecionado atual
@@ -1332,11 +1333,13 @@ export default function Canva({
                         <div>Ações de melhoria</div>
                       </div>
                       <div className="customBorder7">
+                
                         {dadosCanvaDoFuncionario.map((item) =>
                           item.melhorias.map((item, index) => (
                             <div>{item}</div>
                           )),
-                        )}
+                        )
+                        }
                       </div>
                     </div>
                   </div>
