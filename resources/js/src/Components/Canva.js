@@ -73,17 +73,18 @@ export default function Canva({
       return;
     }
 
-    //Lógica para puxar os dados para comparação dos canvas
+    let canvaDoFuncionario = [];
 
-    const canvaDoFuncionario = avalDoFuncionario
-      .map((item) => item.avaliacoes)
-      .join();
+    try {
+      canvaDoFuncionario = avalDoFuncionario.map((item) =>
+        JSON.parse(item.avaliacoes),
+      );
+    } catch (error) {
+      console.log('Erro ao fazer o parse', error);
+    }
+    const canvaDoFuncionarioParse = canvaDoFuncionario;
 
     console.log('canvaDoFuncionario', canvaDoFuncionario);
-
-    const canvaDoFuncionarioParse = canvaDoFuncionario
-      ? JSON.parse(canvaDoFuncionario)
-      : [];
 
     //Recuperação do funcionário selecionado atual
     const listaNomeAtual = listaCadastro.filter(
@@ -433,14 +434,18 @@ export default function Canva({
                 setYearDate(null);
               }
 
-              //Lógica para puxar os dados para comparação dos canvas
-              const canvaDoFuncionario = avalDoFuncionario
-                .map((item) => item.avaliacoes)
-                .join();
+              let canvaDoFuncionario = [];
 
-              const canvaDoFuncionarioParse = canvaDoFuncionario
-                ? JSON.parse(canvaDoFuncionario)
-                : [];
+              try {
+                canvaDoFuncionario = avalDoFuncionario.map((item) =>
+                  JSON.parse(item.avaliacoes),
+                );
+              } catch (error) {
+                console.log('Erro ao fazer o parse', error);
+              }
+              const canvaDoFuncionarioParse = canvaDoFuncionario;
+
+              console.log('canvaDoFuncionario', canvaDoFuncionario);
               console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
               //Recuperação do funcionário selecionado atual
               const listaNomeAtual = listaCadastro.filter(
