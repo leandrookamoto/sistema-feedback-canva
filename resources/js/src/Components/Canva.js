@@ -74,17 +74,6 @@ export default function Canva({
     }
 
     //Comparação entre os canvas
-    
-
-    // try {
-    //   canvaDoFuncionario = avalDoFuncionario.map((item) =>
-    //     JSON.parse(item.avaliacoes),
-    //   );
-    // } catch (error) {
-    //   console.log('Erro ao fazer o parse', error);
-    // }
-
-
     //Recuperação do funcionário selecionado atual
     const listaNomeAtual = listaCadastro.filter(
       (item) => item.id === idFuncionario,
@@ -143,6 +132,8 @@ export default function Canva({
       comparaName ==
       newName
     ) {
+      
+
       setDadosCanvaDoFuncionario(canvaParseData);
       console.log('canvaParseData',canvaParseData);
       setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade)[canvaParseData.length-1]);
@@ -266,7 +257,6 @@ export default function Canva({
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
-
     comparaCanvas();
   }
   // Função para apagar último gráfico
@@ -435,6 +425,7 @@ export default function Canva({
     }
   }
   //Função de comparação entre os canvas do gestor e funcionário
+  //Analisar se está dando erro e 'copiar' do primeiro useEffect se estiver
   function comparaCanvas() {
     axios
       .get(`/cadastrados/${setorChefe}`)
@@ -567,6 +558,7 @@ export default function Canva({
     setMouthDate(nomeMes);
     setYearDate(ano);
   }
+
   //Função para controle da renderização ao escolher a data do feedback
   function handleData(e) {
     const meuDado = {};
@@ -708,6 +700,21 @@ export default function Canva({
                 </>
               ))}
             </select>
+            <button
+                type="button"
+                className="btn btn-primary mt-1"
+                style={{ marginRight: '10px' }}
+                onClick={apagarPrimeiro}
+              >
+                Apagar Primeiro Canva
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary mt-1"
+                onClick={apagarUltimo}
+              >
+                Apagar Último Canva
+              </button>
             <div className="headerCanva d-flex justify-content-between align-items-center">
               <div>Feedback Canva</div>
               {mouthDate && (
@@ -1027,28 +1034,10 @@ export default function Canva({
             </div>
           </div>
 
-          {dadosCanvaDoFuncionario.length == 0 && (
-            <>
-              <button
-                type="button"
-                className="btn btn-primary mt-1"
-                style={{ marginRight: '10px' }}
-                onClick={apagarPrimeiro}
-              >
-                Apagar Primeiro Canva
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary mt-1"
-                onClick={apagarUltimo}
-              >
-                Apagar Último Canva
-              </button>
-            </>
-          )}
 
           {/* Parte do canva de comparação  */}
-          {dadosCanvaDoFuncionario.length > 0 && (
+          {console.log('dadosCanvaDoFuncionario',dadosCanvaDoFuncionario)}
+          {(dadosCanvaDoFuncionario.length > 0 && dadosCanvaDoFuncionario.filter(item=>(item.mes==mouthDate&&item.ano==yearDate)||(item.mes==dataHistorico.mes&&item.ano==dataHistorico.ano)).length>0)&&(
             <>
               <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
                 Quadro do Funcionário
