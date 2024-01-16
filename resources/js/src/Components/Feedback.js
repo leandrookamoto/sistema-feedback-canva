@@ -113,6 +113,7 @@ export default function Feedback({
   useEffect(()=>{
     setAvaliar(avaliar2);
   },[avaliar2])
+  
   //useEffect para manter a lista da paginação atualizada
   useEffect(() => {
     const offset = (page - 1) * pageSize;
@@ -182,7 +183,7 @@ export default function Feedback({
       }
     }
   }
-  //Função para editar o funcionário
+  //Função para editar o funcionário que vem do CadastroComponent
   function editar() {
     const dado = listaFiltrada.find((item) => item.id === idFuncionario);
     onChangeDadosFuncionario(dado);
@@ -192,7 +193,6 @@ export default function Feedback({
   function pesquisar(e) {
     const nova = capitalizeWords(e.currentTarget.value).trim();
     const mail = e.currentTarget.value.trim().toLowerCase();
-    console.log(nova);
     const novaListaFiltrada = listaCadastro.filter(
       (item) => item.nome.includes(nova) || item.email.includes(mail),
     );

@@ -110,7 +110,7 @@ export default function App() {
   }, []);
 
   //Funções principais
-  //Função para cadastrar os funcionários
+  //Função para cadastrar os funcionários que vem do CadastroComponent
   async function gravar() {
     try {
       if (dadosFuncionario.id) {
@@ -174,17 +174,15 @@ export default function App() {
       }
 
       // Atualização da lista após edição ou cadastro
-      const response = await axios.get('/cadastrados');
+      const response = await axios.get(`/cadastrados/${setorChefe}`);
       const lista = response.data;
-      const listaFiltrada = lista.filter(
-        (item) => item.administrador === usuario,
-      );
+      
 
       //Após a gravação ou edição recupera os valores do banco de dados
-      const novaLista = listaFiltrada.find((item) => item.email === email);
+      const novaLista = lista.find((item) => item.email === email);
       setDados(novaLista);
 
-      setListaCadastro(listaFiltrada);
+      setListaCadastro(lista);
 
       const id = lista.length ? lista[lista.length - 1].id : 0;
       setIdFuncionario(id);

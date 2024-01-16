@@ -11,10 +11,13 @@ import PersonIcon from '@mui/icons-material/Person';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import Card from './Card';
 import Box from '@mui/material/Box';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import Pagination from './Pagination';
 import StepConnector, {
   stepConnectorClasses,
 } from '@mui/material/StepConnector';
-import { useState, useEffect, useRef  } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
@@ -180,6 +183,10 @@ const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
+  const [listaRender, setListaRender] = useState([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 3;
+  const [mes, setMes] = useState('');
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -197,7 +204,81 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [novaData, setNovaData] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
-  const [mes, setMes] = useState('');
+
+
+
+  //Função para a mudança de página
+  function handleChange(event, value) {
+    setPage(Math.min(value, totalPage));
+  }
+
+  useEffect(() => {
+    const listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
+      const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+      return !obj2 || obj1.nome !== obj2.nome;
+    });
+
+    const listaCadastrados = listaCadastro.filter((obj1) => {
+      const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+      return obj2 && obj1.nome === obj2.nome;
+    });
+
+    const comparaCadastrados = listaCadastrados.map((objeto) => {
+      if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+        try {
+          return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+        } catch (error) {
+          return objeto;
+        }
+      }
+      return objeto;
+    });
+
+    const listaAdicional = comparaCadastrados.filter((objeto) => {
+      try {
+        const avaliacoesArray = objeto.avaliacoes;
+        return (
+          Array.isArray(avaliacoesArray) &&
+          avaliacoesArray.every(
+            (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
+          )
+        );
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    });
+
+    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
+    const orderedList = orderEmployeeData(lista);
+
+    setListaRender(orderedList);
+    setPage(1); // Resetar para a primeira página ao atualizar a lista
+  }, [mes, listaCadastro, avalDoFuncionario]);
+
+  let totalPage = 1;
+  try {
+    totalPage = Math.ceil(listaRender.length / pageSize);
+  } catch (error) {
+    console.log('Erro do totalPage', error);
+  }
+
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDisplayList = listaRender.slice(startIndex, endIndex);
+
+  //Variáveis para o estilo do search input
+  const estiloInput = {
+    position: 'relative',
+    display: 'inline-block',
+  };
+  const estiloIcone = {
+    position: 'absolute',
+    top: '50%',
+    left: '10px',
+    transform: 'translateY(-50%)',
+    color: 'gray',
+  };
 
   //Constantes para comparação das avaliações (se tem) e datas
   let listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
@@ -205,7 +286,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return !obj2 || obj1.nome !== obj2.nome;
   });
 
-  const [listaRender, setListaRender] = useState(listaFuncionarioNaoCadastrado);
+  
 
 
   let nomesDiferentes = [];
@@ -253,18 +334,14 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   console.log('listaFuncionarioNaoCadastrado', listaFuncionarioNaoCadastrado);
 
-
   useEffect(() => {
-    const lista = [
-      ...listaFuncionarioNaoCadastrado,
-      ...listaAdicional,
-    ];
-  
+    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
+
     const orderedList = orderEmployeeData(lista);
-  
+
     setListaRender(orderedList);
   }, [mes]);
-  
+
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
     if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
@@ -304,9 +381,42 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     comparacaoAvaliacoesListaCadastro,
   );
 
+  //Função de pesquisa
+  function pesquisar(e) {
+    const nova = capitalizeWords(e.currentTarget.value).trim();
+    const mail = e.currentTarget.value.trim().toLowerCase();
+    let novaListaFiltrada = [];
+    try {
+      novaListaFiltrada =
+        listaCadastro.filter(
+          (item) => item.nome.includes(nova) || item.email.includes(mail),
+        ).length > 0
+          ? listaCadastro.filter(
+              (item) => item.nome.includes(nova) || item.email.includes(mail),
+            )
+          : listaCadastro;
+    } catch (error) {
+      console.log('Erro do pesquisar', error);
+    }
 
-   //Função auxiliar para a ordenação dos funcionários por nome
-   function orderEmployeeData(data) {
+    setListaRender(novaListaFiltrada);
+    setPage(1);
+  }
+
+  //Função Capitalize
+  //Função para padronizar a digitação dos inputs
+  function capitalizeWords(sentence) {
+    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
+      if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
+        return match.toLowerCase();
+      } else {
+        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+      }
+    });
+  }
+
+  //Função auxiliar para a ordenação dos funcionários por nome
+  function orderEmployeeData(data) {
     return [...data].sort((a, b) => {
       const nomeA = a.nome.toUpperCase();
       const nomeB = b.nome.toUpperCase();
@@ -492,8 +602,22 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
             {activeStep === 0 && (
               <>
                 {/* Renderização da lista de funcionários */}
-                {listaRender.map((item) => {
-                  console.log('Dados do funcionário:', item); // Adicione esta linha
+                <div style={estiloInput}>
+                  <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar"
+                    onChange={pesquisar}
+                    style={{
+                      paddingLeft: '30px',
+                      width: '250px',
+                      borderRadius: '5px',
+                      border: '1px solid #ccc',
+                      height: '40px',
+                    }}
+                  />
+                </div>
+                {currentDisplayList.map((item) => {
                   return (
                     <div
                       key={item.id}
@@ -509,6 +633,11 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                     </div>
                   );
                 })}
+                <Pagination
+                  page={page}
+                  handleChange={handleChange}
+                  totalPage={totalPage}
+                />
               </>
             )}
             {/* Renderização do Feedback */}
