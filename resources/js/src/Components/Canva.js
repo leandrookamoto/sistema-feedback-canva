@@ -31,13 +31,16 @@ export default function Canva({
   const [notaFinal, setNotaFinal] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [mouthDate, setMouthDate] = useState('');
-  const [yearDate, setYearDate] = useState('');
-  const [listaRender, setListaRender] = useState([]);
+    const [listaRender, setListaRender] = useState([]);
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
   const [openValidaData, setOpenValidaData] = useState(false);
   const [nomeFuncionario, setNomeFuncionario] = useState('');
   const [emailFuncionario, setEmailFuncionario] = useState('');
+
+  //Constantes para o novo select de data 
+  const anoAtual = new Date().getFullYear();
+  const [yearDate, setYearDate] = useState(anoAtual);
 
   //Constante para esconder o formulário de solicitação de feedback;
   const envio = false;
@@ -82,24 +85,24 @@ export default function Canva({
     setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
 
     //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
-             
 
     //Comparação do nome selecionado e o nome recuperado no banco de dados do funcionário
-    
+
     const newName = listaNomeAtual.map((item) => item.nome).join();
-    console.log('newName',newName);
-    
-    let canvaDoFuncionario = avalDoFuncionario.find((item) =>
-    item.nome==newName);
-    console.log('canvaDoFuncionario',canvaDoFuncionario);
-    
-    let comparaName = []
-    try{
-      comparaName= canvaDoFuncionario.nome;
-    }catch (error){
+    console.log('newName', newName);
+
+    let canvaDoFuncionario = avalDoFuncionario.find(
+      (item) => item.nome == newName,
+    );
+    console.log('canvaDoFuncionario', canvaDoFuncionario);
+
+    let comparaName = [];
+    try {
+      comparaName = canvaDoFuncionario.nome;
+    } catch (error) {
       console.log('Erro no comparaName', error);
     }
-    console.log('comparaName',comparaName);
+    console.log('comparaName', comparaName);
 
     let canvaDoFuncionario2 = [];
 
@@ -111,8 +114,6 @@ export default function Canva({
     let canvaDoFuncionarioParse = canvaDoFuncionario2;
 
     console.log('canvaDoFuncionario2', canvaDoFuncionario2);
-
-
 
     let canvaParseData =
       dataHistorico !== 'Última Data'
@@ -128,16 +129,20 @@ export default function Canva({
               item.mes ===
                 canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1].mes,
           );
-    if (
-      comparaName ==
-      newName
-    ) {
-      
-
+    if (comparaName == newName) {
       setDadosCanvaDoFuncionario(canvaParseData);
-      console.log('canvaParseData',canvaParseData);
-      setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade)[canvaParseData.length-1]);
-      console.log('senior', canvaParseData.map((item) => item.senioridade)[canvaParseData.length-1])
+      console.log('canvaParseData', canvaParseData);
+      setSeniorDoFuncionario(
+        canvaParseData.map((item) => item.senioridade)[
+          canvaParseData.length - 1
+        ],
+      );
+      console.log(
+        'senior',
+        canvaParseData.map((item) => item.senioridade)[
+          canvaParseData.length - 1
+        ],
+      );
     }
 
     if (listaCanva.length > 0) {
@@ -150,14 +155,19 @@ export default function Canva({
             item.mes === dataHistorico.mes && item.ano === dataHistorico.ano,
         );
       }
-
-      setYearDate(render.map((item) => item.ano));
-      setMouthDate(render.map((item) => item.mes));
-      setSenioridade(render.map((item) => item.senioridade));
-      console.table(render);
-      setListaRender(render); // Definindo disretamente o resultado do filtro
+    
+      if (render.length > 0) {
+        setYearDate(render[0].ano);
+        setMouthDate(render[0].mes);
+        setSenioridade(render[0].senioridade);
+        console.table(render);
+        setListaRender(render); // Definindo disretamente o resultado do filtro
+      }
+    
     }
   }, [listaCanva, dataHistorico]);
+
+
   //useEffect para resetar a const atividades
   useEffect(() => {
     setAtividades('');
@@ -454,7 +464,7 @@ export default function Canva({
                 setListaCanva([]);
                 setSenioridade('');
                 setMouthDate('');
-                setYearDate(null);
+                
               }
 
               let canvaDoFuncionario = [];
@@ -503,7 +513,7 @@ export default function Canva({
               setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
               setSenioridade('');
               setMouthDate('');
-              setYearDate(null);
+              
             }
           } else {
             console.log('Nenhum dado de avaliações encontrado');
@@ -561,14 +571,21 @@ export default function Canva({
 
   //Função para controle da renderização ao escolher a data do feedback
   function handleData(e) {
-    const meuDado = {};
-    const data =
-      e.currentTarget.value === 'Última Data'
-        ? 'Última Data'
-        : JSON.parse(e.currentTarget.value);
+    const value = e.currentTarget.value;
+    const data = value === 'Última Data' ? 'Última Data' : JSON.parse(value);
     setDataHistorico(data);
-    console.log(data);
+  
+    if (data === 'Última Data') {
+      setYearDate(anoAtual);
+    } else {
+      setYearDate(data.ano);
+    }
   }
+  
+  
+  
+  
+  
 
   return (
     <>
@@ -682,40 +699,109 @@ export default function Canva({
         <section>
           <div className="canvaContainer container w-100 mb-3">
             <h5>Escolha a data do Feedback</h5>
-            <select
-              className="form-select mb-2"
-              aria-label="Default select example"
-              onChange={handleData}
-            >
-              <option selected>Escolha a data</option>
-              <option value="Última Data">Última Data</option>
-              {listaCanva.map((item, index) => (
+            <div className="container w-100 mb-3">
+              <h5>Escolha a data</h5>
+              <div className="container text-center">
+                <div className="row align-items-start mb-1">
+                  <div
+                    className={
+                      anoAtual - 2 === yearDate
+                        ? 'col border p-1 bg-dark text-white'
+                        : 'col border p-1'
+                    }
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setYearDate(anoAtual - 2)}
+                  >
+                    {anoAtual - 2}
+                  </div>
+                  <div
+                    className={
+                      anoAtual - 1 === yearDate
+                        ? 'col border p-1 bg-dark text-white'
+                        : 'col border p-1'
+                    }
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setYearDate(anoAtual - 1)}
+                  >
+                    {anoAtual - 1}
+                  </div>
+                  <div
+                    className={
+                      anoAtual === yearDate
+                        ? 'col border p-1 bg-dark text-white'
+                        : 'col border p-1'
+                    }
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setYearDate(anoAtual)}
+                  >
+                    {anoAtual}
+                  </div>
+                  <div
+                    className={
+                      anoAtual + 1 === yearDate
+                        ? 'col border p-1 bg-dark text-white'
+                        : 'col border p-1'
+                    }
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setYearDate(anoAtual + 1)}
+                  >
+                    {anoAtual + 1}
+                  </div>
+                  <div
+                    className={
+                      anoAtual + 2 === yearDate
+                        ? 'col border p-1 bg-dark text-white'
+                        : 'col border p-1'
+                    }
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setYearDate(anoAtual + 2)}
+                  >
+                    {anoAtual + 2}
+                  </div>
+                </div>
+              </div>
+              <select
+                className="form-select mb-2"
+                aria-label="Default select example"
+                onChange={handleData}
+              >
+                <option selected>Escolha a data</option>
+                <option value="Última Data">Última Data</option>
+                {listaCanva.map((item, index) => (
                 <>
                   <option
                     key={index}
-                    value={JSON.stringify({ mes: item.mes, ano: item.ano })}
+                    value={JSON.stringify({ mes: item.mes, ano: yearDate })}
                   >
-                    {item.mes}/{item.ano}
+                    {item.mes}
                   </option>
                 </>
               ))}
-            </select>
+              </select>
+            </div>
+            
             <button
-                type="button"
-                className="btn btn-primary mt-1"
-                style={{ marginRight: '10px' }}
-                onClick={apagarPrimeiro}
-              >
-                Apagar Primeiro Canva
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary mt-1"
-                onClick={apagarUltimo}
-              >
-                Apagar Último Canva
-              </button>
-            <div className="headerCanva d-flex justify-content-between align-items-center">
+              type="button"
+              className="btn btn-primary mt-1"
+              style={{ marginRight: '10px' }}
+              onClick={apagarPrimeiro}
+            >
+              Apagar Primeiro Canva
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary mt-1"
+              onClick={apagarUltimo}
+            >
+              Apagar Último Canva
+            </button>
+            {listaRender.length > 0 &&
+            listaRender.filter(
+              (item) =>
+                (item.mes == mouthDate && item.ano == yearDate) ||
+                (item.mes == dataHistorico.mes &&
+                  item.ano == dataHistorico.ano),
+            ).length > 0 &&<><div className="headerCanva d-flex justify-content-between align-items-center">
               <div>Feedback Canva</div>
               {mouthDate && (
                 <div style={{ fontSize: '15px' }}>
@@ -836,7 +922,6 @@ export default function Canva({
                 </div>
               </div>
             </div>
-
             <div className="row">
               <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
                 {listaRender.length > 0 &&
@@ -1031,340 +1116,347 @@ export default function Canva({
                   </div>
                 </div>
               </div>
-            </div>
+            </div></>}
           </div>
 
-
           {/* Parte do canva de comparação  */}
-          {console.log('dadosCanvaDoFuncionario',dadosCanvaDoFuncionario)}
-          {(dadosCanvaDoFuncionario.length > 0 && dadosCanvaDoFuncionario.filter(item=>(item.mes==mouthDate&&item.ano==yearDate)||(item.mes==dataHistorico.mes&&item.ano==dataHistorico.ano)).length>0)&&(
-            <>
-              <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
-                Quadro do Funcionário
-              </h2>
-              <div className="canvaContainer container w-100 mb-3">
-                <div className="headerCanva d-flex justify-content-between align-items-center">
-                  <div>Feedback Canva</div>
-                  {mouthDate && (
-                    <div style={{ fontSize: '15px' }}>
-                      Data: {mouthDate}/{yearDate}
+          {console.log('dadosCanvaDoFuncionario', dadosCanvaDoFuncionario)}
+          {dadosCanvaDoFuncionario.length > 0 &&
+            dadosCanvaDoFuncionario.filter(
+              (item) =>
+                (item.mes == mouthDate && item.ano == yearDate) ||
+                (item.mes == dataHistorico.mes &&
+                  item.ano == dataHistorico.ano),
+            ).length > 0 && (
+              <>
+                <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
+                  Quadro do Funcionário
+                </h2>
+                <div className="canvaContainer container w-100 mb-3">
+                  <div className="headerCanva d-flex justify-content-between align-items-center">
+                    <div>Feedback Canva</div>
+                    {mouthDate && (
+                      <div style={{ fontSize: '15px' }}>
+                        Data: {mouthDate}/{yearDate}
+                      </div>
+                    )}
+                  </div>
+                  <div className="row">
+                    <div className="customBorder col-2 d-flex justify-content-center align-items-center">
+                      Competência
                     </div>
-                  )}
-                </div>
-                <div className="row">
-                  <div className="customBorder col-2 d-flex justify-content-center align-items-center">
-                    Competência
-                  </div>
-                  <div className="customBorder col-3 d-flex justify-content-center align-items-center">
-                    Atividades
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#fefdd9' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>1</div>
+                    <div className="customBorder col-3 d-flex justify-content-center align-items-center">
+                      Atividades
+                    </div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#fefdd9' }}
                     >
-                      Novato
+                      <div style={{ fontSize: '15px' }}>1</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Novato
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#fff3d5' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>2</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#fff3d5' }}
                     >
-                      Aprendiz
+                      <div style={{ fontSize: '15px' }}>2</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Aprendiz
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#fee2d5' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>3</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#fee2d5' }}
                     >
-                      Praticante
+                      <div style={{ fontSize: '15px' }}>3</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Praticante
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#fad4df' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>4</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#fad4df' }}
                     >
-                      Profissional
+                      <div style={{ fontSize: '15px' }}>4</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Profissional
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#f2caff' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>5</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#f2caff' }}
                     >
-                      Professor
+                      <div style={{ fontSize: '15px' }}>5</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Professor
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#d9c9ff' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>6</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#d9c9ff' }}
                     >
-                      Líder
+                      <div style={{ fontSize: '15px' }}>6</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Líder
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="customBorder2 col d-flex justify-content-center flex-column align-items-center"
-                    style={{ backgroundColor: '#d4e4fe' }}
-                  >
-                    <div style={{ fontSize: '15px' }}>7</div>
                     <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        marginTop: '-5px',
-                      }}
+                      className="customBorder2 col d-flex justify-content-center flex-column align-items-center"
+                      style={{ backgroundColor: '#d4e4fe' }}
                     >
-                      Mestre
+                      <div style={{ fontSize: '15px' }}>7</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginTop: '-5px',
+                        }}
+                      >
+                        Mestre
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="row">
-                  <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
-                    {dadosCanvaDoFuncionario.length > 0 &&
-                      dadosCanvaDoFuncionario.map(
-                        (item, index) =>
-                          item.competencia && ( // Verifica se a competência existe
+                  <div className="row">
+                    <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
+                      {dadosCanvaDoFuncionario.length > 0 &&
+                        dadosCanvaDoFuncionario.map(
+                          (item, index) =>
+                            item.competencia && ( // Verifica se a competência existe
+                              <div
+                                key={index}
+                                className="post-it d-flex justify-content-center align-items-center"
+                              >
+                                {item.competencia}
+                              </div>
+                            ),
+                        )}
+                    </div>
+                    <div className="customBorder3 col-3">
+                      <div className="box mt-1">
+                        {dadosCanvaDoFuncionario.map((item) =>
+                          item.atividades.map((item, index) => (
                             <div
-                              key={index}
-                              className="post-it d-flex justify-content-center align-items-center"
+                              className={
+                                listaAtividades.length <= 3
+                                  ? 'd-flex justify-content-center align-items-center post-it2'
+                                  : 'd-flex justify-content-center align-items-center post-it'
+                              }
                             >
-                              {item.competencia}
+                              {item}
                             </div>
-                          ),
-                      )}
-                  </div>
-                  <div className="customBorder3 col-3">
-                    <div className="box mt-1">
-                      {dadosCanvaDoFuncionario.map((item) =>
-                        item.atividades.map((item, index) => (
-                          <div
-                            className={
-                              listaAtividades.length <= 3
-                                ? 'd-flex justify-content-center align-items-center post-it2'
-                                : 'd-flex justify-content-center align-items-center post-it'
-                            }
-                          >
-                            {item}
-                          </div>
-                        )),
-                      )}
-                    </div>
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'novato' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'aprendiz' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'praticante' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'profissional' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'professor' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'lider' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
-                    {seniorDoFuncionario == 'mestre' && (
-                      <div
-                        className="mb-3"
-                        style={{
-                          borderRadius: '100%',
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: 'red',
-                        }}
-                      ></div>
-                    )}
-                  </div>
-
-                  <div className="row w-100">
-                    <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                      <div>
-                        <div className="d-flex justify-content-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="30"
-                            height="30"
-                            fill="currentColor"
-                            className="bi bi-emoji-smile"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                            <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
-                          </svg>
-                        </div>
-                        <div>Pontos Fortes</div>
-                      </div>
-                      <div className="customBorder7">
-                        {dadosCanvaDoFuncionario.map((item) =>
-                          item.fortes.map((item, index) => <div>{item}</div>),
-                        )}
-                      </div>
-                    </div>
-                    <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                      <div>
-                        <div className="d-flex justify-content-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="30"
-                            height="30"
-                            fill="currentColor"
-                            className="bi bi-emoji-frown"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                            <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
-                          </svg>
-                        </div>
-                        <div>Pontos de atenção</div>
-                      </div>
-                      <div className="customBorder7">
-                        {dadosCanvaDoFuncionario.map((item) =>
-                          item.atencao.map((item, index) => <div>{item}</div>),
-                        )}
-                      </div>
-                    </div>
-                    <div className="customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
-                      <div>
-                        <div className="d-flex justify-content-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="30"
-                            height="30"
-                            fill="currentColor"
-                            className="bi bi-check-circle-fill"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                          </svg>
-                        </div>
-                        <div>Ações de melhoria</div>
-                      </div>
-                      <div className="customBorder7">
-                        {dadosCanvaDoFuncionario.map((item) =>
-                          item.melhorias.map((item, index) => (
-                            <div>{item}</div>
                           )),
                         )}
                       </div>
                     </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'novato' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'aprendiz' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'praticante' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'profissional' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'professor' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'lider' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
+                      {seniorDoFuncionario == 'mestre' && (
+                        <div
+                          className="mb-3"
+                          style={{
+                            borderRadius: '100%',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'red',
+                          }}
+                        ></div>
+                      )}
+                    </div>
+
+                    <div className="row w-100">
+                      <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                        <div>
+                          <div className="d-flex justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="30"
+                              height="30"
+                              fill="currentColor"
+                              className="bi bi-emoji-smile"
+                              viewBox="0 0 16 16"
+                            >
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                              <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                            </svg>
+                          </div>
+                          <div>Pontos Fortes</div>
+                        </div>
+                        <div className="customBorder7">
+                          {dadosCanvaDoFuncionario.map((item) =>
+                            item.fortes.map((item, index) => <div>{item}</div>),
+                          )}
+                        </div>
+                      </div>
+                      <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                        <div>
+                          <div className="d-flex justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="30"
+                              height="30"
+                              fill="currentColor"
+                              className="bi bi-emoji-frown"
+                              viewBox="0 0 16 16"
+                            >
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                              <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                            </svg>
+                          </div>
+                          <div>Pontos de atenção</div>
+                        </div>
+                        <div className="customBorder7">
+                          {dadosCanvaDoFuncionario.map((item) =>
+                            item.atencao.map((item, index) => (
+                              <div>{item}</div>
+                            )),
+                          )}
+                        </div>
+                      </div>
+                      <div className="customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                        <div>
+                          <div className="d-flex justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="30"
+                              height="30"
+                              fill="currentColor"
+                              className="bi bi-check-circle-fill"
+                              viewBox="0 0 16 16"
+                            >
+                              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                            </svg>
+                          </div>
+                          <div>Ações de melhoria</div>
+                        </div>
+                        <div className="customBorder7">
+                          {dadosCanvaDoFuncionario.map((item) =>
+                            item.melhorias.map((item, index) => (
+                              <div>{item}</div>
+                            )),
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
           {dadosCanvaDoFuncionario.length == 0 && (
             <>
