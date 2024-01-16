@@ -74,18 +74,16 @@ export default function Canva({
     }
 
     //Comparação entre os canvas
-    let canvaDoFuncionario = [];
+    
 
-    try {
-      canvaDoFuncionario = avalDoFuncionario.map((item) =>
-        JSON.parse(item.avaliacoes),
-      );
-    } catch (error) {
-      console.log('Erro ao fazer o parse', error);
-    }
-    const canvaDoFuncionarioParse = canvaDoFuncionario;
+    // try {
+    //   canvaDoFuncionario = avalDoFuncionario.map((item) =>
+    //     JSON.parse(item.avaliacoes),
+    //   );
+    // } catch (error) {
+    //   console.log('Erro ao fazer o parse', error);
+    // }
 
-    console.log('canvaDoFuncionario', canvaDoFuncionario);
 
     //Recuperação do funcionário selecionado atual
     const listaNomeAtual = listaCadastro.filter(
@@ -95,7 +93,39 @@ export default function Canva({
     setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
 
     //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
-    const canvaParseData =
+             
+
+    //Comparação do nome selecionado e o nome recuperado no banco de dados do funcionário
+    
+    const newName = listaNomeAtual.map((item) => item.nome).join();
+    console.log('newName',newName);
+    
+    let canvaDoFuncionario = avalDoFuncionario.find((item) =>
+    item.nome==newName);
+    console.log('canvaDoFuncionario',canvaDoFuncionario);
+    
+    let comparaName = []
+    try{
+      comparaName= canvaDoFuncionario.nome;
+    }catch (error){
+      console.log('Erro no comparaName', error);
+    }
+    console.log('comparaName',comparaName);
+
+    let canvaDoFuncionario2 = [];
+
+    try {
+      canvaDoFuncionario2 = JSON.parse(canvaDoFuncionario.avaliacoes);
+    } catch (error) {
+      console.log('Erro ao fazer o parse', error);
+    }
+    let canvaDoFuncionarioParse = canvaDoFuncionario2;
+
+    console.log('canvaDoFuncionario2', canvaDoFuncionario2);
+
+
+
+    let canvaParseData =
       dataHistorico !== 'Última Data'
         ? canvaDoFuncionarioParse.filter(
             (item) =>
@@ -109,13 +139,14 @@ export default function Canva({
               item.mes ===
                 canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1].mes,
           );
-
     if (
-      avalDoFuncionario.map((item) => item.nome).join() ==
-      listaNomeAtual.map((item) => item.nome).join()
+      comparaName ==
+      newName
     ) {
       setDadosCanvaDoFuncionario(canvaParseData);
-      setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade));
+      console.log('canvaParseData',canvaParseData);
+      setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade)[canvaParseData.length-1]);
+      console.log('senior', canvaParseData.map((item) => item.senioridade)[canvaParseData.length-1])
     }
 
     if (listaCanva.length > 0) {
@@ -445,7 +476,7 @@ export default function Canva({
                 console.log('Erro ao fazer o parse', error);
               }
               const canvaDoFuncionarioParse = canvaDoFuncionario;
-          
+
               console.log('canvaDoFuncionario', canvaDoFuncionario);
               console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
               //Recuperação do funcionário selecionado atual
@@ -1333,13 +1364,11 @@ export default function Canva({
                         <div>Ações de melhoria</div>
                       </div>
                       <div className="customBorder7">
-                
                         {dadosCanvaDoFuncionario.map((item) =>
                           item.melhorias.map((item, index) => (
                             <div>{item}</div>
                           )),
-                        )
-                        }
+                        )}
                       </div>
                     </div>
                   </div>
