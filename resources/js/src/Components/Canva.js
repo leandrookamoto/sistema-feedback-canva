@@ -2,6 +2,7 @@ import { faTruckField } from '@fortawesome/free-solid-svg-icons';
 import './Canva.css';
 import { useState, useEffect, useRef } from 'react';
 import Dialog from './Dialog';
+import emailjs from '@emailjs/browser';
 
 export default function Canva({
   historico,
@@ -12,7 +13,7 @@ export default function Canva({
   listaCadastro,
   usuario,
   setorChefe,
-  avalDoFuncionario
+  avalDoFuncionario,
 }) {
   //Constantes para gravação de estado para o canva
   const [listaCanva, setListaCanva] = useState([]);
@@ -35,26 +36,86 @@ export default function Canva({
   const [dataHistorico, setDataHistorico] = useState('Última Data');
   const montagemInicial = useRef(true);
   const [openValidaData, setOpenValidaData] = useState(false);
+  const [nomeFuncionario, setNomeFuncionario] = useState('');
+  const [emailFuncionario, setEmailFuncionario] = useState('');
+
+  //Constante para esconder o formulário de solicitação de feedback;
+  const envio = false;
+
   //Constantes para validações em geral
   const [isValidAtividades, setIsValidAtividades] = useState(true);
   const [isValidFortes, setIsValidFortes] = useState(true);
   const [isValidAtencao, setIsValidAtencao] = useState(true);
   const [isValidMelhorias, setIsValidMelhorias] = useState(true);
   const [openValidaNota, setOpenValidaNota] = useState(false);
+
+  //Dados puxados do banco de dados da auto avaliação do funcionário
+  const [dadosCanvaDoFuncionario, setDadosCanvaDoFuncionario] = useState([]);
+  const [seniorDoFuncionario, setSeniorDoFuncionario] = useState('');
+
+  //Contantes para envio do e-mail
+  const assunto = `${usuario} solicita o seu feedback pelo programa Feedback Canva`;
+
   //Constante para abertura do Dialog/Modal
   const [open, setOpen] = useState(false);
+  const [openEmail, setOpenEmail] = useState(false);
   const descricao =
     'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
   const validaNota = 'O intervalo de notas é de 1 a 7';
   const validaData = 'Mês e ano já cadastrados!';
+  const sucessoEmail = 'Sua solicitação de feedback foi enviada com sucesso!';
 
   //useEffects
-  //useEffect para manter o listaRender atualizado.
+  //useEffect para manter o listaRender atualizado e avalDoFuncionario que vem do App.js
   useEffect(() => {
     if (montagemInicial.current) {
       montagemInicial.current = false;
       return;
     }
+
+    //Lógica para puxar os dados para comparação dos canvas
+
+    const canvaDoFuncionario = avalDoFuncionario
+      .map((item) => item.avaliacoes)
+      .join();
+
+    console.log('canvaDoFuncionario', canvaDoFuncionario);
+
+    const canvaDoFuncionarioParse = canvaDoFuncionario
+      ? JSON.parse(canvaDoFuncionario)
+      : [];
+
+    //Recuperação do funcionário selecionado atual
+    const listaNomeAtual = listaCadastro.filter(
+      (item) => item.id === idFuncionario,
+    );
+    setNomeFuncionario(listaNomeAtual.map((item) => item.nome).join());
+    setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
+
+    //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
+    const canvaParseData =
+      dataHistorico !== 'Última Data'
+        ? canvaDoFuncionarioParse.filter(
+            (item) =>
+              item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
+          )
+        : canvaDoFuncionarioParse.filter(
+            (item) =>
+              item.ano ===
+                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1]
+                  .ano &&
+              item.mes ===
+                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1].mes,
+          );
+
+    if (
+      avalDoFuncionario.map((item) => item.nome).join() ==
+      listaNomeAtual.map((item) => item.nome).join()
+    ) {
+      setDadosCanvaDoFuncionario(canvaParseData);
+      setSeniorDoFuncionario(canvaParseData.map((item) => item.senioridade));
+    }
+
     if (listaCanva.length > 0) {
       let render = null;
       if (dataHistorico === 'Última Data') {
@@ -66,7 +127,6 @@ export default function Canva({
         );
       }
 
-      console.log('render', render);
       setYearDate(render.map((item) => item.ano));
       setMouthDate(render.map((item) => item.mes));
       setSenioridade(render.map((item) => item.senioridade));
@@ -88,65 +148,7 @@ export default function Canva({
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
-    axios
-      .get(`/cadastrados/${setorChefe}`)
-      .then((response) => {
-        const lista = response.data;
-        const listaFiltrada2 = lista.filter(
-          (item) => item.setor === setorChefe,
-        );
-        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
-        const objetoEncontrado = listaFiltrada2.find(
-          (objeto) => objeto.id === idFuncionario,
-        );
-        if (objetoEncontrado) {
-          if (objetoEncontrado.avaliacoes != null) {
-            let avaliacoes = [];
-            try {
-              avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
-
-              if (avaliacoes.length > 0) {
-                console.table(avaliacoes);
-                setListaCanva(avaliacoes);
-                setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
-                setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
-                setYearDate(avaliacoes[avaliacoes.length - 1].ano);
-              } else {
-                setAtividades([]);
-                setListaCanva([]);
-                setSenioridade('');
-                setMouthDate('');
-                setYearDate(null);
-              }
-            } catch (error) {
-              console.error('Erro ao analisar avaliações:', error);
-              setAtividades([]);
-              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
-              setSenioridade('');
-              setMouthDate('');
-              setYearDate(null);
-            }
-          } else {
-            console.log('Nenhum dado de avaliações encontrado');
-            setAtividades([]);
-            setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
-            setSenioridade('');
-            setMouthDate('');
-            setYearDate(null);
-          }
-        } else {
-          console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
-          setAtividades([]);
-          setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
-          setSenioridade('');
-          setMouthDate('');
-          setYearDate(null);
-        }
-      })
-      .catch((error) => {
-        console.error('Erro ao obter os dados:', error);
-        // Lidar com possíveis erros
-      });
+    comparaCanvas();
   }, [avaliar2, historico]);
 
   //Funções principais
@@ -202,6 +204,7 @@ export default function Canva({
       }
     }
   }
+
   // Função para apagar primeiro gráfico
   function apagarPrimeiro() {
     const primeiroRemovido = listaCanva[0]; // Armazena o primeiro elemento antes de removê-lo
@@ -219,17 +222,19 @@ export default function Canva({
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
-        setListaRender([]); 
+        setListaCanva([]);
         setSenioridade('');
         setMouthDate('');
         setYearDate('');
-      }else{
+      } else {
         setListaRender([listaAtualizada[listaAtualizada.length - 1]]);
       }
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
+
+    comparaCanvas();
   }
   // Função para apagar último gráfico
   function apagarUltimo() {
@@ -248,18 +253,43 @@ export default function Canva({
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
-        setListaRender([]); // Mantém somente o último elemento na listaRender
+        setListaCanva([]); // Mantém somente o último elemento na listaRender
         setSenioridade('');
         setMouthDate('');
         setYearDate('');
-      }else{
+      } else {
         setListaRender([listaAtualizada[listaAtualizada.length - 1]]);
       }
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
+
+    comparaCanvas();
   }
+  //Função para envio do e-mail
+  const sendEmail = () => {
+    const templateParams = {
+      email: emailFuncionario,
+      assunto: assunto,
+      nome: nomeFuncionario,
+    };
+
+    emailjs
+      .send(
+        'service_3qsan9n',
+        'template_6yt5ty9',
+        templateParams,
+        'eX61PTky11yxk4MAJ',
+      )
+      .then((response) => {
+        console.log('Email enviado com sucesso', response);
+        setOpenEmail(true);
+      })
+      .catch((error) => {
+        console.log('Erro ao enviar email', error);
+      });
+  };
 
   //Funções auxiliares
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
@@ -370,6 +400,104 @@ export default function Canva({
     } else {
       return (senior = 'mestre');
     }
+  }
+  //Função de comparação entre os canvas do gestor e funcionário
+  function comparaCanvas() {
+    axios
+      .get(`/cadastrados/${setorChefe}`)
+      .then((response) => {
+        const lista = response.data;
+        const listaFiltrada2 = lista.filter(
+          (item) => item.setor === setorChefe,
+        );
+        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
+        const objetoEncontrado = listaFiltrada2.find(
+          (objeto) => objeto.id === idFuncionario,
+        );
+        if (objetoEncontrado) {
+          if (objetoEncontrado.avaliacoes != null) {
+            let avaliacoes = [];
+            try {
+              avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
+              //Lógica para gravar a parte de avaliações com o funcionário já selecionado pelo id
+              if (avaliacoes.length > 0) {
+                setListaCanva(avaliacoes);
+                setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
+                setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
+                setYearDate(avaliacoes[avaliacoes.length - 1].ano);
+              } else {
+                setAtividades([]);
+                setListaCanva([]);
+                setSenioridade('');
+                setMouthDate('');
+                setYearDate(null);
+              }
+
+              //Lógica para puxar os dados para comparação dos canvas
+              const canvaDoFuncionario = avalDoFuncionario
+                .map((item) => item.avaliacoes)
+                .join();
+
+              const canvaDoFuncionarioParse = canvaDoFuncionario
+                ? JSON.parse(canvaDoFuncionario)
+                : [];
+              console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
+              //Recuperação do funcionário selecionado atual
+              const listaNomeAtual = listaCadastro.filter(
+                (item) => item.id === idFuncionario,
+              );
+              setNomeFuncionario(
+                listaNomeAtual.map((item) => item.nome).join(),
+              );
+              setEmailFuncionario(
+                listaNomeAtual.map((item) => item.email).join(),
+              );
+
+              //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
+              const canvaParseData = canvaDoFuncionarioParse.filter(
+                (item) =>
+                  item.ano === avaliacoes[avaliacoes.length - 1].ano &&
+                  item.mes === avaliacoes[avaliacoes.length - 1].mes,
+              );
+
+              if (
+                avalDoFuncionario.map((item) => item.nome).join() ==
+                listaNomeAtual.map((item) => item.nome).join()
+              ) {
+                setDadosCanvaDoFuncionario(canvaParseData);
+                setSeniorDoFuncionario(
+                  canvaParseData.map((item) => item.senioridade),
+                );
+              }
+            } catch (error) {
+              console.error('Erro ao analisar avaliações:', error);
+              setAtividades([]);
+              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+              setSenioridade('');
+              setMouthDate('');
+              setYearDate(null);
+            }
+          } else {
+            console.log('Nenhum dado de avaliações encontrado');
+            setAtividades([]);
+            setListaCanva([]); // Definir lista como um array vazio se não houver dados de avaliações
+            setSenioridade('');
+            setMouthDate('');
+            setYearDate(null);
+          }
+        } else {
+          console.log('Nenhum objeto encontrado com o ID:', idFuncionario);
+          setAtividades([]);
+          setListaCanva([]); // Definir lista como um array vazio se nenhum objeto for encontrado
+          setSenioridade('');
+          setMouthDate('');
+          setYearDate(null);
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao obter os dados:', error);
+        // Lidar com possíveis erros
+      });
   }
   //Função para obter somente o mês pelo input date
   function obterNomeDoMes(dataString) {
@@ -861,21 +989,373 @@ export default function Canva({
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary mt-1"
-            style={{ marginRight: '10px' }}
-            onClick={apagarPrimeiro}
-          >
-            Apagar Primeiro Canva
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary mt-1"
-            onClick={apagarUltimo}
-          >
-            Apagar Último Canva
-          </button>
+
+          {dadosCanvaDoFuncionario.length == 0 && (
+            <>
+              <button
+                type="button"
+                className="btn btn-primary mt-1"
+                style={{ marginRight: '10px' }}
+                onClick={apagarPrimeiro}
+              >
+                Apagar Primeiro Canva
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary mt-1"
+                onClick={apagarUltimo}
+              >
+                Apagar Último Canva
+              </button>
+            </>
+          )}
+
+          {/* Parte do canva de comparação  */}
+          {dadosCanvaDoFuncionario.length > 0 && (
+            <>
+              <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
+                Quadro do Funcionário
+              </h2>
+              <div className="canvaContainer container w-100 mb-3">
+                <div className="headerCanva d-flex justify-content-between align-items-center">
+                  <div>Feedback Canva</div>
+                  {mouthDate && (
+                    <div style={{ fontSize: '15px' }}>
+                      Data: {mouthDate}/{yearDate}
+                    </div>
+                  )}
+                </div>
+                <div className="row">
+                  <div className="customBorder col-2 d-flex justify-content-center align-items-center">
+                    Competência
+                  </div>
+                  <div className="customBorder col-3 d-flex justify-content-center align-items-center">
+                    Atividades
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#fefdd9' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>1</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Novato
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#fff3d5' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>2</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Aprendiz
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#fee2d5' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>3</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Praticante
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#fad4df' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>4</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Profissional
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#f2caff' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>5</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Professor
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#d9c9ff' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>6</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Líder
+                    </div>
+                  </div>
+                  <div
+                    className="customBorder2 col d-flex justify-content-center flex-column align-items-center"
+                    style={{ backgroundColor: '#d4e4fe' }}
+                  >
+                    <div style={{ fontSize: '15px' }}>7</div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        marginTop: '-5px',
+                      }}
+                    >
+                      Mestre
+                    </div>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
+                    {dadosCanvaDoFuncionario.length > 0 &&
+                      dadosCanvaDoFuncionario.map(
+                        (item, index) =>
+                          item.competencia && ( // Verifica se a competência existe
+                            <div
+                              key={index}
+                              className="post-it d-flex justify-content-center align-items-center"
+                            >
+                              {item.competencia}
+                            </div>
+                          ),
+                      )}
+                  </div>
+                  <div className="customBorder3 col-3">
+                    <div className="box mt-1">
+                      {dadosCanvaDoFuncionario.map((item) =>
+                        item.atividades.map((item, index) => (
+                          <div
+                            className={
+                              listaAtividades.length <= 3
+                                ? 'd-flex justify-content-center align-items-center post-it2'
+                                : 'd-flex justify-content-center align-items-center post-it'
+                            }
+                          >
+                            {item}
+                          </div>
+                        )),
+                      )}
+                    </div>
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'novato' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'aprendiz' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'praticante' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'profissional' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'professor' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder3 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'lider' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                  <div className="customBorder4 col d-flex flex-column justify-content-center align-items-center">
+                    {seniorDoFuncionario == 'mestre' && (
+                      <div
+                        className="mb-3"
+                        style={{
+                          borderRadius: '100%',
+                          width: '45px',
+                          height: '45px',
+                          backgroundColor: 'red',
+                        }}
+                      ></div>
+                    )}
+                  </div>
+
+                  <div className="row w-100">
+                    <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                      <div>
+                        <div className="d-flex justify-content-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="30"
+                            height="30"
+                            fill="currentColor"
+                            className="bi bi-emoji-smile"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                          </svg>
+                        </div>
+                        <div>Pontos Fortes</div>
+                      </div>
+                      <div className="customBorder7">
+                        {dadosCanvaDoFuncionario.map((item) =>
+                          item.fortes.map((item, index) => <div>{item}</div>),
+                        )}
+                      </div>
+                    </div>
+                    <div className="customBorder5 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                      <div>
+                        <div className="d-flex justify-content-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="30"
+                            height="30"
+                            fill="currentColor"
+                            className="bi bi-emoji-frown"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                          </svg>
+                        </div>
+                        <div>Pontos de atenção</div>
+                      </div>
+                      <div className="customBorder7">
+                        {dadosCanvaDoFuncionario.map((item) =>
+                          item.atencao.map((item, index) => <div>{item}</div>),
+                        )}
+                      </div>
+                    </div>
+                    <div className="customBorder8 pt-3 col-4 d-flex flex-column justify-content-center align-items-center">
+                      <div>
+                        <div className="d-flex justify-content-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="30"
+                            height="30"
+                            fill="currentColor"
+                            className="bi bi-check-circle-fill"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                          </svg>
+                        </div>
+                        <div>Ações de melhoria</div>
+                      </div>
+                      <div className="customBorder7">
+                        {dadosCanvaDoFuncionario.map((item) =>
+                          item.melhorias.map((item, index) => (
+                            <div>{item}</div>
+                          )),
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {dadosCanvaDoFuncionario.length == 0 && (
+            <>
+              <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
+                Solicitar feedback para o funcionário
+              </h2>
+
+              <button
+                type="button"
+                className="btn btn-primary mt-1"
+                style={{ marginRight: '10px' }}
+                onClick={sendEmail}
+              >
+                Solicitar feedback para o funcionário
+              </button>
+            </>
+          )}
         </section>
       )}
 
@@ -895,6 +1375,12 @@ export default function Canva({
         open={openValidaData}
         descricao={validaData}
         handleClose={() => setOpenValidaData(false)}
+        Title="Atenção"
+      />
+      <Dialog
+        open={openEmail}
+        descricao={sucessoEmail}
+        handleClose={() => setOpenEmail(false)}
         Title="Atenção"
       />
     </>
