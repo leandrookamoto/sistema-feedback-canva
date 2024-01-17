@@ -280,6 +280,10 @@ export default function App() {
           onClickCadastrados={handleCadastrados}
           onClickHome={handleHome}
           onClickPendentes={handlePendentes}
+          pendentes={pendentes}
+          cadastrar={cadastrar}
+          homeRender={homeRender}
+          feedback={feedback}
         />
 
         <div className="m-3" style={{ width: '70%' }}>
