@@ -181,7 +181,6 @@ ColorlibStepIcon.propTypes = {
 
 const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
-
 //O function component do React
 export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   //Constantes do material UI para renderização dos steps
@@ -220,20 +219,17 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   //useEffect responsável por ordenar a lista em ordem alfabética
   useEffect(() => {
-    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
+    const lista = listaConfereFeedChefe;
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
-  }, [mes]);
-
- 
- 
+  }, [mes, listaConfereFeedChefe]);
 
   //Funções auxiliares
   //Função responsável por puxar os dados do banco através da const listaCadastro
   //e filtragens necessárias para a lógica
   function primeiraLista() {
-    //Filtragem responsável por verificar quais são funcionários ainda não estão cadastrados para 
-    //adicionar na primeira lista que é necessário realizar 
+    //Filtragem responsável por verificar quais são funcionários ainda não estão cadastrados para
+    //adicionar na primeira lista que é necessário realizar
     const listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
       const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
       return !obj2 || obj1.nome !== obj2.nome;
@@ -255,7 +251,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
       return objeto;
     });
 
-    console.log('comparaCadastrados',comparaCadastrados);
+    console.log('comparaCadastrados', comparaCadastrados);
 
     const listaAdicional = comparaCadastrados.filter((objeto) => {
       try {
@@ -277,8 +273,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     setListaRender(orderedList);
   }
 
-  
-
   let totalPage = 1;
   try {
     totalPage = Math.ceil(listaRender.length / pageSize);
@@ -286,11 +280,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     console.log('Erro do totalPage', error);
   }
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  let currentDisplayList = listaRender.slice(startIndex, endIndex);
-
-  //Variáveis para o estilo do search input
+   //Variáveis para o estilo do search input
   const estiloInput = {
     position: 'relative',
     display: 'inline-block',
@@ -302,6 +292,39 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     transform: 'translateY(-50%)',
     color: 'gray',
   };
+
+  //Início da lógica para início do processo
+  console.log('listaCadastro', listaCadastro);
+  //Fazendo o parse da chave avaliacoes para facilitar o processo
+  const listaParseAvaliacoes = listaCadastro.map((objeto) => {
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        return objeto;
+      }
+    }
+    return objeto;
+  });
+
+  //Verificando se há alguma avaliação do gerente registrada no mês e excluindo da primeira lista
+  const listaConfereFeedChefe = listaParseAvaliacoes.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        !Array.isArray(avaliacoesArray) ||
+        avaliacoesArray.length === 0 ||
+        avaliacoesArray.every(
+          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
+  console.log('listaConfereFeedChefe', listaConfereFeedChefe);
 
   //Constantes para comparação das avaliações (se tem) e datas
   let listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
@@ -330,7 +353,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
-  console.log('comparaCadastrados',comparaCadastrados);
+  console.log('comparaCadastrados', comparaCadastrados);
 
   const listaAdicional = comparaCadastrados.filter((objeto) => {
     try {
@@ -346,7 +369,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
       return false;
     }
   });
-
 
   //lista responsável pela filtragem quando está faltando o feedback somente do funcionário
   const listaFaltaFeedFuncionario = comparaCadastrados.filter((objeto) => {
@@ -364,14 +386,12 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     }
   });
 
-
   const listaAdicionalRef = useRef(listaAdicional);
 
-   //Função para a mudança de página
-   function handleChange(event, value) {
+  //Função para a mudança de página
+  function handleChange(event, value) {
     setPage(Math.min(value, totalPage));
   }
-
 
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
@@ -405,8 +425,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   //Função de pesquisa
   function pesquisar(e) {
-    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
-    const orderedList = orderEmployeeData(lista);
+    const orderedList = orderEmployeeData(listaConfereFeedChefe);
     const nova = capitalizeWords(e.currentTarget.value).trim();
     const mail = e.currentTarget.value.trim().toLowerCase();
     let novaListaFiltrada = [];
@@ -495,6 +514,11 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const handleData = (e) => {
     setMes(e.currentTarget.value);
   };
+
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  let currentDisplayList = listaRender.slice(startIndex, endIndex);
+
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
       <div className="container w-100 mb-3">
@@ -665,7 +689,9 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
               </>
             )}
             {/* Renderização do Feedback */}
-            {activeStep === 1 && <><div style={estiloInput}>
+            {activeStep === 1 && (
+              <>
+                <div style={estiloInput}>
                   <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
                   <input
                     type="text"
@@ -701,10 +727,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                   handleChange={handleChange}
                   totalPage={totalPage}
                 />
-              </>}
+              </>
+            )}
             {/* Renderização do Plano de Ação */}
-            {activeStep === 2 && <>Faltando plano de ação
-              </>}
+            {activeStep === 2 && <>Faltando plano de ação</>}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
