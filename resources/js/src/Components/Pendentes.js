@@ -188,6 +188,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [skipped, setSkipped] = useState(new Set());
   //Constantes para gravação de estado
   const [listaRender, setListaRender] = useState([]);
+  const [listaRender2, setListaRender2] = useState([]);
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
@@ -324,13 +325,24 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     }
   });
 
-  console.log('listaConfereFeedChefe', listaConfereFeedChefe);
+  
+  //Lógica da segunda lista
+  const listaFeedChefe = listaParseAvaliacoes.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        Array.isArray(avaliacoesArray) &&
+        avaliacoesArray.some(
+          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
 
   //Constantes para comparação das avaliações (se tem) e datas
-  let listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
-    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
-    return !obj2 || obj1.nome !== obj2.nome;
-  });
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
@@ -355,42 +367,51 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   console.log('comparaCadastrados', comparaCadastrados);
 
-  const listaAdicional = comparaCadastrados.filter((objeto) => {
+  const listaFeedChefe2 = comparaCadastrados.filter((objetoA) => {
     try {
-      const avaliacoesArray = objeto.avaliacoes;
-      return (
-        Array.isArray(avaliacoesArray) &&
-        avaliacoesArray.every(
-          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
-        )
-      );
+      // Verifica se o objeto da Lista A possui a data e ano selecionados
+      const possuiDataAno = Array.isArray(objetoA.avaliacoes) &&
+        objetoA.avaliacoes.some((avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes);
+  
+      // Retorna verdadeiro se as condições forem atendidas
+      return possuiDataAno;
     } catch (error) {
       console.error('Erro ao fazer parsing do JSON:', error);
       return false;
     }
   });
+  
+  console.log('listaFeedChefe2',listaFeedChefe2);
 
-  //lista responsável pela filtragem quando está faltando o feedback somente do funcionário
-  const listaFaltaFeedFuncionario = comparaCadastrados.filter((objeto) => {
-    try {
-      const avaliacoesArray = objeto.avaliacoes;
-      return (
-        Array.isArray(avaliacoesArray) &&
-        avaliacoesArray.some(
-          (avaliacao) => avaliacao.ano == ano && avaliacao.mes == mes,
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
+
+  console.log('listaFeedChefe',listaFeedChefe);
+
+  // Verifica se o nome do objeto da Lista A está presente na Lista B
+  const listaFinal = listaFeedChefe.filter((objetoA) => {
+    // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
+    const objetoB = listaFeedChefe2.find((objetoB) => objetoB.nome === objetoA.nome);
+  
+    // Retorna true apenas se não houver correspondência na Lista B
+    return !objetoB;
   });
+  
 
-  const listaAdicionalRef = useRef(listaAdicional);
+console.log('listaFinal',listaFinal);
+
+
+  
+
+
+
+
 
   //Função para a mudança de página
   function handleChange(event, value) {
     setPage(Math.min(value, totalPage));
+  }
+
+  function handleChange2(event, value) {
+    setPage2(Math.min(value, totalPage2));
   }
 
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
@@ -443,6 +464,29 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     }
 
     setListaRender(novaListaFiltrada);
+    setPage(1);
+  }
+
+//Função pesquisar do segundo step
+  function pesquisar2(e) {
+    const orderedList = orderEmployeeData(listaFeedChefe);
+    const nova = capitalizeWords(e.currentTarget.value).trim();
+    const mail = e.currentTarget.value.trim().toLowerCase();
+    let novaListaFiltrada = [];
+    try {
+      novaListaFiltrada =
+        orderedList.filter(
+          (item) => item.nome.includes(nova) || item.email.includes(mail),
+        ).length > 0
+          ? orderedList.filter(
+              (item) => item.nome.includes(nova) || item.email.includes(mail),
+            )
+          : listaRender2;
+    } catch (error) {
+      console.log('Erro do pesquisar', error);
+    }
+
+    setListaRender2(novaListaFiltrada);
     setPage(1);
   }
 
@@ -517,7 +561,9 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
+  //Renderização do primeiro step
   let currentDisplayList = listaRender.slice(startIndex, endIndex);
+  let currentDisplayList2 = listaRender2.slice(startIndex, endIndex);
 
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
@@ -696,7 +742,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                   <input
                     type="text"
                     placeholder="Pesquisar"
-                    onChange={pesquisar}
+                    onChange={pesquisar2}
                     style={{
                       paddingLeft: '30px',
                       width: '250px',
@@ -706,7 +752,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                     }}
                   />
                 </div>
-                {listaFaltaFeedFuncionario.map((item) => {
+                {listaFinal.map((item) => {
                   return (
                     <div
                       key={item.id}
