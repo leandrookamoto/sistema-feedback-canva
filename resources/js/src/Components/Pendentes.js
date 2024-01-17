@@ -258,7 +258,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   useEffect(() => {
     primeiraLista();
     setPage(1); // Resetar para a primeira página ao atualizar a lista
-  }, [mes, listaCadastro, avalDoFuncionario]);
+  }, [mes, listaCadastro, avalDoFuncionario, ano]);
 
   let totalPage = 1;
   try {
