@@ -167,7 +167,7 @@ export default function Feedback({
         const id = response.data.length
           ? lista[response.data.length - 1].id
           : 0;
-        console.log(`Este é o id final: ${id}`);
+
         // Atualiza o estado dadosFuncionario com a lista filtrada recebida
         setDadosFuncionario(listaFiltrada2);
         setListaFiltrada(listaFiltrada2);
@@ -187,7 +187,7 @@ export default function Feedback({
   function editar() {
     const dado = listaFiltrada.find((item) => item.id === idFuncionario);
     onChangeDadosFuncionario(dado);
-    console.log(dado);
+
   }
   //Função de pesquisa
   function pesquisar(e) {
@@ -196,7 +196,7 @@ export default function Feedback({
     const novaListaFiltrada = listaCadastro.filter(
       (item) => item.nome.includes(nova) || item.email.includes(mail),
     );
-    console.log(listaFiltrada);
+
     setListaFiltrada(novaListaFiltrada);
     setPage(1);
   }

@@ -187,6 +187,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [page, setPage] = useState(1);
   const pageSize = 3;
   const [mes, setMes] = useState('');
+  const [listaCompara, setListaCompara] = useState([]);
+  const [listaPesquisa, setListaPesquisa] = useState([]);
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -205,14 +207,12 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
 
-
-
   //Função para a mudança de página
   function handleChange(event, value) {
     setPage(Math.min(value, totalPage));
   }
 
-  useEffect(() => {
+  function primeiraLista() {
     const listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
       const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
       return !obj2 || obj1.nome !== obj2.nome;
@@ -251,8 +251,12 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
     const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
     const orderedList = orderEmployeeData(lista);
-
     setListaRender(orderedList);
+    setListaCompara(orderedList);
+  }
+
+  useEffect(() => {
+    primeiraLista();
     setPage(1); // Resetar para a primeira página ao atualizar a lista
   }, [mes, listaCadastro, avalDoFuncionario]);
 
@@ -265,7 +269,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentDisplayList = listaRender.slice(startIndex, endIndex);
+  let currentDisplayList = listaRender.slice(startIndex, endIndex);
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -285,9 +289,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
     return !obj2 || obj1.nome !== obj2.nome;
   });
-
-  
-
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
@@ -310,11 +311,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
-  console.log('comparaCadastrados', comparaCadastrados);
-
-  console.log('ano', ano);
-  console.log('mes', mes);
-
   const listaAdicional = comparaCadastrados.filter((objeto) => {
     try {
       const avaliacoesArray = objeto.avaliacoes;
@@ -332,13 +328,9 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   const listaAdicionalRef = useRef(listaAdicional);
 
-  console.log('listaFuncionarioNaoCadastrado', listaFuncionarioNaoCadastrado);
-
   useEffect(() => {
     const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
-
     const orderedList = orderEmployeeData(lista);
-
     setListaRender(orderedList);
   }, [mes]);
 
@@ -372,29 +364,22 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
-  console.log('listaFuncionarioNaoCadastrado', listaFuncionarioNaoCadastrado);
-
-  console.log('listaCadastro', listaCadastro);
-  console.log('avalDoFuncionario', avalDoFuncionario);
-  console.log(
-    'comparacaoAvaliacoesListaCadastro',
-    comparacaoAvaliacoesListaCadastro,
-  );
-
   //Função de pesquisa
   function pesquisar(e) {
+    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
+    const orderedList = orderEmployeeData(lista);
     const nova = capitalizeWords(e.currentTarget.value).trim();
     const mail = e.currentTarget.value.trim().toLowerCase();
     let novaListaFiltrada = [];
     try {
       novaListaFiltrada =
-        listaCadastro.filter(
+        orderedList.filter(
           (item) => item.nome.includes(nova) || item.email.includes(mail),
         ).length > 0
-          ? listaCadastro.filter(
+          ? orderedList.filter(
               (item) => item.nome.includes(nova) || item.email.includes(mail),
             )
-          : listaCadastro;
+          : listaRender;
     } catch (error) {
       console.log('Erro do pesquisar', error);
     }
