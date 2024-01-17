@@ -577,11 +577,17 @@ export default function Canva({
   
     if (data === 'Última Data') {
       setYearDate(anoAtual);
+      
     } else {
       setYearDate(data.ano);
+      setMouthDate(data.mes);
     }
   }
   
+  function handleYear(props){
+    setYearDate(anoAtual+props);
+    setDataHistorico({ano:anoAtual+props,mes:mouthDate})
+  }
   
   
   
@@ -710,7 +716,7 @@ export default function Canva({
                         : 'col border p-1'
                     }
                     style={{ cursor: 'pointer' }}
-                    onClick={() => setYearDate(anoAtual - 2)}
+                    onClick={() => handleYear(- 2)}
                   >
                     {anoAtual - 2}
                   </div>
@@ -721,7 +727,7 @@ export default function Canva({
                         : 'col border p-1'
                     }
                     style={{ cursor: 'pointer' }}
-                    onClick={() => setYearDate(anoAtual - 1)}
+                    onClick={() => handleYear(- 1)}
                   >
                     {anoAtual - 1}
                   </div>
@@ -732,7 +738,7 @@ export default function Canva({
                         : 'col border p-1'
                     }
                     style={{ cursor: 'pointer' }}
-                    onClick={() => setYearDate(anoAtual)}
+                    onClick={() => handleYear(0)}
                   >
                     {anoAtual}
                   </div>
@@ -743,7 +749,7 @@ export default function Canva({
                         : 'col border p-1'
                     }
                     style={{ cursor: 'pointer' }}
-                    onClick={() => setYearDate(anoAtual + 1)}
+                    onClick={() => handleYear(+ 1)}
                   >
                     {anoAtual + 1}
                   </div>
@@ -754,7 +760,7 @@ export default function Canva({
                         : 'col border p-1'
                     }
                     style={{ cursor: 'pointer' }}
-                    onClick={() => setYearDate(anoAtual + 2)}
+                    onClick={() => handleYear( + 2)}
                   >
                     {anoAtual + 2}
                   </div>
