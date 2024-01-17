@@ -15,7 +15,8 @@ export default function Feedback({
   onChangeDadosFuncionario,
   dados,
   setorChefe,
-  avalDoFuncionario
+  avalDoFuncionario,
+  email
 }) {
   //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -93,11 +94,13 @@ export default function Feedback({
           (item) => item.setor === setorChefe,
         );
 
+        //parte responsável por selecionar somente o funcionário que acabou de ser cadastrado
+        //ou editado
         const novaListaFiltrada = listaFiltrada2.filter((item) =>
           item.email.includes(dados.email),
         );
         console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
-        setListaFiltrada(listaFiltrada2);
+        setListaFiltrada(novaListaFiltrada);
         setPage(1);
       })
       .catch((error) => {
