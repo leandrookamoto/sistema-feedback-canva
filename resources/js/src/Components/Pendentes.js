@@ -21,6 +21,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
+//Parte do Material UI responsável pelo stepper
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 10,
@@ -180,15 +181,18 @@ ColorlibStepIcon.propTypes = {
 
 const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
+
+//O function component do React
 export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
+  //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
+  //Constantes para gravação de estado
   const [listaRender, setListaRender] = useState([]);
-  const [page, setPage] = useState(1);
-  const pageSize = 3;
   const [mes, setMes] = useState('');
-  const [listaCompara, setListaCompara] = useState([]);
-  const [listaPesquisa, setListaPesquisa] = useState([]);
+  const anoAtual = new Date().getFullYear();
+  const [ano, setAno] = useState(anoAtual);
+
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -203,16 +207,33 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     'Novembro',
     'Dezembro',
   ];
-  const [novaData, setNovaData] = useState('');
-  const anoAtual = new Date().getFullYear();
-  const [ano, setAno] = useState(anoAtual);
+  //Constantes que controlam o page
+  const [page, setPage] = useState(1);
+  const pageSize = 3;
 
-  //Função para a mudança de página
-  function handleChange(event, value) {
-    setPage(Math.min(value, totalPage));
-  }
+  //useEffects
+  //useEffect responsável por puxar os primeiros dados do banco
+  useEffect(() => {
+    primeiraLista();
+    setPage(1); // Resetar para a primeira página ao atualizar a lista
+  }, [mes, listaCadastro, avalDoFuncionario, ano]);
 
+  //useEffect responsável por ordenar a lista em ordem alfabética
+  useEffect(() => {
+    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
+    const orderedList = orderEmployeeData(lista);
+    setListaRender(orderedList);
+  }, [mes]);
+
+ 
+ 
+
+  //Funções auxiliares
+  //Função responsável por puxar os dados do banco através da const listaCadastro
+  //e filtragens necessárias para a lógica
   function primeiraLista() {
+    //Filtragem responsável por verificar quais são funcionários ainda não estão cadastrados para 
+    //adicionar na primeira lista que é necessário realizar 
     const listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
       const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
       return !obj2 || obj1.nome !== obj2.nome;
@@ -234,6 +255,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
       return objeto;
     });
 
+    console.log('comparaCadastrados',comparaCadastrados);
+
     const listaAdicional = comparaCadastrados.filter((objeto) => {
       try {
         const avaliacoesArray = objeto.avaliacoes;
@@ -252,13 +275,9 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
-    setListaCompara(orderedList);
   }
 
-  useEffect(() => {
-    primeiraLista();
-    setPage(1); // Resetar para a primeira página ao atualizar a lista
-  }, [mes, listaCadastro, avalDoFuncionario, ano]);
+  
 
   let totalPage = 1;
   try {
@@ -311,6 +330,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
+  console.log('comparaCadastrados',comparaCadastrados);
+
   const listaAdicional = comparaCadastrados.filter((objeto) => {
     try {
       const avaliacoesArray = objeto.avaliacoes;
@@ -326,13 +347,31 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     }
   });
 
+
+  //lista responsável pela filtragem quando está faltando o feedback somente do funcionário
+  const listaFaltaFeedFuncionario = comparaCadastrados.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        Array.isArray(avaliacoesArray) &&
+        avaliacoesArray.some(
+          (avaliacao) => avaliacao.ano == ano && avaliacao.mes == mes,
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
+
   const listaAdicionalRef = useRef(listaAdicional);
 
-  useEffect(() => {
-    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
-    const orderedList = orderEmployeeData(lista);
-    setListaRender(orderedList);
-  }, [mes]);
+   //Função para a mudança de página
+   function handleChange(event, value) {
+    setPage(Math.min(value, totalPage));
+  }
+
 
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
@@ -626,9 +665,46 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
               </>
             )}
             {/* Renderização do Feedback */}
-            {activeStep === 1 && <>Faltando feedback do funcionário</>}
+            {activeStep === 1 && <><div style={estiloInput}>
+                  <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar"
+                    onChange={pesquisar}
+                    style={{
+                      paddingLeft: '30px',
+                      width: '250px',
+                      borderRadius: '5px',
+                      border: '1px solid #ccc',
+                      height: '40px',
+                    }}
+                  />
+                </div>
+                {listaFaltaFeedFuncionario.map((item) => {
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => selecionarFuncionario(item.id)}
+                    >
+                      <Card
+                        nome={item.nome}
+                        email={item.email}
+                        setor={item.setor}
+                        chefe={item.administrador}
+                        botao1="Selecionar"
+                      />
+                    </div>
+                  );
+                })}
+                <Pagination
+                  page={page}
+                  handleChange={handleChange}
+                  totalPage={totalPage}
+                />
+              </>}
             {/* Renderização do Plano de Ação */}
-            {activeStep === 2 && <>Faltando o plano de ação do funcionário</>}
+            {activeStep === 2 && <>Faltando plano de ação
+              </>}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
