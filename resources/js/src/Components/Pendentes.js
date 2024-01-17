@@ -189,10 +189,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   //Constantes para gravação de estado
   const [listaRender, setListaRender] = useState([]);
   const [listaRender2, setListaRender2] = useState([]);
+  //Constantes para controle de data
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
-
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -210,6 +210,127 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   //Constantes que controlam o page
   const [page, setPage] = useState(1);
   const pageSize = 3;
+  let totalPage = 1;
+  try {
+    totalPage = Math.ceil(listaRender.length / pageSize);
+  } catch (error) {
+    console.log('Erro do totalPage', error);
+  }
+  //Variáveis para o estilo do search input
+  const estiloInput = {
+    position: 'relative',
+    display: 'inline-block',
+  };
+  const estiloIcone = {
+    position: 'absolute',
+    top: '50%',
+    left: '10px',
+    transform: 'translateY(-50%)',
+    color: 'gray',
+  };
+
+  //Lógica da lista do primeiro step
+  /*Formação da LISTA DO início do processo que são os funcionários 
+  que o gestor ainda não realizou o feedback canva
+  Fazendo o parse da chave avaliacoes para facilitar o processo, pois vem do banco de dados
+  como stringfy*/
+  const listaParseAvaliacoes = listaCadastro.map((objeto) => {
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        return objeto;
+      }
+    }
+    return objeto;
+  });
+  /*Verifica se há alguma avaliação do gerente registrada no mês selecionado e se tiver excluindo
+  da lista, pois na primeira lista quero todos os funcionários que não tem nenhum feedback registrado 
+  no mês*/
+  const listaConfereFeedChefe = listaParseAvaliacoes.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        !Array.isArray(avaliacoesArray) ||
+        avaliacoesArray.length === 0 ||
+        avaliacoesArray.every(
+          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
+  //Lógica da lista do segundo step
+  //Esta const pega a lista e verifica se há avaliações registradas do gestor na data selecionada
+  const listaFeedChefe = listaParseAvaliacoes.filter((objeto) => {
+    try {
+      const avaliacoesArray = objeto.avaliacoes;
+      return (
+        Array.isArray(avaliacoesArray) &&
+        avaliacoesArray.some(
+          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+  //Constantes para comparação das avaliações (se tem) e datas
+  //Aqui puxa os dados de todos os funcionários que se cadastraram no feedback do funcionário
+  //Os dados do banco vem por props com a const avalDoFuncionario
+  let nomesDiferentes = [];
+  const listaCadastrados = listaCadastro.filter((obj1) => {
+    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+    if (!obj2 || obj1.nome !== obj2.nome) {
+      nomesDiferentes.push(obj1);
+      return false;
+    }
+    return true;
+  });
+  //Aqui somente faz o parse das avaliações para facilitar, pois vem como stringfy do banco
+  const comparaCadastrados = listaCadastrados.map((objeto) => {
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        return objeto;
+      }
+    }
+    return objeto;
+  });
+  //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
+  //do que o gestor programa de feedback dos funcionários e excluindo caso sejam iguais, pois 
+  //isso significa que não está faltando o feedback do funcionário para a data escolhida
+  const listaFeedChefe2 = comparaCadastrados.filter((objetoA) => {
+    try {
+      // Verifica se o objeto da Lista A possui a data e ano selecionados
+      const possuiDataAno =
+        Array.isArray(objetoA.avaliacoes) &&
+        objetoA.avaliacoes.some(
+          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+        );
+
+      // Retorna verdadeiro se as condições forem atendidas
+      return possuiDataAno;
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+  // Verifica se o nome do objeto da Lista A está presente na Lista B
+  const listaFinal = listaFeedChefe.filter((objetoA) => {
+    // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
+    const objetoB = listaFeedChefe2.find(
+      (objetoB) => objetoB.nome === objetoA.nome,
+    );
+    // Retorna true apenas se não houver correspondência na Lista B
+    return !objetoB;
+  });
+
 
   //useEffects
   //useEffect responsável por puxar os primeiros dados do banco
@@ -224,6 +345,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
   }, [mes, listaConfereFeedChefe]);
+
 
   //Funções auxiliares
   //Função responsável por puxar os dados do banco através da const listaCadastro
@@ -273,137 +395,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
   }
-
-  let totalPage = 1;
-  try {
-    totalPage = Math.ceil(listaRender.length / pageSize);
-  } catch (error) {
-    console.log('Erro do totalPage', error);
-  }
-
-   //Variáveis para o estilo do search input
-  const estiloInput = {
-    position: 'relative',
-    display: 'inline-block',
-  };
-  const estiloIcone = {
-    position: 'absolute',
-    top: '50%',
-    left: '10px',
-    transform: 'translateY(-50%)',
-    color: 'gray',
-  };
-
-  //Início da lógica para início do processo
-  console.log('listaCadastro', listaCadastro);
-  //Fazendo o parse da chave avaliacoes para facilitar o processo
-  const listaParseAvaliacoes = listaCadastro.map((objeto) => {
-    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-      try {
-        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-      } catch (error) {
-        return objeto;
-      }
-    }
-    return objeto;
-  });
-
-  //Verificando se há alguma avaliação do gerente registrada no mês e excluindo da primeira lista
-  const listaConfereFeedChefe = listaParseAvaliacoes.filter((objeto) => {
-    try {
-      const avaliacoesArray = objeto.avaliacoes;
-      return (
-        !Array.isArray(avaliacoesArray) ||
-        avaliacoesArray.length === 0 ||
-        avaliacoesArray.every(
-          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
-  });
-
-  
-  //Lógica da segunda lista
-  const listaFeedChefe = listaParseAvaliacoes.filter((objeto) => {
-    try {
-      const avaliacoesArray = objeto.avaliacoes;
-      return (
-        Array.isArray(avaliacoesArray) &&
-        avaliacoesArray.some(
-          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
-  });
-
-  //Constantes para comparação das avaliações (se tem) e datas
-
-  let nomesDiferentes = [];
-  const listaCadastrados = listaCadastro.filter((obj1) => {
-    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
-    if (!obj2 || obj1.nome !== obj2.nome) {
-      nomesDiferentes.push(obj1);
-      return false;
-    }
-    return true;
-  });
-
-  const comparaCadastrados = listaCadastrados.map((objeto) => {
-    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-      try {
-        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-      } catch (error) {
-        return objeto;
-      }
-    }
-    return objeto;
-  });
-
-  console.log('comparaCadastrados', comparaCadastrados);
-
-  const listaFeedChefe2 = comparaCadastrados.filter((objetoA) => {
-    try {
-      // Verifica se o objeto da Lista A possui a data e ano selecionados
-      const possuiDataAno = Array.isArray(objetoA.avaliacoes) &&
-        objetoA.avaliacoes.some((avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes);
-  
-      // Retorna verdadeiro se as condições forem atendidas
-      return possuiDataAno;
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
-  });
-  
-  console.log('listaFeedChefe2',listaFeedChefe2);
-
-
-  console.log('listaFeedChefe',listaFeedChefe);
-
-  // Verifica se o nome do objeto da Lista A está presente na Lista B
-  const listaFinal = listaFeedChefe.filter((objetoA) => {
-    // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
-    const objetoB = listaFeedChefe2.find((objetoB) => objetoB.nome === objetoA.nome);
-  
-    // Retorna true apenas se não houver correspondência na Lista B
-    return !objetoB;
-  });
-  
-
-console.log('listaFinal',listaFinal);
-
-
-  
-
-
-
-
 
   //Função para a mudança de página
   function handleChange(event, value) {
@@ -467,7 +458,7 @@ console.log('listaFinal',listaFinal);
     setPage(1);
   }
 
-//Função pesquisar do segundo step
+  //Função pesquisar do segundo step
   function pesquisar2(e) {
     const orderedList = orderEmployeeData(listaFeedChefe);
     const nova = capitalizeWords(e.currentTarget.value).trim();
