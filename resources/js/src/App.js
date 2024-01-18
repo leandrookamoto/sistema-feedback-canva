@@ -32,6 +32,8 @@ export default function App() {
   const [dados, setDados] = useState({});
   const [setorChefe, setSetorChefe] = useState('');
   const [avalDoFuncionario, setAvalDoFuncionario] = useState([]);
+   // Referência para o estado resetKey
+   const [resetKey, setResetKey] = useState(0);
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -108,6 +110,12 @@ export default function App() {
 
     fetchData();
   }, []);
+  //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
+  useEffect(()=>{
+    if(!feedback){
+      setDados([]);
+    }  
+  },[feedback]);
 
   //Funções principais
   //Função para cadastrar os funcionários que vem do CadastroComponent
@@ -322,9 +330,10 @@ export default function App() {
               dados={dados}
               setorChefe={setorChefe}
               avalDoFuncionario={avalDoFuncionario}
+  
             />
           )}
-          {/* Aqui é a renderização do componente do feedback */}
+          {/* Aqui é a renderização do componente do pendentes */}
           {pendentes && (
             <Pendentes
               listaCadastro={listaCadastro}

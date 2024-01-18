@@ -27,6 +27,8 @@ export default function Feedback({
   const [historico, setHistorico] = useState(false);
   const [avaliar2, setAvaliar2] = useState(false);
   const [compararAval, setCompararAval] = useState(false);
+  const [listaCompara, setListaCompara] = useState([]);
+  console.log('listaCompara',listaCompara);
 
   //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
@@ -108,6 +110,7 @@ export default function Feedback({
         // Lidar com possíveis erros
       });
   }, [dados]);
+
   //useEffect para atualização da paginação
   useEffect(() => {
     setPage(1);
