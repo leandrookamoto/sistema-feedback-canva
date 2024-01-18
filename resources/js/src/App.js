@@ -174,7 +174,11 @@ export default function App() {
       }
 
       // Atualização da lista após edição ou cadastro
+      try{
       const response = await axios.get(`/cadastrados/${setorChefe}`);
+      }catch(error){
+        console.log('Erro ao requisitar os dados do setor',error);
+      }
       const lista = response.data;
       
 

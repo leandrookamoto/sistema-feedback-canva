@@ -262,6 +262,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
       return false;
     }
   });
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  //Renderização do primeiro step
+  let currentDisplayList = listaRender.slice(startIndex, endIndex);
 
   //Lógica da lista do segundo step
   //Esta const pega a lista e verifica se há avaliações registradas do gestor na data selecionada
@@ -303,7 +307,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
   //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
-  //do que o gestor programa de feedback dos funcionários e excluindo caso sejam iguais, pois 
+  //do que o gestor programa de feedback dos funcionários e excluindo caso sejam iguais, pois
   //isso significa que não está faltando o feedback do funcionário para a data escolhida
   const listaFeedChefe2 = comparaCadastrados.filter((objetoA) => {
     try {
@@ -330,7 +334,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     // Retorna true apenas se não houver correspondência na Lista B
     return !objetoB;
   });
-
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page2, setPage2] = useState(1);
   let totalPage2 = 1;
@@ -343,6 +346,58 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const endIndex2 = startIndex2 + pageSize;
   let currentDisplayList2 = listaFinal.slice(startIndex2, endIndex2);
 
+  //Lógica da lista do 3º step
+  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
+  console.log('listaRender',listaRender);
+
+  const comparacaoNovo = comparaAvaliacoesFuncionario.filter((objetoA) => {
+    try {
+      // Verifica se o objeto da Lista A possui a data e ano selecionados
+      const possuiDataAno =
+        Array.isArray(objetoA.avaliacoes) &&
+        objetoA.avaliacoes.some(
+          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+        );
+
+      // Retorna verdadeiro se as condições forem atendidas
+      return possuiDataAno;
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
+  console.log('comparaAvaliacoesFuncionario',comparaAvaliacoesFuncionario)
+  console.log('comparacaoNovo',comparacaoNovo)
+
+
+  const listaFinal2 = listaFeedChefe2.filter((objetoA) => {
+    // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
+    const objetoB = comparacaoNovo.find(
+      (objetoB) => objetoB.nome === objetoA.nome,
+    );
+    // Retorna true apenas se não houver correspondência na Lista B
+    return objetoB;
+  });
+  console.log('comparaCadastrados', comparaCadastrados);
+  console.log('listaFinal2', listaFinal2);
+
+
+
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
@@ -350,7 +405,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     const lista = listaConfereFeedChefe;
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
-    setPage(1); 
+    setPage(1);
   }, [mes, ano]);
 
   //Funções auxiliares
@@ -378,20 +433,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
-  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
-    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
-    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-      try {
-        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
-        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-      } catch (error) {
-        // Se não for uma string JSON válida, mantém o valor original
-        return objeto;
-      }
-    }
-    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
-    return objeto;
-  });
+  
 
   //Função de pesquisa
   function pesquisar(e) {
@@ -507,12 +549,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const handleData = (e) => {
     setMes(e.currentTarget.value);
   };
-
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  //Renderização do primeiro step
-  let currentDisplayList = listaRender.slice(startIndex, endIndex);
-
 
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
@@ -701,22 +737,20 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                     }}
                   />
                 </div>
-                {currentDisplayList2.map((item) => {
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => selecionarFuncionario(item.id)}
-                    >
-                      <Card
-                        nome={item.nome}
-                        email={item.email}
-                        setor={item.setor}
-                        chefe={item.administrador}
-                        botao1="Selecionar"
-                      />
-                    </div>
-                  );
-                })}
+                {currentDisplayList2.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => selecionarFuncionario(item.id)}
+                  >
+                    <Card
+                      nome={item.nome}
+                      email={item.email}
+                      setor={item.setor}
+                      chefe={item.administrador}
+                      botao1="Selecionar"
+                    />
+                  </div>
+                ))}
                 <Pagination
                   page={page}
                   handleChange={handleChange2}
@@ -724,6 +758,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                 />
               </>
             )}
+
             {/* Renderização do Plano de Ação */}
             {activeStep === 2 && <>Faltando plano de ação</>}
           </Typography>
