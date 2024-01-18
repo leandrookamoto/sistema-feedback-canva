@@ -331,71 +331,29 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return !objetoB;
   });
 
+  //Controles da paginação do segundo step coloquei aqui para evitar erro
+  const [page2, setPage2] = useState(1);
+  let totalPage2 = 1;
+  try {
+    totalPage2 = Math.ceil(listaFinal.length / pageSize);
+  } catch (error) {
+    console.log('Erro do totalPage', error);
+  }
+  const startIndex2 = (page2 - 1) * pageSize;
+  const endIndex2 = startIndex2 + pageSize;
+  let currentDisplayList2 = listaFinal.slice(startIndex2, endIndex2);
+
 
   //useEffects
-  //useEffect responsável por puxar os primeiros dados do banco
-  useEffect(() => {
-    primeiraLista();
-    setPage(1); // Resetar para a primeira página ao atualizar a lista
-  }, [mes, listaCadastro, avalDoFuncionario, ano]);
-
   //useEffect responsável por ordenar a lista em ordem alfabética
   useEffect(() => {
     const lista = listaConfereFeedChefe;
     const orderedList = orderEmployeeData(lista);
     setListaRender(orderedList);
-  }, [mes, listaConfereFeedChefe]);
-
+    setPage(1); 
+  }, [mes, ano]);
 
   //Funções auxiliares
-  //Função responsável por puxar os dados do banco através da const listaCadastro
-  //e filtragens necessárias para a lógica
-  function primeiraLista() {
-    //Filtragem responsável por verificar quais são funcionários ainda não estão cadastrados para
-    //adicionar na primeira lista que é necessário realizar
-    const listaFuncionarioNaoCadastrado = listaCadastro.filter((obj1) => {
-      const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
-      return !obj2 || obj1.nome !== obj2.nome;
-    });
-
-    const listaCadastrados = listaCadastro.filter((obj1) => {
-      const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
-      return obj2 && obj1.nome === obj2.nome;
-    });
-
-    const comparaCadastrados = listaCadastrados.map((objeto) => {
-      if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-        try {
-          return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-        } catch (error) {
-          return objeto;
-        }
-      }
-      return objeto;
-    });
-
-    console.log('comparaCadastrados', comparaCadastrados);
-
-    const listaAdicional = comparaCadastrados.filter((objeto) => {
-      try {
-        const avaliacoesArray = objeto.avaliacoes;
-        return (
-          Array.isArray(avaliacoesArray) &&
-          avaliacoesArray.every(
-            (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
-          )
-        );
-      } catch (error) {
-        console.error('Erro ao fazer parsing do JSON:', error);
-        return false;
-      }
-    });
-
-    const lista = [...listaFuncionarioNaoCadastrado, ...listaAdicional];
-    const orderedList = orderEmployeeData(lista);
-    setListaRender(orderedList);
-  }
-
   //Função para a mudança de página
   function handleChange(event, value) {
     setPage(Math.min(value, totalPage));
@@ -554,7 +512,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const endIndex = startIndex + pageSize;
   //Renderização do primeiro step
   let currentDisplayList = listaRender.slice(startIndex, endIndex);
-  let currentDisplayList2 = listaRender2.slice(startIndex, endIndex);
+
 
   return (
     <Stack sx={{ width: '100%' }} spacing={4}>
@@ -743,7 +701,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                     }}
                   />
                 </div>
-                {listaFinal.map((item) => {
+                {currentDisplayList2.map((item) => {
                   return (
                     <div
                       key={item.id}
@@ -761,8 +719,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                 })}
                 <Pagination
                   page={page}
-                  handleChange={handleChange}
-                  totalPage={totalPage}
+                  handleChange={handleChange2}
+                  totalPage={totalPage2}
                 />
               </>
             )}
