@@ -347,6 +347,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   let currentDisplayList2 = listaFinal.slice(startIndex2, endIndex2);
 
   //Lógica da lista do 3º step
+  //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
+  //parar facilitar
   let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
     if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
@@ -362,32 +364,34 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     return objeto;
   });
 
-  console.log('listaRender',listaRender);
+  //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
+  //as datas selecionadas pelo usuário
+  const verificaDataFuncionario = comparaAvaliacoesFuncionario.filter(
+    (objetoA) => {
+      try {
+        // Verifica se o objeto da Lista A possui a data e ano selecionados
+        const possuiDataAno =
+          Array.isArray(objetoA.avaliacoes) &&
+          objetoA.avaliacoes.some(
+            (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+          );
 
-  const comparacaoNovo = comparaAvaliacoesFuncionario.filter((objetoA) => {
-    try {
-      // Verifica se o objeto da Lista A possui a data e ano selecionados
-      const possuiDataAno =
-        Array.isArray(objetoA.avaliacoes) &&
-        objetoA.avaliacoes.some(
-          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
-        );
+        // Retorna verdadeiro se as condições forem atendidas
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    },
+  );
 
-      // Retorna verdadeiro se as condições forem atendidas
-      return possuiDataAno;
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
-  });
-
-  console.log('comparaAvaliacoesFuncionario',comparaAvaliacoesFuncionario)
-  console.log('comparacaoNovo',comparacaoNovo)
-
-
+  console.log('comparaAvaliacoesFuncionario', comparaAvaliacoesFuncionario);
+  console.log('verificaDataFuncionario', verificaDataFuncionario);
+  //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
+  //significa que ambos fizeram o feedback e retorna numa lista final
   const listaFinal2 = listaFeedChefe2.filter((objetoA) => {
     // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
-    const objetoB = comparacaoNovo.find(
+    const objetoB = verificaDataFuncionario.find(
       (objetoB) => objetoB.nome === objetoA.nome,
     );
     // Retorna true apenas se não houver correspondência na Lista B
@@ -395,9 +399,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   });
   console.log('comparaCadastrados', comparaCadastrados);
   console.log('listaFinal2', listaFinal2);
-
-
-
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
@@ -432,8 +433,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
     return objeto;
   });
-
-  
 
   //Função de pesquisa
   function pesquisar(e) {
