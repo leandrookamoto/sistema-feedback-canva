@@ -385,8 +385,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     },
   );
 
-  console.log('comparaAvaliacoesFuncionario', comparaAvaliacoesFuncionario);
-  console.log('verificaDataFuncionario', verificaDataFuncionario);
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
   const listaFinal2 = listaFeedChefe2.filter((objetoA) => {
@@ -397,8 +395,17 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     // Retorna true apenas se não houver correspondência na Lista B
     return objetoB;
   });
-  console.log('comparaCadastrados', comparaCadastrados);
-  console.log('listaFinal2', listaFinal2);
+  //Controles da paginação do segundo step coloquei aqui para evitar erro
+  const [page3, setPage3] = useState(1);
+  let totalPage3 = 1;
+  try {
+    totalPage3 = Math.ceil(listaFinal2.length / pageSize);
+  } catch (error) {
+    console.log('Erro do totalPage', error);
+  }
+  const startIndex3 = (page3 - 1) * pageSize;
+  const endIndex3 = startIndex3 + pageSize;
+  let currentDisplayList3 = listaFinal2.slice(startIndex3, endIndex3);
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
@@ -417,6 +424,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
 
   function handleChange2(event, value) {
     setPage2(Math.min(value, totalPage2));
+  }
+  
+  function handleChange3(event, value) {
+    setPage3(Math.min(value, totalPage3));
   }
 
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
@@ -759,7 +770,45 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
             )}
 
             {/* Renderização do Plano de Ação */}
-            {activeStep === 2 && <>Faltando plano de ação</>}
+            {activeStep === 2 && <>
+            {/* Renderização da lista de funcionários */}
+            <div style={estiloInput}>
+                  <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar"
+                    onChange={pesquisar}
+                    style={{
+                      paddingLeft: '30px',
+                      width: '250px',
+                      borderRadius: '5px',
+                      border: '1px solid #ccc',
+                      height: '40px',
+                    }}
+                  />
+                </div>
+                {currentDisplayList3.map((item) => {
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => selecionarFuncionario(item.id)}
+                    >
+                      <Card
+                        nome={item.nome}
+                        email={item.email}
+                        setor={item.setor}
+                        chefe={item.administrador}
+                        botao1="Selecionar"
+                      />
+                    </div>
+                  );
+                })}
+                <Pagination
+                  page={page3}
+                  handleChange={handleChange3}
+                  totalPage={totalPage3}
+                />
+            </>}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
