@@ -30,6 +30,8 @@ export default function Feedback({
   const [listaCompara, setListaCompara] = useState([]);
   console.log('listaCompara',listaCompara);
 
+  console.log('dados', dados);
+
   //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
 

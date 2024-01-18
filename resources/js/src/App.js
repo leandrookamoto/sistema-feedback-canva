@@ -282,6 +282,14 @@ export default function App() {
     setFeedback(false);
     setPendentes(true);
   }
+  //Função disparada no componente pendentes para troca para o componente feedback
+  function handleChangeFeed(e){
+    setHomeRender(e.homeRender);
+    setCadastrar(e.cadastrar);
+    setFeedback(e.feedback);
+    setPendentes(e.pendentes);
+  }
+
 
   return (
     <main>
@@ -338,6 +346,8 @@ export default function App() {
             <Pendentes
               listaCadastro={listaCadastro}
               avalDoFuncionario={avalDoFuncionario}
+              onChangeDados={e=>setDados(e)}
+              onChangeComponenteFeedBack={e=>handleChangeFeed(e)}
             />
           )}
         </div>

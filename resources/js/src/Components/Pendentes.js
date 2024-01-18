@@ -20,6 +20,7 @@ import StepConnector, {
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Dialog from './Dialog';
 
 //Parte do Material UI responsável pelo stepper
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
@@ -182,7 +183,7 @@ ColorlibStepIcon.propTypes = {
 const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
 //O function component do React
-export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
+export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeComponenteFeedBack, onChangeDados }) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
@@ -193,6 +194,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
+  
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -228,7 +230,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
     transform: 'translateY(-50%)',
     color: 'gray',
   };
-
+  //Constantes para controle do Dialog
+  const [open, setOpen] = useState(false);
+  const descricao = ' Você será encaminhado para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.'
+  
   //Lógica da lista do primeiro step
   /*Formação da LISTA DO início do processo que são os funcionários 
   que o gestor ainda não realizou o feedback canva
@@ -415,10 +420,34 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
       const orderedList = orderEmployeeData(lista);
       setListaRender(orderedList);
       setPage(1);
-    }else{
+    } else {
       setListaRender([]);
     }
   }, [mes, ano]);
+
+  //Funções principais
+  //Funções principais
+  //Seleciona pelo clique no card
+  function selecionarFuncionario(id) {
+    setOpen(true);
+  
+    setTimeout(() => {
+      const funcionarioSelecionado = listaCadastro.find(
+        (funcionario) => funcionario.id === id,
+      );
+      
+      onChangeDados(funcionarioSelecionado);
+      onChangeComponenteFeedBack({
+        homeRender: false,
+        pendentes: false,
+        cadastrar: false,
+        feedback: true,
+      });
+    }, 4000);
+  }
+  
+
+
 
   //Funções auxiliares
   //Função para a mudança de página
@@ -651,9 +680,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
           const stepProps = {};
           const labelProps = {};
           if (isStepOptional(index)) {
-            labelProps.optional = (
-              <Typography variant="caption">Optional</Typography>
-            );
+            labelProps.optional = <Typography variant="caption"></Typography>;
           }
           if (isStepSkipped(index)) {
             stepProps.completed = false;
@@ -826,9 +853,11 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
             </Button>
             <Box sx={{ flex: '1 1 auto' }} />
             {isStepOptional(activeStep) && (
-              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                Skip
-              </Button>
+              <Button
+                color="inherit"
+                onClick={handleSkip}
+                sx={{ mr: 1 }}
+              ></Button>
             )}
 
             <Button onClick={handleNext}>
@@ -837,6 +866,12 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
           </Box>
         </React.Fragment>
       )}
+      <Dialog
+        open={open}
+        descricao={descricao}
+        handleClose={() => setOpen(false)}
+        Title="Atenção"
+      />
     </Stack>
   );
 }
