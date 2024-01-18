@@ -410,10 +410,14 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
   useEffect(() => {
-    const lista = listaConfereFeedChefe;
-    const orderedList = orderEmployeeData(lista);
-    setListaRender(orderedList);
-    setPage(1);
+    if (mes && ano) {
+      const lista = listaConfereFeedChefe;
+      const orderedList = orderEmployeeData(lista);
+      setListaRender(orderedList);
+      setPage(1);
+    }else{
+      setListaRender([]);
+    }
   }, [mes, ano]);
 
   //Funções auxiliares
@@ -425,7 +429,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
   function handleChange2(event, value) {
     setPage2(Math.min(value, totalPage2));
   }
-  
+
   function handleChange3(event, value) {
     setPage3(Math.min(value, totalPage3));
   }
@@ -629,7 +633,6 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
           onChange={handleData}
         >
           <option selected>Escolha a data</option>
-          <option value="Última Data">Última Data</option>
           {data.map((item, index) => (
             <>
               <option key={index} value={item}>
@@ -770,9 +773,10 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
             )}
 
             {/* Renderização do Plano de Ação */}
-            {activeStep === 2 && <>
-            {/* Renderização da lista de funcionários */}
-            <div style={estiloInput}>
+            {activeStep === 2 && (
+              <>
+                {/* Renderização da lista de funcionários */}
+                <div style={estiloInput}>
                   <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
                   <input
                     type="text"
@@ -808,7 +812,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario }) {
                   handleChange={handleChange3}
                   totalPage={totalPage3}
                 />
-            </>}
+              </>
+            )}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Button
