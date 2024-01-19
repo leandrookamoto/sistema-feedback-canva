@@ -21,6 +21,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Dialog from './Dialog';
+import { Link as ScrollLink, animateScroll } from 'react-scroll';
 
 //Parte do Material UI responsável pelo stepper
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
@@ -463,6 +464,13 @@ export default function Pendentes({
       setListaRender([]);
     }
   }, [mes, ano]);
+  //useEffect para fazer subir a tela toda vez que mudar pagination
+  useEffect(() => {
+    animateScroll.scrollToTop({
+      duration: 1000, // Defina a duração desejada em milissegundos
+    });
+
+  }, [page, page2, page3]);
 
   //Funções principais
   //Funções principais

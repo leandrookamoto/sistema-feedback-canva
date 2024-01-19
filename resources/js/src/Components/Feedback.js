@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Pagination from './Pagination';
 import Canva from './Canva';
 import Dialog from './Dialog';
+import { Link as ScrollLink, animateScroll } from 'react-scroll';
 
 // As props são enviadas para o App.js
 export default function Feedback({
@@ -16,7 +17,7 @@ export default function Feedback({
   dados,
   setorChefe,
   avalDoFuncionario,
-  email
+  email,
 }) {
   //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -28,7 +29,7 @@ export default function Feedback({
   const [avaliar2, setAvaliar2] = useState(false);
   const [compararAval, setCompararAval] = useState(false);
   const [listaCompara, setListaCompara] = useState([]);
-  console.log('listaCompara',listaCompara);
+  console.log('listaCompara', listaCompara);
 
   console.log('dados', dados);
 
@@ -118,10 +119,10 @@ export default function Feedback({
     setPage(1);
   }, [listaCadastro]);
   //useEffect para atualização do avaliar
-  useEffect(()=>{
+  useEffect(() => {
     setAvaliar(avaliar2);
-  },[avaliar2])
-  
+  }, [avaliar2]);
+
   //useEffect para manter a lista da paginação atualizada
   useEffect(() => {
     const offset = (page - 1) * pageSize;
@@ -134,6 +135,14 @@ export default function Feedback({
     console.table(dataToShow);
     setDadosFuncionario(dataToShow);
   }, [page, pageSize, listaCadastro, listaFiltrada]);
+
+  //useEffect para fazer subir a tela toda vez que mudar pagination
+  useEffect(() => {
+    animateScroll.scrollToTop({
+      duration: 1000, // Defina a duração desejada em milissegundos
+    });
+
+  }, [page]);
 
   //Funções principais
   //Seleciona pelo clique no card
@@ -195,7 +204,6 @@ export default function Feedback({
   function editar() {
     const dado = listaFiltrada.find((item) => item.id === idFuncionario);
     onChangeDadosFuncionario(dado);
-
   }
   //Função de pesquisa
   function pesquisar(e) {
