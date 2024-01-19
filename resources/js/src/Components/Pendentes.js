@@ -469,7 +469,6 @@ export default function Pendentes({
     animateScroll.scrollToTop({
       duration: 1000, // Defina a duração desejada em milissegundos
     });
-
   }, [page, page2, page3]);
 
   //Funções principais
@@ -600,6 +599,9 @@ export default function Pendentes({
   };
 
   const handleNext = () => {
+    animateScroll.scrollToTop({
+      duration: 1000,
+    });
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
       newSkipped = new Set(newSkipped.values());
@@ -611,6 +613,9 @@ export default function Pendentes({
   };
 
   const handleBack = () => {
+    animateScroll.scrollToTop({
+      duration: 1000,
+    });
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
