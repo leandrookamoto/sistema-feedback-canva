@@ -360,6 +360,7 @@ export default function App() {
             {planoDeAcao && (
             <Planodeacao
               listaCadastro={listaCadastro} 
+              avalDoFuncionario={avalDoFuncionario}
             />
           )}
           {/* Aqui é a renderização do componente do pendentes */}
