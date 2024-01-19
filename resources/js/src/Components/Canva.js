@@ -1463,10 +1463,6 @@ export default function Canva({
               </>
             )}
 
-          {console.log(
-                'dadosCanvaDoFuncionario',
-                dadosCanvaDoFuncionario.map(item=>item.mes).join(),
-              )}
 
           {(dadosCanvaDoFuncionario.length == 0 || dadosCanvaDoFuncionario.map(item=>item.mes).join() != mouthDate) && (
             <>

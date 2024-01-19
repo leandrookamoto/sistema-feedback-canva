@@ -183,7 +183,12 @@ ColorlibStepIcon.propTypes = {
 const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
 //O function component do React
-export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeComponenteFeedBack, onChangeDados }) {
+export default function Pendentes({
+  listaCadastro,
+  avalDoFuncionario,
+  onChangeComponenteFeedBack,
+  onChangeDados,
+}) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
@@ -194,7 +199,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
-  
+
   const data = [
     'Janeiro',
     'Fevereiro',
@@ -232,8 +237,9 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
   };
   //Constantes para controle do Dialog
   const [open, setOpen] = useState(false);
-  const descricao = ' Você será encaminhado para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.'
-  
+  const descricao =
+    ' Você será encaminhado em 3 segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.';
+
   //Lógica da lista do primeiro step
   /*Formação da LISTA DO início do processo que são os funcionários 
   que o gestor ainda não realizou o feedback canva
@@ -288,6 +294,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
       return false;
     }
   });
+  console.log('listaFeedChefe', listaFeedChefe);
   //Constantes para comparação das avaliações (se tem) e datas
   //Aqui puxa os dados de todos os funcionários que se cadastraram no feedback do funcionário
   //Os dados do banco vem por props com a const avalDoFuncionario
@@ -311,10 +318,22 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
     }
     return objeto;
   });
+  //Esta const exclui do comparaCadastrados pessoas que tiverem dados do mês selecionado
+  // Filtra o array de objetos
+  const excluiMesFuncionario = comparaCadastrados.filter((item) => {
+    // Verifica se há alguma avaliação com o mês procurado
+    const temMesProcurado = item.avaliacoes.some(
+      (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+    );
+    // Retorna false se houver uma avaliação com o mês procurado, caso contrário, true
+    return !temMesProcurado;
+  });
+
+  console.log('excluiMesFuncionario', excluiMesFuncionario);
   //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
   //do que o gestor programa de feedback dos funcionários e excluindo caso sejam iguais, pois
   //isso significa que não está faltando o feedback do funcionário para a data escolhida
-  const listaFeedChefe2 = comparaCadastrados.filter((objetoA) => {
+  const listaFeedChefe2 = excluiMesFuncionario.filter((objetoA) => {
     try {
       // Verifica se o objeto da Lista A possui a data e ano selecionados
       const possuiDataAno =
@@ -330,6 +349,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
       return false;
     }
   });
+
   // Verifica se o nome do objeto da Lista A está presente na Lista B
   const listaFinal = listaFeedChefe.filter((objetoA) => {
     // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
@@ -339,6 +359,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
     // Retorna true apenas se não houver correspondência na Lista B
     return !objetoB;
   });
+  console.log('listaFinal', listaFinal);
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page2, setPage2] = useState(1);
   let totalPage2 = 1;
@@ -390,9 +411,26 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
     },
   );
 
+  const listaFeedChefe3 = comparaCadastrados.filter((objetoA) => {
+    try {
+      // Verifica se o objeto da Lista A possui a data e ano selecionados
+      const possuiDataAno =
+        Array.isArray(objetoA.avaliacoes) &&
+        objetoA.avaliacoes.some(
+          (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
+        );
+
+      // Retorna verdadeiro se as condições forem atendidas
+      return possuiDataAno;
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
-  const listaFinal2 = listaFeedChefe2.filter((objetoA) => {
+  const listaFinal2 = listaFeedChefe3.filter((objetoA) => {
     // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
     const objetoB = verificaDataFuncionario.find(
       (objetoB) => objetoB.nome === objetoA.nome,
@@ -400,6 +438,7 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
     // Retorna true apenas se não houver correspondência na Lista B
     return objetoB;
   });
+  console.log('listaFinal2', listaFinal2);
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page3, setPage3] = useState(1);
   let totalPage3 = 1;
@@ -430,12 +469,12 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
   //Seleciona pelo clique no card
   function selecionarFuncionario(id) {
     setOpen(true);
-  
+
     setTimeout(() => {
       const funcionarioSelecionado = listaCadastro.find(
         (funcionario) => funcionario.id === id,
       );
-      
+
       onChangeDados(funcionarioSelecionado);
       onChangeComponenteFeedBack({
         homeRender: false,
@@ -443,11 +482,8 @@ export default function Pendentes({ listaCadastro, avalDoFuncionario, onChangeCo
         cadastrar: false,
         feedback: true,
       });
-    }, 4000);
+    }, 3000);
   }
-  
-
-
 
   //Funções auxiliares
   //Função para a mudança de página
