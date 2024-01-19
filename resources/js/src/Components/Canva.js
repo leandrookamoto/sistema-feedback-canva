@@ -186,7 +186,6 @@ export default function Canva({
   //Funções principais
   //Função para gravar os dados
   async function gravar() {
-
     const lista = listaCanva.find(
       (item) => item.mes === mouthDate && item.ano === yearDate,
     );
@@ -236,7 +235,6 @@ export default function Canva({
         }
       }
     }
-    
   }
 
   // Função para apagar primeiro gráfico
@@ -307,7 +305,7 @@ export default function Canva({
       assunto: assunto,
       nome: nomeFuncionario,
     };
-  
+
     emailjs
       .send(
         'service_3qsan9n',
@@ -323,7 +321,6 @@ export default function Canva({
         console.log('Erro ao enviar email', error);
       });
   };
-  
 
   //Funções auxiliares
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
@@ -1466,10 +1463,14 @@ export default function Canva({
               </>
             )}
 
-          {dadosCanvaDoFuncionario.length == 0 && (
-            
+          {console.log(
+                'dadosCanvaDoFuncionario',
+                dadosCanvaDoFuncionario.map(item=>item.mes).join(),
+              )}
+
+          {(dadosCanvaDoFuncionario.length == 0 || dadosCanvaDoFuncionario.map(item=>item.mes).join() != mouthDate) && (
             <>
-            {console.log('dadosCanvaDoFuncionario',)}
+              
               <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
                 Solicitar feedback para o funcionário
               </h2>
