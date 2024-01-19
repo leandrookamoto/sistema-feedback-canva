@@ -11,6 +11,7 @@ import validator from 'validator';
 import Dialog from './Components/Dialog';
 import Feedback from './Components/Feedback';
 import Pendentes from './Components/Pendentes';
+import Planodeacao from './Components/Planodeacao';
 
 export default function App() {
   //Variáveis para mudança de tela
@@ -18,6 +19,7 @@ export default function App() {
   const [homeRender, setHomeRender] = useState(true);
   const [feedback, setFeedback] = useState(false);
   const [pendentes, setPendentes] = useState(false);
+  const [planoDeAcao, setPlanoDeAcao] = useState(false);
 
   //Variáveis para gravação de estado
   const [usuario, setUsuario] = useState('');
@@ -32,8 +34,6 @@ export default function App() {
   const [dados, setDados] = useState({});
   const [setorChefe, setSetorChefe] = useState('');
   const [avalDoFuncionario, setAvalDoFuncionario] = useState([]);
-   // Referência para o estado resetKey
-   const [resetKey, setResetKey] = useState(0);
 
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
@@ -260,6 +260,7 @@ export default function App() {
     setFeedback(false);
     setHomeRender(false);
     setPendentes(false);
+    setPlanoDeAcao(false);
   }
   //Função para renderização do componente de feedback
   function handleCadastrados() {
@@ -267,6 +268,7 @@ export default function App() {
     setFeedback(true);
     setHomeRender(false);
     setPendentes(false);
+    setPlanoDeAcao(false);
   }
   // Função para renderização do componente Home
   function handleHome() {
@@ -274,13 +276,23 @@ export default function App() {
     setCadastrar(false);
     setFeedback(false);
     setPendentes(false);
+    setPlanoDeAcao(false);
   }
-  // Função para renderização do componente Home
+  // Função para renderização do componente Pendentes
   function handlePendentes() {
     setHomeRender(false);
     setCadastrar(false);
     setFeedback(false);
     setPendentes(true);
+    setPlanoDeAcao(false);
+  }
+  // Função para renderização do componente Planodeacao
+  function handlePlano() {
+    setHomeRender(false);
+    setCadastrar(false);
+    setFeedback(false);
+    setPendentes(false);
+    setPlanoDeAcao(true);
   }
   //Função disparada no componente pendentes para troca para o componente feedback
   function handleChangeFeed(e){
@@ -288,6 +300,7 @@ export default function App() {
     setCadastrar(e.cadastrar);
     setFeedback(e.feedback);
     setPendentes(e.pendentes);
+    setPlanoDeAcao(e.planoDeAcao);
   }
 
 
@@ -301,10 +314,12 @@ export default function App() {
           onClickCadastrados={handleCadastrados}
           onClickHome={handleHome}
           onClickPendentes={handlePendentes}
+          onClickPlano={handlePlano}
           pendentes={pendentes}
           cadastrar={cadastrar}
           homeRender={homeRender}
           feedback={feedback}
+          planoDeAcao={planoDeAcao}
         />
 
         <div className="m-3" style={{ width: '70%' }}>
@@ -339,6 +354,12 @@ export default function App() {
               setorChefe={setorChefe}
               avalDoFuncionario={avalDoFuncionario}
   
+            />
+          )}
+            {/* Aqui é a renderização do componente do feedback */}
+            {planoDeAcao && (
+            <Planodeacao
+              listaCadastro={listaCadastro} 
             />
           )}
           {/* Aqui é a renderização do componente do pendentes */}

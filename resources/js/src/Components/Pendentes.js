@@ -488,6 +488,7 @@ export default function Pendentes({
         pendentes: false,
         cadastrar: false,
         feedback: true,
+        planoDeAcao: false
       });
     }, 3000);
   }
