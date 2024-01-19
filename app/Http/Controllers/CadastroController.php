@@ -56,6 +56,7 @@ class CadastroController extends Controller
         $user->email = $request->email;
         $user->setor = $request->setor;
         $user->administrador = $request->administrador;
+        $user->avaliacoes = [];
 
         // Salvar o novo usuário no banco de dados
         $user->save();
