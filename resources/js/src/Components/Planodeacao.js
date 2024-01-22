@@ -5,9 +5,13 @@ import Lista from './Lista';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 
 export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
+  //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
+  //e isolar este componente.
+
   //Constantes para controle de data
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
+  const [idFuncionario, setIdFuncionario] = useState(null);
   const [ano, setAno] = useState(anoAtual);
   const data = [
     'Janeiro',
@@ -23,16 +27,12 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
     'Novembro',
     'Dezembro',
   ];
-  console.log('listaCadastro', listaCadastro);
-  console.log('avalDoFuncionario', avalDoFuncionario);
-  console.log('mes', mes);
-  console.log('ano', ano);
-
   //Constantes para gravação de estado
   const [inputs, setInputs] = useState([{ value: '', feito: false }]);
 
   //Constantes para renderização do plano de ação
   const [plano, setPlano] = useState(false);
+  const [gravarPlano, setGravarPlano] = useState(false);
 
   //Constantes que controlam o page
   const [page, setPage] = useState(1);
@@ -185,6 +185,11 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
     setInputs([...inputs, { value: '', feito: false }]);
   };
 
+  function selecionarFuncionario(id) {
+    setIdFuncionario(id);
+    setGravarPlano(true);
+  }
+
   return (
     <>
       <div className="container w-100 mb-3">
@@ -263,27 +268,31 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
           ))}
         </select>
       </div>
-      {listaFinal2.map((item) => {
-        return (
-          <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
-            <Card
-              nome={item.nome}
-              email={item.email}
-              setor={item.setor}
-              chefe={item.administrador}
-              botao1="Selecionar"
-            />
-          </div>
-        );
-      })}
-      <Pagination
-        page={page}
-        handleChange={handleChange}
-        totalPage={totalPage}
-      />
+      {!gravarPlano && (
+        <>
+          {listaFinal2.map((item) => {
+            return (
+              <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
+                <Card
+                  nome={item.nome}
+                  email={item.email}
+                  setor={item.setor}
+                  chefe={item.administrador}
+                  botao1="Selecionar"
+                />
+              </div>
+            );
+          })}
+          <Pagination
+            page={page}
+            handleChange={handleChange}
+            totalPage={totalPage}
+          />
+        </>
+      )}
 
       {/* Parte da renderização do plano de ação */}
-      {listaFinal2.length > 0 && !plano && (
+      {listaFinal2.length > 0 && !plano && idFuncionario && gravarPlano && (
         <>
           <h5>Plano de ação</h5>
 
@@ -307,17 +316,26 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
               onClick={handleAddInput}
             />
           </div>
-          <button
-            type="button"
-            className="btn btn-primary mt-1"
-            onClick={gravar}
-          >
-            Gravar
-          </button>
+          <div className='d-flex'>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={gravar}
+            >
+              Gravar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary ml-3"
+              onClick={() => setGravarPlano(false)}
+            >
+              Voltar
+            </button>
+          </div>
         </>
       )}
       {console.log('inputs', inputs)}
-      {listaFinal2.length > 0 && plano && (
+      {listaFinal2.length > 0 && plano && idFuncionario && gravarPlano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
           <Lista
