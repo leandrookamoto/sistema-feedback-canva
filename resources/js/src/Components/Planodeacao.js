@@ -152,27 +152,37 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
 
   //Funções principais
   function gravar() {
-    const lista = inputs.map((input) => input.value);
-    console.log(lista);
     setPlano(true);
+  }
+
+  //Função para editar a lista do plano de ação
+  function editar() {
+    setPlano(false);
+  }
+
+  function apagar(index) {
+    let newInputs = [...inputs];
+    newInputs.splice(index, 1);
+    setInputs(newInputs);
   }
 
   //Funções para deixar os inputs dinâmicos
   const handleInputChange = (event, index) => {
-    const newInputs = [...inputs];
-    const novaLista = event.currentTarget.value;
+    let newInputs = [...inputs];
+    const novaLista = { plano: event.currentTarget.value, feito: false };
+    newInputs[index] = novaLista;
 
     console.log('novaLista', novaLista);
 
     // Certifique-se de que o índice existe no array antes de acessar a propriedade
     if (newInputs[index]) {
-      newInputs[index].value = novaLista;
+      newInputs[index] = novaLista;
       setInputs(newInputs);
     }
   };
 
   const handleAddInput = () => {
-    setInputs([...inputs, { value: '' }]);
+    setInputs([...inputs, { value: '', feito: false }]);
   };
 
   return (
@@ -285,9 +295,8 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
               <div key={index}>
                 <input
                   type="text"
-                  value={input.value}
-                  onChange={event => handleInputChange(event, index)
-                  }
+                  value={input.plano}
+                  onChange={(event) => handleInputChange(event, index)}
                   placeholder="Colocar o plano de ação. Ex: Fazer treinamentos"
                   className="form-control mb-2"
                 />
@@ -307,10 +316,15 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
           </button>
         </>
       )}
+      {console.log('inputs', inputs)}
       {listaFinal2.length > 0 && plano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
-          <Lista />
+          <Lista
+            listaPlano={inputs.map((item) => item.plano)}
+            onClickEdit={editar}
+            onClickApagar={(index) => apagar(index)}
+          />
         </>
       )}
     </>
