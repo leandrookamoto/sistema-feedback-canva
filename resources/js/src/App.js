@@ -161,7 +161,6 @@ export default function App() {
           email: email,
           setor: setor,
           administrador: usuario,
-          id: newId,
         };
 
         // Cadastro do novo funcionário
