@@ -488,17 +488,23 @@ export default function Canva({
                 listaNomeAtual.map((item) => item.email).join(),
               );
 
+              console.log('O canva parse que quero ver', canvaDoFuncionarioParse)
+
+              console.log('avaliacoes',avaliacoes)
               //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
-              const canvaParseData = canvaDoFuncionarioParse.filter(
+              const canvaParseData = canvaDoFuncionarioParse[0].filter(
                 (item) =>
                   item.ano === avaliacoes[avaliacoes.length - 1].ano &&
                   item.mes === avaliacoes[avaliacoes.length - 1].mes,
               );
 
+              
+
               if (
                 avalDoFuncionario.map((item) => item.nome).join() ==
                 listaNomeAtual.map((item) => item.nome).join()
               ) {
+                console.log('dadoscanva dentro do compara', canvaParseData)
                 setDadosCanvaDoFuncionario(canvaParseData);
                 setSeniorDoFuncionario(
                   canvaParseData.map((item) => item.senioridade),
@@ -1125,7 +1131,7 @@ export default function Canva({
           </div>
 
           {/* Parte do canva de comparação  */}
-          {console.log('dadosCanvaDoFuncionario', dadosCanvaDoFuncionario)}
+          {console.log('dadosCanvaDoFuncionario antes do lugar', dadosCanvaDoFuncionario)}
           {dadosCanvaDoFuncionario.length > 0 &&
             dadosCanvaDoFuncionario.filter(
               (item) =>
