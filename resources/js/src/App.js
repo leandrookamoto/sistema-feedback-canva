@@ -360,17 +360,17 @@ export default function App() {
             {/* Aqui é a renderização do componente do feedback */}
             {planoDeAcao && (
             <Planodeacao
-              listaCadastro={listaCadastro} 
               avalDoFuncionario={avalDoFuncionario}
+              setorChefe={setorChefe}
             />
           )}
           {/* Aqui é a renderização do componente do pendentes */}
           {pendentes && (
             <Pendentes
-              listaCadastro={listaCadastro}
               avalDoFuncionario={avalDoFuncionario}
               onChangeDados={e=>setDados(e)}
               onChangeComponenteFeedBack={e=>handleChangeFeed(e)}
+              setorChefe={setorChefe}
             />
           )}
         </div>

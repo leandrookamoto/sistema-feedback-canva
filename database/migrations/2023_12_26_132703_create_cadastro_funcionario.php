@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('setor');
             $table->string('administrador');
             $table->json('avaliacoes')->nullable();
+            $table->json('plano')->nullable();
             $table->timestamps();
         });
     }

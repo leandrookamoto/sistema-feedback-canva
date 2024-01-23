@@ -15,7 +15,8 @@ class Cadastro extends Model
         'email',
         'setor',
         'administrador',
-        'avaliacoes'
+        'avaliacoes',
+        'plano'
     ];
 }
 

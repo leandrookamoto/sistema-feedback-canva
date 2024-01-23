@@ -489,7 +489,7 @@ export default function Canva({
               );
 
               //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
-              const canvaParseData = canvaDoFuncionarioParse.filter(
+              const canvaParseData = canvaDoFuncionarioParse[0].filter(
                 (item) =>
                   item.ano === avaliacoes[avaliacoes.length - 1].ano &&
                   item.mes === avaliacoes[avaliacoes.length - 1].mes,

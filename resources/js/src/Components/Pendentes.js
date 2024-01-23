@@ -185,10 +185,10 @@ const steps = ['Início', 'Feedback funcionário', 'Plano de Ação'];
 
 //O function component do React
 export default function Pendentes({
-  listaCadastro,
   avalDoFuncionario,
   onChangeComponenteFeedBack,
   onChangeDados,
+  setorChefe
 }) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
@@ -196,6 +196,7 @@ export default function Pendentes({
   //Constantes para gravação de estado
   const [listaRender, setListaRender] = useState([]);
   const [listaRender2, setListaRender2] = useState([]);
+  const [listaCadastro, setListaCadastro] = useState([]);
   //Constantes para controle de data
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
@@ -241,6 +242,17 @@ export default function Pendentes({
   const descricao =
     ' Você será encaminhado em 3 segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.';
 
+
+    //useEffect para manter dados atualizados
+    useEffect(()=>{
+      async function fetchData(){
+        const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
+        const listaOriginal = responseListaOriginal.data;
+        setListaCadastro(listaOriginal);
+      }
+
+      fetchData();
+    },[])
   //Lógica da lista do primeiro step
   /*Formação da LISTA DO início do processo que são os funcionários 
   que o gestor ainda não realizou o feedback canva

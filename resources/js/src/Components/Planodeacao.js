@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from './Card';
 import Pagination from './Pagination';
 import Lista from './Lista';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 
-export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
+export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
 
@@ -29,6 +29,7 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
   ];
   //Constantes para gravação de estado
   const [inputs, setInputs] = useState([{ value: '', feito: false }]);
+  const [listaCadastro, setListaCadastro] = useState([]);
 
   //Constantes para renderização do plano de ação
   const [plano, setPlano] = useState(false);
@@ -43,6 +44,17 @@ export default function Planodeacao({ listaCadastro, avalDoFuncionario }) {
   } catch (error) {
     console.log('Erro do totalPage', error);
   }
+
+   //useEffect para manter dados atualizados
+   useEffect(()=>{
+    async function fetchData(){
+      const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
+      const listaOriginal = responseListaOriginal.data;
+      setListaCadastro(listaOriginal);
+    }
+
+    fetchData();
+  },[])
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
