@@ -45,14 +45,15 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     console.log('Erro do totalPage', error);
   }
 
+  //Função responsável por pegar os dados do banco e deixar atualizado neste componente
+  async function fetchData(){
+    const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
+    const listaOriginal = responseListaOriginal.data;
+    setListaCadastro(listaOriginal);
+  }
+
    //useEffect para manter dados atualizados
    useEffect(()=>{
-    async function fetchData(){
-      const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
-      const listaOriginal = responseListaOriginal.data;
-      setListaCadastro(listaOriginal);
-    }
-
     fetchData();
   },[])
 

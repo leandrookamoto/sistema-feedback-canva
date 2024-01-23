@@ -320,6 +320,7 @@ export default function Pendentes({
     }
     return true;
   });
+
   //Aqui somente faz o parse das avaliações para facilitar, pois vem como stringfy do banco
   const comparaCadastrados = listaCadastrados.map((objeto) => {
     if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
@@ -331,16 +332,39 @@ export default function Pendentes({
     }
     return objeto;
   });
+
+  //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
+  //parar facilitar
+  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
   //Esta const exclui do comparaCadastrados pessoas que tiverem dados do mês selecionado
   // Filtra o array de objetos
-  const excluiMesFuncionario = comparaCadastrados.filter((item) => {
-    // Verifica se há alguma avaliação com o mês procurado
-    const temMesProcurado = item.avaliacoes.some(
-      (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
-    );
-    // Retorna false se houver uma avaliação com o mês procurado, caso contrário, true
-    return !temMesProcurado;
+  const excluiMesFuncionario = comparaAvaliacoesFuncionario.filter((item) => {
+    console.log('Item:', item);
+  
+    const temMesProcurado = item.avaliacoes &&
+      item.avaliacoes.some(
+        (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes
+      );
+  
+    console.log('temMesProcurado:', temMesProcurado);
+  
+    return temMesProcurado;
   });
+  
 
   console.log('excluiMesFuncionario', excluiMesFuncionario);
   //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
@@ -386,22 +410,7 @@ export default function Pendentes({
   let currentDisplayList2 = listaFinal.slice(startIndex2, endIndex2);
 
   //Lógica da lista do 3º step
-  //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
-  //parar facilitar
-  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
-    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
-    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-      try {
-        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
-        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-      } catch (error) {
-        // Se não for uma string JSON válida, mantém o valor original
-        return objeto;
-      }
-    }
-    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
-    return objeto;
-  });
+  
 
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
