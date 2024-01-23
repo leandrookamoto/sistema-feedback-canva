@@ -46,16 +46,16 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   }
 
   //Função responsável por pegar os dados do banco e deixar atualizado neste componente
-  async function fetchData(){
+  async function fetchData() {
     const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
     const listaOriginal = responseListaOriginal.data;
     setListaCadastro(listaOriginal);
   }
 
-   //useEffect para manter dados atualizados
-   useEffect(()=>{
+  //useEffect para manter dados atualizados
+  useEffect(() => {
     fetchData();
-  },[])
+  }, []);
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
@@ -146,7 +146,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     // Retorna true apenas se não houver correspondência na Lista B
     return objetoB;
   });
-  console.log('listaFinal2', listaFinal2);
+
 
   const handleData = (e) => {
     setMes(e.currentTarget.value);
@@ -159,18 +159,14 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Funções principais
   async function gravar() {
     setPlano(true);
-    try{
-    await axios.put(
-      `/cadastro/${idFuncionario}/update-plano`,
-      {
+    try {
+      await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
         plano: inputs,
-      },
-      );
-      console.log('Gravado com sucesso!')
-    }catch(error){
+      });
+      console.log('Gravado com sucesso!');
+    } catch (error) {
       console.log('Erro ao fazer a gravação do plano', error);
     }
-    
   }
 
   //Função para editar a lista do plano de ação
@@ -206,6 +202,18 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   function selecionarFuncionario(id) {
     setIdFuncionario(id);
     setGravarPlano(true);
+    const lista = listaCadastro.filter((item) => item.id == id);
+    let newPlan = [];
+    try {
+      newPlan = JSON.parse(lista[0].plano);
+      if (newPlan.length > 0) {
+        setPlano(true);
+        setInputs(newPlan);
+      }
+    } catch (error) {
+      console.log('Erro no parse do plano', error);
+    }
+    console.log('newPlan', newPlan);
   }
 
   return (
@@ -334,12 +342,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
               onClick={handleAddInput}
             />
           </div>
-          <div className='d-flex'>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={gravar}
-            >
+          <div className="d-flex">
+            <button type="button" className="btn btn-primary" onClick={gravar}>
               Gravar
             </button>
             <button
@@ -352,7 +356,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
           </div>
         </>
       )}
-      {console.log('inputs', inputs)}
+   
       {listaFinal2.length > 0 && plano && idFuncionario && gravarPlano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
