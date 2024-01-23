@@ -1,12 +1,16 @@
 
-export default function Lista({ listaPlano, onClickEdit, onClickApagar}) {
+export default function Lista({ listaPlano, onClickEdit, onClickApagar, ano, mes }) {
   console.log('listaPlano', listaPlano);
+
+  // Filtrar a lista com base no ano e mês
+  const listaFiltrada = listaPlano.filter(item => item.ano === ano && item.mes === mes);
+
   return (
     <>
       <div className="card w-100 mt-3">
         <div className="card-header">Lista do plano de ação</div>
         <ul className="list-group list-group-flush">
-          {listaPlano.map((item, index) => (
+          {listaFiltrada.map((item, index) => (
             <li
               key={index}
               className="list-group-item d-flex justify-content-between"

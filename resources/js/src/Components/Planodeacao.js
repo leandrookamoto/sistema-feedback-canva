@@ -182,7 +182,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Funções para deixar os inputs dinâmicos
   const handleInputChange = (event, index) => {
     let newInputs = [...inputs];
-    const novaLista = { plano: event.currentTarget.value, feito: false };
+    const novaLista = { plano: event.currentTarget.value, feito: false, ano: ano, mes: mes };
     newInputs[index] = novaLista;
 
     console.log('novaLista', novaLista);
@@ -363,6 +363,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
             listaPlano={inputs}       
             onClickEdit={editar}
             onClickApagar={(index) => apagar(index)}
+            ano={ano}
+            mes={mes}
           />
         </>
       )}
