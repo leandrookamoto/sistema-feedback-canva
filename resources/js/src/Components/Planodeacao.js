@@ -147,7 +147,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     return objetoB;
   });
 
-
   const handleData = (e) => {
     setMes(e.currentTarget.value);
   };
@@ -213,8 +212,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     } catch (error) {
       console.log('Erro no parse do plano', error);
     }
-    console.log('newPlan', newPlan);
   }
+
 
   return (
     <>
@@ -356,12 +355,12 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
           </div>
         </>
       )}
-   
+
       {listaFinal2.length > 0 && plano && idFuncionario && gravarPlano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
           <Lista
-            listaPlano={inputs.map((item) => item.plano)}
+            listaPlano={inputs}       
             onClickEdit={editar}
             onClickApagar={(index) => apagar(index)}
           />
