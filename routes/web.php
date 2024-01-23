@@ -57,4 +57,6 @@ Route::middleware([
 
     Route::get('/funcionarios/{setor}', [CadastroController::class, 'getAllFuncionarios']);
 
+    Route::put('/cadastro/{id}/update-plano', [CadastroController::class, 'updatePlano']);
+
 });

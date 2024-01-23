@@ -109,6 +109,22 @@ class CadastroController extends Controller
           ], 404);
       }
   }
+
+  public function updatePlano(Request $request, $id) {
+    if (Cadastro::where('id', $id)->exists()) {
+      $funcionario = Cadastro::find($id);
+      $funcionario->plano = is_null($request->plano) ? $funcionario->plano : $request->plano;
+      $funcionario->save();
+
+      return response()->json([
+          "message" => "records updated successfully"
+      ], 200);
+      } else {
+      return response()->json([
+          "message" => "Description not found"
+      ], 404);
+  }
+  }
   
 
      

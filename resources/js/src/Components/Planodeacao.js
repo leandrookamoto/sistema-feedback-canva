@@ -67,8 +67,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     return true;
   });
 
-  console.log('listaCadastrados', listaCadastrados);
-
   //Aqui somente faz o parse das avaliações para facilitar, pois vem como stringfy do banco
   const comparaCadastrados = listaCadastrados.map((objeto) => {
     if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
@@ -81,7 +79,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     return objeto;
   });
 
-  console.log('comparaCadastrados', comparaCadastrados);
   //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
   //para facilitar
   let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
@@ -98,8 +95,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
     return objeto;
   });
-
-  console.log('comparaAvaliacoesFuncionario', comparaAvaliacoesFuncionario);
 
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
@@ -121,8 +116,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       }
     },
   );
-
-  console.log('verificaDataFuncionario', verificaDataFuncionario);
 
   const listaFeedChefe3 = comparaCadastrados.filter((objetoA) => {
     try {
@@ -164,8 +157,20 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   }
 
   //Funções principais
-  function gravar() {
+  async function gravar() {
     setPlano(true);
+    try{
+    await axios.put(
+      `/cadastro/${idFuncionario}/update-plano`,
+      {
+        plano: inputs,
+      },
+      );
+      console.log('Gravado com sucesso!')
+    }catch(error){
+      console.log('Erro ao fazer a gravação do plano', error);
+    }
+    
   }
 
   //Função para editar a lista do plano de ação
