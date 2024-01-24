@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Card from './Card';
 import Pagination from './Pagination';
 import Lista from './Lista';
@@ -59,6 +59,9 @@ export default function Planodeacao({
   const [gravarPlano, setGravarPlano] = useState(false);
   const [inputsFiltrados, setInputsFiltrados] = useState([]);
 
+  //const para evitar o useEffect no inicio
+  const montagemInicial = useRef(true);
+
   //Constantes que controlam o page
   const [page, setPage] = useState(1);
   const pageSize = 3;
@@ -83,6 +86,10 @@ export default function Planodeacao({
 
   //useEffect para receber os dados do componente Pendentes
   useEffect(() => {
+    if (montagemInicial.current) {
+      montagemInicial.current = false;
+      return;
+    }
     setAno(anoPai);
     setMes(mesPai);
   }, [anoPai, mesPai, emailPai]);
