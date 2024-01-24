@@ -59,6 +59,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     fetchData();
   }, []);
 
+
   //useEffect para filtrar o inputs
   useEffect(()=>{
     const lista = inputs.filter(
@@ -240,7 +241,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
 
   return (
     <>
-      <div className="container w-100 mb-3">
+     {(!plano&&!gravarPlano)&&<><div className="container w-100 mb-3">
         <h5>Escolha a data</h5>
         <div className="container text-center">
           <div className="row align-items-start mb-1">
@@ -315,7 +316,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
             </>
           ))}
         </select>
-      </div>
+      </div></>}
       {!gravarPlano && (
         <>
           {listaFinal2.map((item) => {
@@ -343,12 +344,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       {listaFinal2.length > 0 && !plano && idFuncionario && gravarPlano && (
         <>
           <h5>Plano de ação</h5>
-
-          <div className="mb-1 mt-6">
-            <label htmlFor="exampleFormControlInput1" className="form-label">
-              Plano
-            </label>
-
+          <h6>{mes}/{ano}</h6>
+          <div className="mb-1 mt-6" style={{marginTop: '-5px'}}>
             {inputsFiltrados.map((input, index) => (
               <div key={index}>
                 <input
@@ -383,6 +380,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       {listaFinal2.length > 0 && plano && idFuncionario && gravarPlano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
+          <h6>{mes}/{ano}</h6>
           <Lista
             listaPlano={inputs}
             onClickEdit={(index) => editar(index)}
