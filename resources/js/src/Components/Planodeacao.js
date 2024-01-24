@@ -30,10 +30,12 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Constantes para gravação de estado
   const [inputs, setInputs] = useState([{ value: '', feito: false }]);
   const [listaCadastro, setListaCadastro] = useState([]);
+  const [newIndex, setNewIndex] = useState(null);
 
   //Constantes para renderização do plano de ação
   const [plano, setPlano] = useState(false);
   const [gravarPlano, setGravarPlano] = useState(false);
+  const [inputsFiltrados, setInputsFiltrados] = useState([]);
 
   //Constantes que controlam o page
   const [page, setPage] = useState(1);
@@ -56,6 +58,14 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  //useEffect para filtrar o inputs
+  useEffect(()=>{
+    const lista = inputs.filter(
+      (item) => item.mes == mes && item.ano == ano,
+    );
+    setInputsFiltrados(lista);
+  },[inputs])
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
@@ -169,9 +179,14 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   }
 
   //Função para editar a lista do plano de ação
-  function editar() {
+  function editar(index) {
+    const lista = inputsFiltrados[index];
+    console.log('lista',lista);
     setPlano(false);
-  }
+    const novoIndex = inputs.findIndex(item=>item.ano==ano&&item.mes==mes&&lista.plano==item.plano);
+    setNewIndex(novoIndex);
+    }
+  
 
   function apagar(index) {
     let newInputs = [...inputs];
@@ -180,22 +195,28 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   }
 
   //Funções para deixar os inputs dinâmicos
-  const handleInputChange = (event, index) => {
+  const handleInputChange = (event) => {
     let newInputs = [...inputs];
-    const novaLista = { plano: event.currentTarget.value, feito: false, ano: ano, mes: mes };
-    newInputs[index] = novaLista;
+    const novaLista = {
+      plano: event.currentTarget.value,
+      feito: false,
+      ano: ano,
+      mes: mes,
+    };
+    if (newIndex) {
+      newInputs[newIndex] = novaLista;
+    }
 
-    console.log('novaLista', novaLista);
 
     // Certifique-se de que o índice existe no array antes de acessar a propriedade
-    if (newInputs[index]) {
-      newInputs[index] = novaLista;
+    if (newInputs[newIndex]) {
+      newInputs[newIndex] = novaLista;
       setInputs(newInputs);
     }
   };
 
   const handleAddInput = () => {
-    setInputs([...inputs, { value: '', feito: false }]);
+    setInputs([...inputs, { value: '', feito: false, ano: ano, mes:mes }]);
   };
 
   function selecionarFuncionario(id) {
@@ -214,6 +235,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     }
   }
 
+  
 
   return (
     <>
@@ -325,12 +347,13 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
             <label htmlFor="exampleFormControlInput1" className="form-label">
               Plano
             </label>
-            {inputs.map((input, index) => (
+
+            {inputsFiltrados.map((input, index) => (
               <div key={index}>
                 <input
                   type="text"
                   value={input.plano}
-                  onChange={(event) => handleInputChange(event, index)}
+                  onChange={(event) => handleInputChange(event)}
                   placeholder="Colocar o plano de ação. Ex: Fazer treinamentos"
                   className="form-control mb-2"
                 />
@@ -360,8 +383,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
         <>
           <h5 className="mt-3">Plano de ação</h5>
           <Lista
-            listaPlano={inputs}       
-            onClickEdit={editar}
+            listaPlano={inputs}
+            onClickEdit={(index) => editar(index)}
             onClickApagar={(index) => apagar(index)}
             ano={ano}
             mes={mes}

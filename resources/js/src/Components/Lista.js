@@ -1,9 +1,12 @@
+import {useEffect, useMemo} from 'react';
 
 export default function Lista({ listaPlano, onClickEdit, onClickApagar, ano, mes }) {
   console.log('listaPlano', listaPlano);
 
   // Filtrar a lista com base no ano e mês
-  const listaFiltrada = listaPlano.filter(item => item.ano === ano && item.mes === mes);
+  const listaFiltrada = listaPlano.filter(
+    (item) => item.ano === ano && item.mes === mes,
+  );
 
   return (
     <>
@@ -18,7 +21,7 @@ export default function Lista({ listaPlano, onClickEdit, onClickApagar, ano, mes
               <div>{item.plano}</div>
               <div className="d-flex mt-1">
                 <svg
-                  onClick={onClickEdit}
+                  onClick={()=>onClickEdit(index)}
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
