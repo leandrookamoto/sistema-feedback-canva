@@ -63,6 +63,8 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   useEffect(() => {
     const lista = inputs.filter((item) => item.mes == mes && item.ano == ano);
     setInputsFiltrados(lista);
+    //Função para manter os dados atualizados
+    fetchData();
   }, [inputs]);
 
   let nomesDiferentes = [];
@@ -174,23 +176,33 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     } catch (error) {
       console.log('Erro ao fazer a gravação do plano', error);
     }
+    //Função para deixar os dados atualizados
+    fetchData();
+
   }
 
   //Função para editar a lista do plano de ação
   function editar(index) {
     const lista = inputsFiltrados[index];
-    console.log('lista', lista);
     setPlano(false);
     const novoIndex = inputs.findIndex(
       (item) => item.ano == ano && item.mes == mes && lista.plano == item.plano,
     );
     setNewIndex(novoIndex);
+    //Função para deixar os dados atualizados
+    fetchData();
   }
 
   function apagar(index) {
+    const lista = inputsFiltrados[index];
+    const novoIndex = inputs.findIndex(
+      (item) => item.ano == ano && item.mes == mes && lista.plano == item.plano,
+    );
     let newInputs = [...inputs];
-    newInputs.splice(index, 1);
+    newInputs.splice(novoIndex, 1);
     setInputs(newInputs);
+    //Função para deixar os dados atualizados
+   
   }
 
   //Funções para deixar os inputs dinâmicos
@@ -238,9 +250,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
           setPlano(true);
         } else {
           setPlano(false);
-          setInputs([{value:''}]);
         }
-        console.log('lista', lista);
         setInputs(newPlan);
       }
     } catch (error) {
