@@ -216,6 +216,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   };
 
   const handleAddInput = () => {
+    setNewIndex(inputs.length);
     setInputs([...inputs, { value: '', feito: false, ano: ano, mes:mes }]);
   };
 
