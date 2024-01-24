@@ -188,7 +188,8 @@ export default function Pendentes({
   avalDoFuncionario,
   onChangeComponenteFeedBack,
   onChangeDados,
-  setorChefe
+  setorChefe,
+  onChangeComponentePlano
 }) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
@@ -523,12 +524,18 @@ export default function Pendentes({
         (funcionario) => funcionario.id === id,
       );
 
+      const lista = listaCadastrados.filter(item=>item.id==id);
       onChangeDados(funcionarioSelecionado);
-      onChangeComponenteFeedBack({
+      onChangeComponentePlano({
         homeRender: false,
         pendentes: false,
         cadastrar: false,
-        feedback: true,
+        feedback: false,
+        planoDeAcao: true,
+        ano:ano,
+        mes:mes,
+        email: lista[0].email
+
       });
     }, 3000);
   }

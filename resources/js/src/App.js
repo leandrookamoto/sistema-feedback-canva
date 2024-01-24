@@ -35,6 +35,11 @@ export default function App() {
   const [setorChefe, setSetorChefe] = useState('');
   const [avalDoFuncionario, setAvalDoFuncionario] = useState([]);
 
+  //Constantes para o envio de informação do componente pendentes para o plano
+  const [anoPai, setAnoPai] = useState(null);
+  const [mesPai,setMesPai] = useState('');
+  const [emailPai, setEmailPai] = useState('');
+
   //Variáveis que controlam a abertura dos Dialogs
   const [openCadastro, setOpenCadastro] = useState(false);
   const [open, setOpen] = useState(false);
@@ -304,6 +309,18 @@ export default function App() {
     setPlanoDeAcao(e.planoDeAcao);
   }
 
+  //Função disparada no componente pendentes para troca para o componente plano
+  function handleChangePlano(e){
+    setHomeRender(e.homeRender);
+    setCadastrar(e.cadastrar);
+    setFeedback(e.feedback);
+    setPendentes(e.pendentes);
+    setPlanoDeAcao(e.planoDeAcao);
+    setAnoPai(e.ano);
+    setMesPai(e.mes);
+    setEmailPai(e.email);
+  }
+
 
   return (
     <main>
@@ -362,6 +379,9 @@ export default function App() {
             <Planodeacao
               avalDoFuncionario={avalDoFuncionario}
               setorChefe={setorChefe}
+              anoPai={anoPai}
+              mesPai={mesPai}
+              emailPai={emailPai}
             />
           )}
           {/* Aqui é a renderização do componente do pendentes */}
@@ -371,6 +391,7 @@ export default function App() {
               onChangeDados={e=>setDados(e)}
               onChangeComponenteFeedBack={e=>handleChangeFeed(e)}
               setorChefe={setorChefe}
+              onChangeComponentePlano={e=>handleChangePlano(e)}
             />
           )}
         </div>

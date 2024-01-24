@@ -4,7 +4,7 @@ import Pagination from './Pagination';
 import Lista from './Lista';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 
-export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
+export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mesPai, emailPai }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
 
@@ -58,6 +58,13 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  //useEffect para receber os dados do componente Pendentes
+  useEffect(()=>{
+    setAno(anoPai);
+    setMes(mesPai);
+    
+  },[anoPai,mesPai,emailPai])
 
   //useEffect para filtrar o inputs
   useEffect(() => {
