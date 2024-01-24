@@ -63,6 +63,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   useEffect(() => {
     const lista = inputs.filter((item) => item.mes == mes && item.ano == ano);
     setInputsFiltrados(lista);
+    atualizaInputs()
     //Função para manter os dados atualizados
     fetchData();
   }, [inputs]);
@@ -168,14 +169,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Funções principais
   async function gravar() {
     setPlano(true);
-    try {
-      await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
-        plano: inputs,
-      });
-      console.log('Gravado com sucesso!');
-    } catch (error) {
-      console.log('Erro ao fazer a gravação do plano', error);
-    }
+    
     //Função para deixar os dados atualizados
     fetchData();
 
@@ -193,6 +187,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     fetchData();
   }
 
+  //Função apagar
   function apagar(index) {
     const lista = inputsFiltrados[index];
     const novoIndex = inputs.findIndex(
@@ -255,6 +250,18 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       }
     } catch (error) {
       console.log('Erro no parse do plano', error);
+    }
+  }
+
+  //Função para deixar o input atualizado
+  async function atualizaInputs(){
+    try {
+      await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
+        plano: inputs,
+      });
+      console.log('Gravado com sucesso!');
+    } catch (error) {
+      console.log('Erro ao fazer a gravação do plano', error);
     }
   }
 

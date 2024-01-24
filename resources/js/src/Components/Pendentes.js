@@ -509,8 +509,33 @@ export default function Pendentes({
         pendentes: false,
         cadastrar: false,
         feedback: true,
+        planoDeAcao: false
       });
     }, 3000);
+  }
+
+  //Seleciona para deixar pré selecionado para mandar para o componenente Plano de Ação
+  function selecionarFuncionario3(id) {
+    setOpen(true);
+
+    setTimeout(() => {
+      const funcionarioSelecionado = listaCadastro.find(
+        (funcionario) => funcionario.id === id,
+      );
+
+      onChangeDados(funcionarioSelecionado);
+      onChangeComponenteFeedBack({
+        homeRender: false,
+        pendentes: false,
+        cadastrar: false,
+        feedback: true,
+      });
+    }, 3000);
+  }
+
+  //Função para avisar funcionário
+  function avisarFuncionario(){
+    //Colocar a lógica para enviar e-mail para funcionário
   }
 
   //Funções auxiliares
@@ -769,6 +794,45 @@ export default function Pendentes({
         <React.Fragment>
           <Typography sx={{ mt: 2, mb: 1 }}>
             Todos os funcionários que estão o com feedback completo.
+            <>
+                {/* Renderização da lista de funcionários */}
+                <div style={estiloInput}>
+                  <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar"
+                    onChange={pesquisar}
+                    style={{
+                      paddingLeft: '30px',
+                      width: '250px',
+                      borderRadius: '5px',
+                      border: '1px solid #ccc',
+                      height: '40px',
+                    }}
+                  />
+                </div>
+                {currentDisplayList.map((item) => {
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => selecionarFuncionario(item.id)}
+                    >
+                      <Card
+                        nome={item.nome}
+                        email={item.email}
+                        setor={item.setor}
+                        chefe={item.administrador}
+                        botao1="Selecionar"
+                      />
+                    </div>
+                  );
+                })}
+                <Pagination
+                  page={page}
+                  handleChange={handleChange}
+                  totalPage={totalPage}
+                />
+              </>
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Box sx={{ flex: '1 1 auto' }} />
@@ -850,14 +914,14 @@ export default function Pendentes({
                 {currentDisplayList2.map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => selecionarFuncionario(item.id)}
+                    onClick={avisarFuncionario}
                   >
                     <Card
                       nome={item.nome}
                       email={item.email}
                       setor={item.setor}
                       chefe={item.administrador}
-                      botao1="Selecionar"
+                      botao1="Avisar Funcionário"
                     />
                   </div>
                 ))}
@@ -892,7 +956,7 @@ export default function Pendentes({
                   return (
                     <div
                       key={item.id}
-                      onClick={() => selecionarFuncionario(item.id)}
+                      onClick={() => selecionarFuncionario3(item.id)}
                     >
                       <Card
                         nome={item.nome}
