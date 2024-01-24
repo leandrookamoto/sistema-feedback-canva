@@ -3,10 +3,31 @@ import Card from './Card';
 import Pagination from './Pagination';
 import Lista from './Lista';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
-export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mesPai, emailPai }) {
+export default function Planodeacao({
+  setorChefe,
+  avalDoFuncionario,
+  anoPai,
+  mesPai,
+  emailPai,
+}) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
+
+  //Variáveis para o estilo do search input
+  const estiloInput = {
+    position: 'relative',
+    display: 'inline-block',
+  };
+  const estiloIcone = {
+    position: 'absolute',
+    top: '50%',
+    left: '10px',
+    transform: 'translateY(-50%)',
+    color: 'gray',
+  };
 
   //Constantes para controle de data
   const [mes, setMes] = useState('');
@@ -60,17 +81,16 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
   }, []);
 
   //useEffect para receber os dados do componente Pendentes
-  useEffect(()=>{
+  useEffect(() => {
     setAno(anoPai);
     setMes(mesPai);
-    
-  },[anoPai,mesPai,emailPai])
+  }, [anoPai, mesPai, emailPai]);
 
   //useEffect para filtrar o inputs
   useEffect(() => {
     const lista = inputs.filter((item) => item.mes == mes && item.ano == ano);
     setInputsFiltrados(lista);
-    atualizaInputs()
+    atualizaInputs();
     //Função para manter os dados atualizados
     fetchData();
   }, [inputs]);
@@ -176,10 +196,35 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
   //Funções principais
   async function gravar() {
     setPlano(true);
-    
+
     //Função para deixar os dados atualizados
     fetchData();
+  }
 
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  let currentDisplayList3 = listaFinal2.slice(startIndex, endIndex);
+  //Função de pesquisa
+  function pesquisar(e) {
+    const orderedList = orderEmployeeData(listaConfereFeedChefe);
+    const nova = capitalizeWords(e.currentTarget.value).trim();
+    const mail = e.currentTarget.value.trim().toLowerCase();
+    let novaListaFiltrada = [];
+    try {
+      novaListaFiltrada =
+        orderedList.filter(
+          (item) => item.nome.includes(nova) || item.email.includes(mail),
+        ).length > 0
+          ? orderedList.filter(
+              (item) => item.nome.includes(nova) || item.email.includes(mail),
+            )
+          : listaRender;
+    } catch (error) {
+      console.log('Erro do pesquisar', error);
+    }
+
+    setListaRender(novaListaFiltrada);
+    setPage(1);
   }
 
   //Função para editar a lista do plano de ação
@@ -204,7 +249,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
     newInputs.splice(novoIndex, 1);
     setInputs(newInputs);
     //Função para deixar os dados atualizados
-   
   }
 
   //Funções para deixar os inputs dinâmicos
@@ -261,7 +305,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
   }
 
   //Função para deixar o input atualizado
-  async function atualizaInputs(){
+  async function atualizaInputs() {
     try {
       await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
         plano: inputs,
@@ -270,6 +314,17 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
     } catch (error) {
       console.log('Erro ao fazer a gravação do plano', error);
     }
+  }
+
+  //Função auxiliar para a ordenação dos funcionários por nome
+  function orderEmployeeData(data) {
+    return [...data].sort((a, b) => {
+      const nomeA = a.nome.toUpperCase();
+      const nomeB = b.nome.toUpperCase();
+      if (nomeA < nomeB) return -1;
+      if (nomeA > nomeB) return 1;
+      return 0;
+    });
   }
 
   return (
@@ -356,7 +411,22 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
       )}
       {!gravarPlano && (
         <>
-          {listaFinal2.map((item) => {
+          <div style={estiloInput}>
+            <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+            <input
+              type="text"
+              placeholder="Pesquisar"
+              onChange={pesquisar}
+              style={{
+                paddingLeft: '30px',
+                width: '250px',
+                borderRadius: '5px',
+                border: '1px solid #ccc',
+                height: '40px',
+              }}
+            />
+          </div>
+          {currentDisplayList3.map((item) => {
             return (
               <div key={item.id} onClick={() => selecionarFuncionario(item.id)}>
                 <Card
@@ -369,6 +439,7 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario, anoPai, mes
               </div>
             );
           })}
+
           <Pagination
             page={page}
             handleChange={handleChange}

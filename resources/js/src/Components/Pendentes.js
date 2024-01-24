@@ -494,7 +494,6 @@ export default function Pendentes({
   }, [page, page2, page3]);
 
   //Funções principais
-  //Funções principais
   //Seleciona pelo clique no card
   function selecionarFuncionario(id) {
     setOpen(true);
