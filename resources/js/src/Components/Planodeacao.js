@@ -59,14 +59,11 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     fetchData();
   }, []);
 
-
   //useEffect para filtrar o inputs
-  useEffect(()=>{
-    const lista = inputs.filter(
-      (item) => item.mes == mes && item.ano == ano,
-    );
+  useEffect(() => {
+    const lista = inputs.filter((item) => item.mes == mes && item.ano == ano);
     setInputsFiltrados(lista);
-  },[inputs])
+  }, [inputs]);
 
   let nomesDiferentes = [];
   const listaCadastrados = listaCadastro.filter((obj1) => {
@@ -182,12 +179,13 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
   //Função para editar a lista do plano de ação
   function editar(index) {
     const lista = inputsFiltrados[index];
-    console.log('lista',lista);
+    console.log('lista', lista);
     setPlano(false);
-    const novoIndex = inputs.findIndex(item=>item.ano==ano&&item.mes==mes&&lista.plano==item.plano);
+    const novoIndex = inputs.findIndex(
+      (item) => item.ano == ano && item.mes == mes && lista.plano == item.plano,
+    );
     setNewIndex(novoIndex);
-    }
-  
+  }
 
   function apagar(index) {
     let newInputs = [...inputs];
@@ -208,7 +206,6 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       newInputs[newIndex] = novaLista;
     }
 
-
     // Certifique-se de que o índice existe no array antes de acessar a propriedade
     if (newInputs[newIndex]) {
       newInputs[newIndex] = novaLista;
@@ -216,20 +213,34 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     }
   };
 
+  function voltar() {
+    setGravarPlano(false);
+  }
+
   const handleAddInput = () => {
     setNewIndex(inputs.length);
-    setInputs([...inputs, { value: '', feito: false, ano: ano, mes:mes }]);
+    setInputs([...inputs, { value: '', feito: false, ano: ano, mes: mes }]);
   };
 
   function selecionarFuncionario(id) {
     setIdFuncionario(id);
     setGravarPlano(true);
     const lista = listaCadastro.filter((item) => item.id == id);
+
     let newPlan = [];
     try {
       newPlan = JSON.parse(lista[0].plano);
       if (newPlan.length > 0) {
-        setPlano(true);
+        const lista = newPlan.filter(
+          (item) => item.mes == mes && item.ano == ano,
+        );
+        if (lista.length > 0) {
+          setPlano(true);
+        } else {
+          setPlano(false);
+          setInputs([{value:''}]);
+        }
+        console.log('lista', lista);
         setInputs(newPlan);
       }
     } catch (error) {
@@ -237,86 +248,88 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
     }
   }
 
-  
-
   return (
     <>
-     {(!plano&&!gravarPlano)&&<><div className="container w-100 mb-3">
-        <h5>Escolha a data</h5>
-        <div className="container text-center">
-          <div className="row align-items-start mb-1">
-            <div
-              className={
-                anoAtual - 2 === ano
-                  ? 'col border p-1 bg-dark text-white'
-                  : 'col border p-1'
-              }
-              style={{ cursor: 'pointer' }}
-              onClick={() => setAno(anoAtual - 2)}
-            >
-              {anoAtual - 2}
+      {!gravarPlano && (
+        <>
+          <div className="container w-100 mb-3">
+            <h5>Escolha a data</h5>
+            <div className="container text-center">
+              <div className="row align-items-start mb-1">
+                <div
+                  className={
+                    anoAtual - 2 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual - 2)}
+                >
+                  {anoAtual - 2}
+                </div>
+                <div
+                  className={
+                    anoAtual - 1 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual - 1)}
+                >
+                  {anoAtual - 1}
+                </div>
+                <div
+                  className={
+                    anoAtual === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual)}
+                >
+                  {anoAtual}
+                </div>
+                <div
+                  className={
+                    anoAtual + 1 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual + 1)}
+                >
+                  {anoAtual + 1}
+                </div>
+                <div
+                  className={
+                    anoAtual + 2 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual + 2)}
+                >
+                  {anoAtual + 2}
+                </div>
+              </div>
             </div>
-            <div
-              className={
-                anoAtual - 1 === ano
-                  ? 'col border p-1 bg-dark text-white'
-                  : 'col border p-1'
-              }
-              style={{ cursor: 'pointer' }}
-              onClick={() => setAno(anoAtual - 1)}
+            <select
+              className="form-select mb-2"
+              aria-label="Default select example"
+              onChange={handleData}
             >
-              {anoAtual - 1}
-            </div>
-            <div
-              className={
-                anoAtual === ano
-                  ? 'col border p-1 bg-dark text-white'
-                  : 'col border p-1'
-              }
-              style={{ cursor: 'pointer' }}
-              onClick={() => setAno(anoAtual)}
-            >
-              {anoAtual}
-            </div>
-            <div
-              className={
-                anoAtual + 1 === ano
-                  ? 'col border p-1 bg-dark text-white'
-                  : 'col border p-1'
-              }
-              style={{ cursor: 'pointer' }}
-              onClick={() => setAno(anoAtual + 1)}
-            >
-              {anoAtual + 1}
-            </div>
-            <div
-              className={
-                anoAtual + 2 === ano
-                  ? 'col border p-1 bg-dark text-white'
-                  : 'col border p-1'
-              }
-              style={{ cursor: 'pointer' }}
-              onClick={() => setAno(anoAtual + 2)}
-            >
-              {anoAtual + 2}
-            </div>
+              <option selected>Escolha a data</option>
+              {data.map((item, index) => (
+                <>
+                  <option key={index} value={item}>
+                    {item}
+                  </option>
+                </>
+              ))}
+            </select>
           </div>
-        </div>
-        <select
-          className="form-select mb-2"
-          aria-label="Default select example"
-          onChange={handleData}
-        >
-          <option selected>Escolha a data</option>
-          {data.map((item, index) => (
-            <>
-              <option key={index} value={item}>
-                {item}
-              </option>
-            </>
-          ))}
-        </select>
-      </div></>}
+        </>
+      )}
       {!gravarPlano && (
         <>
           {listaFinal2.map((item) => {
@@ -344,8 +357,10 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       {listaFinal2.length > 0 && !plano && idFuncionario && gravarPlano && (
         <>
           <h5>Plano de ação</h5>
-          <h6>{mes}/{ano}</h6>
-          <div className="mb-1 mt-6" style={{marginTop: '-5px'}}>
+          <h6>
+            {mes}/{ano}
+          </h6>
+          <div className="mb-1 mt-6" style={{ marginTop: '-5px' }}>
             {inputsFiltrados.map((input, index) => (
               <div key={index}>
                 <input
@@ -380,7 +395,9 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
       {listaFinal2.length > 0 && plano && idFuncionario && gravarPlano && (
         <>
           <h5 className="mt-3">Plano de ação</h5>
-          <h6>{mes}/{ano}</h6>
+          <h6>
+            {mes}/{ano}
+          </h6>
           <Lista
             listaPlano={inputs}
             onClickEdit={(index) => editar(index)}
@@ -388,6 +405,9 @@ export default function Planodeacao({ setorChefe, avalDoFuncionario }) {
             ano={ano}
             mes={mes}
           />
+          <button type="button" class="btn btn-primary mt-3" onClick={voltar}>
+            Voltar
+          </button>
         </>
       )}
     </>
