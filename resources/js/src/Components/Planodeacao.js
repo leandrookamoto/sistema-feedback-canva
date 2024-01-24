@@ -52,6 +52,7 @@ export default function Planodeacao({
   const [inputs, setInputs] = useState([{ value: '', feito: false }]);
   const [listaCadastro, setListaCadastro] = useState([]);
   const [newIndex, setNewIndex] = useState(null);
+  const [listaRender, setListaRender] = useState([]);
 
   //Constantes para renderização do plano de ação
   const [plano, setPlano] = useState(false);
@@ -63,7 +64,7 @@ export default function Planodeacao({
   const pageSize = 3;
   let totalPage = 1;
   try {
-    totalPage = Math.ceil(listaCadastro.length / pageSize);
+    totalPage = Math.ceil(listaFinal2.length / pageSize);
   } catch (error) {
     console.log('Erro do totalPage', error);
   }
@@ -203,10 +204,10 @@ export default function Planodeacao({
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  let currentDisplayList3 = listaFinal2.slice(startIndex, endIndex);
+  let currentDisplayList3 = listaRender.length>0?listaRender.slice(startIndex, endIndex):listaFinal2.slice(startIndex, endIndex);
   //Função de pesquisa
   function pesquisar(e) {
-    const orderedList = orderEmployeeData(listaConfereFeedChefe);
+    const orderedList = orderEmployeeData(listaFinal2);
     const nova = capitalizeWords(e.currentTarget.value).trim();
     const mail = e.currentTarget.value.trim().toLowerCase();
     let novaListaFiltrada = [];
@@ -225,6 +226,18 @@ export default function Planodeacao({
 
     setListaRender(novaListaFiltrada);
     setPage(1);
+  }
+
+  //Função Capitalize
+  //Função para padronizar a digitação dos inputs
+  function capitalizeWords(sentence) {
+    return sentence.toLowerCase().replace(/\b\w+/g, (match) => {
+      if (match.toLowerCase() === 'de' || match.toLowerCase() === 'e') {
+        return match.toLowerCase();
+      } else {
+        return match.charAt(0).toUpperCase() + match.slice(1); // Capitaliza as outras palavras
+      }
+    });
   }
 
   //Função para editar a lista do plano de ação
