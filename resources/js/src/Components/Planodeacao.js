@@ -85,6 +85,11 @@ export default function Planodeacao({
     fetchData();
   }, []);
 
+  //useEffect para evitar o bug da troca de data
+  useEffect(()=>{
+    setListaRender([]);
+  },[ano,mes])
+
   //useEffect para receber os dados do componente Pendentes
   useEffect(() => {
     if (montagemInicial.current) {
@@ -215,7 +220,7 @@ export default function Planodeacao({
   const endIndex = startIndex + pageSize;
   let currentDisplayList3 =
     listaRender.length > 0
-      ? listaRender.slice(startIndex, endIndex)
+      ? orderEmployeeData(listaRender).slice(startIndex, endIndex)
       : orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
 
   // Função de pesquisa
@@ -454,6 +459,7 @@ export default function Planodeacao({
               className="form-select mb-2"
               aria-label="Default select example"
               onChange={handleData}
+              value={mes}
             >
               <option selected>Escolha a data</option>
               {data.map((item, index) => (

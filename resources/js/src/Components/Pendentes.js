@@ -290,7 +290,7 @@ export default function Pendentes({
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   //Renderização do primeiro step
-  let currentDisplayList = listaRender.slice(startIndex, endIndex);
+  let currentDisplayList = orderEmployeeData(listaRender).slice(startIndex, endIndex);
 
   //Lógica da lista do segundo step
   //Esta const pega a lista e verifica se há avaliações registradas do gestor na data selecionada
@@ -407,7 +407,7 @@ export default function Pendentes({
   }
   const startIndex2 = (page2 - 1) * pageSize;
   const endIndex2 = startIndex2 + pageSize;
-  let currentDisplayList2 = listaFinal.slice(startIndex2, endIndex2);
+  let currentDisplayList2 = orderEmployeeData(listaFinal).slice(startIndex2, endIndex2);
 
   //Lógica da lista do 3º step
   
@@ -471,7 +471,7 @@ export default function Pendentes({
   }
   const startIndex3 = (page3 - 1) * pageSize;
   const endIndex3 = startIndex3 + pageSize;
-  let currentDisplayList3 = listaFinal2.slice(startIndex3, endIndex3);
+  let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endIndex3);
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
