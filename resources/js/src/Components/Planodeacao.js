@@ -92,7 +92,7 @@ export default function Planodeacao({
     }
     setAno(anoPai);
     setMes(mesPai);
-    // pesquisar('leandro.okamoto@globalhitss.com.br');
+    pesquisar('leandro.okamoto@globalhitss.com.br');
   }, [anoPai, mesPai, emailPai]);
 
   //useEffect para filtrar o inputs
@@ -212,28 +212,64 @@ export default function Planodeacao({
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  let currentDisplayList3 = listaRender.length>0?listaRender.slice(startIndex, endIndex):orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
-  //Função de pesquisa
-  function pesquisar(e) {
-    const orderedList = orderEmployeeData(listaFinal2);
-    const nova = capitalizeWords(e.currentTarget.value).trim();
-    const mail = e.currentTarget.value.trim().toLowerCase();
-    let novaListaFiltrada = [];
-    try {
-      novaListaFiltrada =
-        orderedList.filter(
-          (item) => item.nome.includes(nova) || item.email.includes(mail),
-        ).length > 0
-          ? orderedList.filter(
-              (item) => item.nome.includes(nova) || item.email.includes(mail),
-            )
-          : listaRender;
-    } catch (error) {
-      console.log('Erro do pesquisar', error);
-    }
+  let currentDisplayList3 =
+    listaRender.length > 0
+      ? listaRender.slice(startIndex, endIndex)
+      : orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
 
-    setListaRender(novaListaFiltrada);
-    setPage(1);
+  // Função de pesquisa
+  async function pesquisar(e) {
+    try {
+      let listaOriginal=[];
+      if (e.length > 0) {
+        // Faz a requisição e aguarda a resolução da Promessa
+        const responseListaOriginal = await axios.get(
+          '/cadastrados/' + setorChefe,
+          console.log('Está fazendo a requisição')
+        );
+
+      // Obtém os dados da resposta
+      listaOriginal = responseListaOriginal.data;
+      }
+
+      const orderedList = orderEmployeeData(listaFinal2);
+      let nova;
+      let mail;
+
+      try {
+        nova = capitalizeWords(e.currentTarget.value).trim();
+        mail = e.currentTarget.value.trim().toLowerCase();
+      } catch {
+        // Lida com o erro de captura de valor
+      }
+
+      let novaListaFiltrada = [];
+
+      try {
+        novaListaFiltrada = orderedList.filter(
+          (item) => item.nome.includes(nova) || item.email.includes(mail),
+        );
+
+        if (novaListaFiltrada.length === 0) {
+          const novaLista = listaOriginal.filter((item) => item.email === e);
+          console.log('listaCadastro', listaCadastro);
+          console.log('novaLista', novaLista);
+
+          if (novaLista.length > 0) {
+            setListaRender(novaLista);
+            setPage(1);
+            return;
+          }
+        }
+
+        setListaRender(novaListaFiltrada);
+        setPage(1);
+      } catch (error) {
+        console.log('Erro do pesquisar', error);
+      }
+    } catch (error) {
+      console.error('Erro ao obter dados:', error);
+    }
   }
 
   //Função Capitalize
