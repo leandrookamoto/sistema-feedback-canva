@@ -16,8 +16,10 @@ export default function Canva({
   avalDoFuncionario,
 }) {
   //Constantes para gravação de estado para o canva
-  //Constante para gravar a lista 
+  //Constante para gravar a lista que só o suficiente para gerar o canva. Ao longo do código fiz 
+  //a separação e o tratamento principalmente na função comparaCanva()
   const [listaCanva, setListaCanva] = useState([]);
+  //As const posteriores é para gravar as outras informações para geração do canva
   const [competencia, setCompetencia] = useState('');
   const [atividades, setAtividades] = useState('');
   const [listaAtividades, setListaAtividades] = useState([]);
@@ -38,7 +40,6 @@ export default function Canva({
   const [openValidaData, setOpenValidaData] = useState(false);
   const [nomeFuncionario, setNomeFuncionario] = useState('');
   const [emailFuncionario, setEmailFuncionario] = useState('');
-  console.log('listaCanva',listaCanva)
 
   //Constantes para o novo select de data
   const anoAtual = new Date().getFullYear();
@@ -93,6 +94,7 @@ export default function Canva({
     const newName = listaNomeAtual.map((item) => item.nome).join();
 
 
+
     let canvaDoFuncionario = avalDoFuncionario.find(
       (item) => item.nome == newName,
     );
@@ -112,22 +114,23 @@ export default function Canva({
     } catch (error) {
       console.log('Erro ao fazer o parse', error);
     }
-    let canvaDoFuncionarioParse = canvaDoFuncionario2;
 
+    console.log('canvaDoFuncionario',canvaDoFuncionario);
+    console.log('canvaDoFuncionario2',canvaDoFuncionario2);
 
     let canvaParseData =
       dataHistorico !== 'Última Data'
-        ? canvaDoFuncionarioParse.filter(
+        ? canvaDoFuncionario2.filter(
             (item) =>
               item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
           )
-        : canvaDoFuncionarioParse.filter(
+        : canvaDoFuncionario2.filter(
             (item) =>
               item.ano ===
-                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1]
+              canvaDoFuncionario2[canvaDoFuncionario2.length - 1]
                   .ano &&
               item.mes ===
-                canvaDoFuncionarioParse[canvaDoFuncionarioParse.length - 1].mes,
+              canvaDoFuncionario2[canvaDoFuncionario2.length - 1].mes,
           );
     if (comparaName == newName) {
       setDadosCanvaDoFuncionario(canvaParseData);
@@ -431,11 +434,9 @@ export default function Canva({
       .get(`/cadastrados/${setorChefe}`)
       .then((response) => {
         const lista = response.data;
-        const listaFiltrada2 = lista.filter(
-          (item) => item.setor === setorChefe,
-        );
-
-        const objetoEncontrado = listaFiltrada2.find(
+        
+        //Aqui faz a separação dos objetos e faz o parse na chave avaliacoes de cada objeto
+        const objetoEncontrado = lista.find(
           (objeto) => objeto.id === idFuncionario,
         );
         if (objetoEncontrado) {
@@ -456,6 +457,8 @@ export default function Canva({
                 setMouthDate('');
               }
 
+              //Aqui é  a lógica para gerar o canva do funcionário no try pega os dados do banco
+              //pela const avalDoFuncionario e faz o parse para facilitar
               let canvaDoFuncionario = [];
 
               try {
@@ -465,7 +468,7 @@ export default function Canva({
               } catch (error) {
                 console.log('Erro ao fazer o parse', error);
               }
-              const canvaDoFuncionarioParse = canvaDoFuncionario;
+
 
               //Recuperação do funcionário selecionado atual
               const listaNomeAtual = listaCadastro.filter(
@@ -479,7 +482,7 @@ export default function Canva({
               );
 
               //Faz a comparação com a última data das avaliações e se tem a data no canvaParse
-              const canvaParseData = canvaDoFuncionarioParse[0].filter(
+              const canvaParseData = canvaDoFuncionario[0].filter(
                 (item) =>
                   item.ano === avaliacoes[avaliacoes.length - 1].ano &&
                   item.mes === avaliacoes[avaliacoes.length - 1].mes,
