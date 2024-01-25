@@ -12,6 +12,7 @@ export default function Planodeacao({
   anoPai,
   mesPai,
   emailPai,
+
 }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
@@ -92,7 +93,7 @@ export default function Planodeacao({
     }
     setAno(anoPai);
     setMes(mesPai);
-    pesquisar('leandro.okamoto@globalhitss.com.br');
+    pesquisar(emailPai);
   }, [anoPai, mesPai, emailPai]);
 
   //useEffect para filtrar o inputs

@@ -354,7 +354,6 @@ export default function Pendentes({
   //Esta const exclui do comparaCadastrados pessoas que tiverem dados do mês selecionado
   // Filtra o array de objetos
   const excluiMesFuncionario = comparaAvaliacoesFuncionario.filter((item) => {
-    console.log('Item:', item);
   
     const temMesProcurado = item.avaliacoes &&
       item.avaliacoes.some(
