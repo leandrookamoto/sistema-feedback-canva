@@ -16,6 +16,7 @@ export default function Canva({
   avalDoFuncionario,
 }) {
   //Constantes para gravação de estado para o canva
+  //Constante para gravar a lista 
   const [listaCanva, setListaCanva] = useState([]);
   const [competencia, setCompetencia] = useState('');
   const [atividades, setAtividades] = useState('');
@@ -37,6 +38,7 @@ export default function Canva({
   const [openValidaData, setOpenValidaData] = useState(false);
   const [nomeFuncionario, setNomeFuncionario] = useState('');
   const [emailFuncionario, setEmailFuncionario] = useState('');
+  console.log('listaCanva',listaCanva)
 
   //Constantes para o novo select de data
   const anoAtual = new Date().getFullYear();
@@ -89,12 +91,12 @@ export default function Canva({
     //Comparação do nome selecionado e o nome recuperado no banco de dados do funcionário
 
     const newName = listaNomeAtual.map((item) => item.nome).join();
-    console.log('newName', newName);
+
 
     let canvaDoFuncionario = avalDoFuncionario.find(
       (item) => item.nome == newName,
     );
-    console.log('canvaDoFuncionario', canvaDoFuncionario);
+
 
     let comparaName = [];
     try {
@@ -102,7 +104,6 @@ export default function Canva({
     } catch (error) {
       console.log('Erro no comparaName', error);
     }
-    console.log('comparaName', comparaName);
 
     let canvaDoFuncionario2 = [];
 
@@ -113,7 +114,6 @@ export default function Canva({
     }
     let canvaDoFuncionarioParse = canvaDoFuncionario2;
 
-    console.log('canvaDoFuncionario2', canvaDoFuncionario2);
 
     let canvaParseData =
       dataHistorico !== 'Última Data'
@@ -131,18 +131,13 @@ export default function Canva({
           );
     if (comparaName == newName) {
       setDadosCanvaDoFuncionario(canvaParseData);
-      console.log('canvaParseData', canvaParseData);
+
       setSeniorDoFuncionario(
         canvaParseData.map((item) => item.senioridade)[
           canvaParseData.length - 1
         ],
       );
-      console.log(
-        'senior',
-        canvaParseData.map((item) => item.senioridade)[
-          canvaParseData.length - 1
-        ],
-      );
+      
     }
 
     if (listaCanva.length > 0) {
@@ -189,9 +184,6 @@ export default function Canva({
     const lista = listaCanva.find(
       (item) => item.mes === mouthDate && item.ano === yearDate,
     );
-    console.table(lista);
-    console.log('Este é o mounthDate ' + mouthDate);
-    console.log('Este é o year ' + yearDate);
 
     if (lista) {
       setOpenValidaData(true);
@@ -250,7 +242,7 @@ export default function Canva({
         },
       );
 
-      console.log(response.data); // Confirmação de atualização da API
+      console.log(response.data); 
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
@@ -280,7 +272,7 @@ export default function Canva({
         },
       );
 
-      console.log(response.data); // Confirmação de atualização da API
+      console.log(response.data); 
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
@@ -442,7 +434,7 @@ export default function Canva({
         const listaFiltrada2 = lista.filter(
           (item) => item.setor === setorChefe,
         );
-        console.log(listaFiltrada2); // Isso será executado depois de a lista ser filtrada
+
         const objetoEncontrado = listaFiltrada2.find(
           (objeto) => objeto.id === idFuncionario,
         );
@@ -475,8 +467,6 @@ export default function Canva({
               }
               const canvaDoFuncionarioParse = canvaDoFuncionario;
 
-              console.log('canvaDoFuncionario', canvaDoFuncionario);
-              console.log('canvaDoFuncionarioParse', canvaDoFuncionarioParse);
               //Recuperação do funcionário selecionado atual
               const listaNomeAtual = listaCadastro.filter(
                 (item) => item.id === idFuncionario,
@@ -1125,7 +1115,6 @@ export default function Canva({
           </div>
 
           {/* Parte do canva de comparação  */}
-          {console.log('dadosCanvaDoFuncionario', dadosCanvaDoFuncionario)}
           {dadosCanvaDoFuncionario.length > 0 &&
             dadosCanvaDoFuncionario.filter(
               (item) =>

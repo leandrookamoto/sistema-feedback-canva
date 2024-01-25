@@ -9,6 +9,8 @@ export default function CadastrarComponent({
   setor,
   gravar,
 }) {
+
+  //Este componente é todo controlado pelo App.js
   return (
     <>
       <h5>Cadastro de funcionários</h5>

@@ -26,13 +26,18 @@ export default function App() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [setor, setSetor] = useState('');
+  //Constante que grava todos os dados do banco
   const [listaCadastro, setListaCadastro] = useState([]);
   const [newId, setNewId] = useState(0);
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [isValid, setIsValid] = useState(true);
+  //Constante separada principalmente para renderização de dados de um funcionário específico
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
   const [setorChefe, setSetorChefe] = useState('');
+  //Constante para gravar todos os dados do banco do software de feedback dos funcionários
+  //O nome não está muito descritivo, mas não alteraria pois está setado em muitas partes diferentes
+  //do código, mas significa avaliação do funcionário
   const [avalDoFuncionario, setAvalDoFuncionario] = useState([]);
 
   //Constantes para o envio de informação do componente pendentes para o plano
@@ -59,28 +64,34 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        //Faz a requisição das informações do login do usuário
         const responseUser = await axios.get('/user');
         const usuarioLogado = responseUser.data.name;
         const setor = responseUser.data.setor;
         setUsuario(usuarioLogado);
         setSetorChefe(setor);
 
+        //Faz a requisição das informações segundo o setor do usuário
         const responseListaOriginal = await axios.get('/cadastrados/' + setor);
         const listaOriginal = responseListaOriginal.data;
         setListaCadastro(listaOriginal);
 
+        //Faz a requisição das informações das avaliações dos funcionários segundo o setor do usuário
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
         //Setando os dados do canva que o funcionário fez
         setAvalDoFuncionario(canvaFuncionario.data);
 
+        //Faz a requisição do programa atestado para o cadastramento automático
         const responseColaboradoresAtestado = await axios.get(
           '/colaboradores-atestado',
         );
-        const listaAtestado2 = responseColaboradoresAtestado.data;
-        const listaAtestado = listaAtestado2.filter(
+        const listaAtestadoFinal = responseColaboradoresAtestado.data;
+        //Faz a filtragem segundo o setor descrito no programa de atestado
+        const listaAtestado = listaAtestadoFinal.filter(
           (item) => item.setor === setor,
         );
 
+        //Lógica para fazer o cadastro automático caso não tenha sido
         const funcionariosNaoCadastrados = listaAtestado.filter(
           (colaboradorAtestado) => {
             return !listaOriginal.some(
