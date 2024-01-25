@@ -92,6 +92,7 @@ export default function Planodeacao({
     }
     setAno(anoPai);
     setMes(mesPai);
+    // pesquisar('leandro.okamoto@globalhitss.com.br');
   }, [anoPai, mesPai, emailPai]);
 
   //useEffect para filtrar o inputs
@@ -211,7 +212,7 @@ export default function Planodeacao({
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  let currentDisplayList3 = listaRender.length>0?listaRender.slice(startIndex, endIndex):listaFinal2.slice(startIndex, endIndex);
+  let currentDisplayList3 = listaRender.length>0?listaRender.slice(startIndex, endIndex):orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
   //Função de pesquisa
   function pesquisar(e) {
     const orderedList = orderEmployeeData(listaFinal2);
