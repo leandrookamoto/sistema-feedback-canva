@@ -12,7 +12,6 @@ export default function Planodeacao({
   anoPai,
   mesPai,
   emailPai,
-
 }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
@@ -86,9 +85,9 @@ export default function Planodeacao({
   }, []);
 
   //useEffect para evitar o bug da troca de data
-  useEffect(()=>{
+  useEffect(() => {
     setListaRender([]);
-  },[ano,mes])
+  }, [ano, mes]);
 
   //useEffect para receber os dados do componente Pendentes
   useEffect(() => {
@@ -200,6 +199,8 @@ export default function Planodeacao({
     return objetoB;
   });
 
+  console.log('listaFinal2', listaFinal2);
+
   const handleData = (e) => {
     setMes(e.currentTarget.value);
   };
@@ -226,16 +227,16 @@ export default function Planodeacao({
   // Função de pesquisa
   async function pesquisar(e) {
     try {
-      let listaOriginal=[];
+      let listaOriginal = [];
       if (e.length > 0) {
         // Faz a requisição e aguarda a resolução da Promessa
         const responseListaOriginal = await axios.get(
           '/cadastrados/' + setorChefe,
-          console.log('Está fazendo a requisição')
+          console.log('Está fazendo a requisição'),
         );
 
-      // Obtém os dados da resposta
-      listaOriginal = responseListaOriginal.data;
+        // Obtém os dados da resposta
+        listaOriginal = responseListaOriginal.data;
       }
 
       const orderedList = orderEmployeeData(listaFinal2);
@@ -334,8 +335,12 @@ export default function Planodeacao({
     }
   };
 
+  console.log('inputs', inputs);
+
   function voltar() {
     setGravarPlano(false);
+    setInputs([]);
+    setPlano(false);
   }
 
   const handleAddInput = () => {
@@ -369,13 +374,15 @@ export default function Planodeacao({
 
   //Função para deixar o input atualizado
   async function atualizaInputs() {
-    try {
-      await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
-        plano: inputs,
-      });
-      console.log('Gravado com sucesso!');
-    } catch (error) {
-      console.log('Erro ao fazer a gravação do plano', error);
+    if (inputs.length > 0) {
+      try {
+        await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
+          plano: inputs,
+        });
+        console.log('Gravado com sucesso!');
+      } catch (error) {
+        console.log('Erro ao fazer a gravação do plano', error);
+      }
     }
   }
 
@@ -475,7 +482,9 @@ export default function Planodeacao({
       )}
       {!gravarPlano && (
         <>
-        {(!ano||!mes)&&<h5 style={{color: 'rgb(34 155 175)'}}>Favor colocar a data!</h5>}
+          {(!ano || !mes) && (
+            <h5 style={{ color: 'rgb(34 155 175)' }}>Favor colocar a data!</h5>
+          )}
           <div style={estiloInput}>
             <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
             <input
