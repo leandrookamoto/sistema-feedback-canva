@@ -770,6 +770,7 @@ export default function Pendentes({
             </>
           ))}
         </select>
+        {(!ano||!mes)&&<h5 style={{color: 'rgb(34 155 175)'}}>Favor colocar a data!</h5>}
       </div>
       <Stepper
         alternativeLabel

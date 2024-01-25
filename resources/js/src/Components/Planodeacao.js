@@ -475,6 +475,7 @@ export default function Planodeacao({
       )}
       {!gravarPlano && (
         <>
+        {(!ano||!mes)&&<h5 style={{color: 'rgb(34 155 175)'}}>Favor colocar a data!</h5>}
           <div style={estiloInput}>
             <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
             <input
