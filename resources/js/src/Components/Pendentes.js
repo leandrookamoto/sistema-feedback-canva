@@ -360,8 +360,6 @@ export default function Pendentes({
         (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes
       );
   
-    console.log('temMesProcurado:', temMesProcurado);
-  
     return temMesProcurado;
   });
   
@@ -410,8 +408,6 @@ export default function Pendentes({
   let currentDisplayList2 = orderEmployeeData(listaFinal).slice(startIndex2, endIndex2);
 
   //Lógica da lista do 3º step
-  
-
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
   const verificaDataFuncionario = comparaAvaliacoesFuncionario.filter(
@@ -472,6 +468,81 @@ export default function Pendentes({
   const startIndex3 = (page3 - 1) * pageSize;
   const endIndex3 = startIndex3 + pageSize;
   let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endIndex3);
+
+
+
+  //Lógica da lista de tudo completo!
+    //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
+  //as datas selecionadas pelo usuário
+  let comparaPlanoFuncionario = listaCadastro.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.plano && typeof objeto.plano === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, plano: JSON.parse(objeto.plano) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
+  console.log('comparaPlanoFuncionario',comparaPlanoFuncionario)
+
+  const verificaDataFuncionarioPlano = comparaPlanoFuncionario.filter(
+    (objetoA) => {
+      try {
+        // Verifica se o objeto da Lista A possui a data e ano selecionados
+        const possuiDataAno =
+          Array.isArray(objetoA.plano) &&
+          objetoA.plano.some(
+            (item) => item.ano === ano && item.mes === mes,
+          );
+        // Retorna verdadeiro se as condições forem atendidas
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    },
+  );
+
+  console.log('verificaDataFuncionarioPlano',verificaDataFuncionarioPlano);
+
+  const verificaDataPlano = verificaDataFuncionarioPlano.map(item => {
+    // Crie uma cópia do objeto original
+    const newObj = { ...item };
+  
+    // Aplique o filtro apenas na chave "plano"
+    newObj.plano = item.plano.filter(planoItem => planoItem.ano == ano && planoItem.mes == mes);
+  
+    return newObj;
+  });
+  
+  console.log('verificaDataPlano',verificaDataPlano);
+
+  const verificaDataPlano2 = verificaDataPlano.filter(item =>
+    item.plano.every(planoItem => planoItem.feito === true)
+  );
+  
+
+console.log('verificaDataPlano2',verificaDataPlano2);
+
+
+  
+  //Controles da paginação do segundo step coloquei aqui para evitar erro
+  const [page4, setPage4] = useState(1);
+  let totalPage4 = 1;
+  try {
+    totalPage3 = Math.ceil(listaFinal2.length / pageSize);
+  } catch (error) {
+    console.log('Erro do totalPage', error);
+  }
+  const startIndex4 = (page4 - 1) * pageSize;
+  const endIndex4 = startIndex4 + pageSize;
+  let currentDisplayList4 = orderEmployeeData(verificaDataPlano2).slice(startIndex4, endIndex4);
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
@@ -556,6 +627,9 @@ export default function Pendentes({
   function handleChange3(event, value) {
     setPage3(Math.min(value, totalPage3));
   }
+  function handleChange4(event, value) {
+    setPage4(Math.min(value, totalPage4));
+  }
 
   let comparacaoAvaliacoesListaCadastro = listaCadastro.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
@@ -598,6 +672,29 @@ export default function Pendentes({
   //Função pesquisar do segundo step
   function pesquisar2(e) {
     const orderedList = orderEmployeeData(listaFeedChefe);
+    const nova = capitalizeWords(e.currentTarget.value).trim();
+    const mail = e.currentTarget.value.trim().toLowerCase();
+    let novaListaFiltrada = [];
+    try {
+      novaListaFiltrada =
+        orderedList.filter(
+          (item) => item.nome.includes(nova) || item.email.includes(mail),
+        ).length > 0
+          ? orderedList.filter(
+              (item) => item.nome.includes(nova) || item.email.includes(mail),
+            )
+          : listaRender2;
+    } catch (error) {
+      console.log('Erro do pesquisar', error);
+    }
+
+    setListaRender2(novaListaFiltrada);
+    setPage(1);
+  }
+
+  //Função pesquisar do segundo step
+  function pesquisar4(e) {
+    const orderedList = orderEmployeeData(verificaDataPlano2);
     const nova = capitalizeWords(e.currentTarget.value).trim();
     const mail = e.currentTarget.value.trim().toLowerCase();
     let novaListaFiltrada = [];
@@ -807,7 +904,7 @@ export default function Pendentes({
                   <input
                     type="text"
                     placeholder="Pesquisar"
-                    onChange={pesquisar}
+                    onChange={pesquisar4}
                     style={{
                       paddingLeft: '30px',
                       width: '250px',
@@ -817,26 +914,25 @@ export default function Pendentes({
                     }}
                   />
                 </div>
-                {currentDisplayList.map((item) => {
+                {currentDisplayList4.map((item) => {
                   return (
                     <div
                       key={item.id}
-                      onClick={() => selecionarFuncionario(item.id)}
                     >
                       <Card
                         nome={item.nome}
                         email={item.email}
                         setor={item.setor}
                         chefe={item.administrador}
-                        botao1="Selecionar"
+                        botao1="Completo"
                       />
                     </div>
                   );
                 })}
                 <Pagination
-                  page={page}
-                  handleChange={handleChange}
-                  totalPage={totalPage}
+                  page={page4}
+                  handleChange={handleChange4}
+                  totalPage={totalPage4}
                 />
               </>
           </Typography>
