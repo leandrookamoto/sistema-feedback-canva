@@ -448,7 +448,7 @@ export default function Pendentes({
 
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
-  const listaFinal2 = listaFeedChefe3.filter((objetoA) => {
+  let listaFinal2 = listaFeedChefe3.filter((objetoA) => {
     // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
     const objetoB = verificaDataFuncionario.find(
       (objetoB) => objetoB.nome === objetoA.nome,
@@ -467,7 +467,7 @@ export default function Pendentes({
   }
   const startIndex3 = (page3 - 1) * pageSize;
   const endIndex3 = startIndex3 + pageSize;
-  let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endIndex3);
+  
 
 
 
@@ -529,6 +529,11 @@ export default function Pendentes({
   
 
 console.log('verificaDataPlano2',verificaDataPlano2);
+
+const emailsToRemove = verificaDataPlano2.map(item => item.email);
+listaFinal2 = listaFinal2.filter(item => !emailsToRemove.includes(item.email));
+console.log('listaFinal2',listaFinal2);
+let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endIndex3);
 
 
   
@@ -737,7 +742,6 @@ console.log('verificaDataPlano2',verificaDataPlano2);
       return 0;
     });
   }
-
   const isStepOptional = (step) => {
     return step === 1;
   };
