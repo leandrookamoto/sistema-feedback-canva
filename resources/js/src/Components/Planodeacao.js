@@ -5,6 +5,7 @@ import Lista from './Lista';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import Dialog from './Dialog';
 
 export default function Planodeacao({
   setorChefe,
@@ -15,6 +16,12 @@ export default function Planodeacao({
 }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
+
+  //Constantes para controle do Dialog
+  const erase = 'Tem certeza?';
+  const [openErase, setOpenErase] = useState(false);
+  const [eraseLast, setEraseLast] = useState(false);
+  const [newIndexButton, setNewIndexButton] = useState(null);
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -190,7 +197,7 @@ export default function Planodeacao({
 
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
-  const listaFinal2 = listaFeedChefe3.filter((objetoA) => {
+  let listaFinal2 = listaFeedChefe3.filter((objetoA) => {
     // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
     const objetoB = verificaDataFuncionario.find(
       (objetoB) => objetoB.nome === objetoA.nome,
@@ -216,6 +223,69 @@ export default function Planodeacao({
     //Função para deixar os dados atualizados
     fetchData();
   }
+
+  //Lógica da lista de tudo completo!
+  //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
+  //as datas selecionadas pelo usuário
+  let comparaPlanoFuncionario = listaCadastro.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.plano && typeof objeto.plano === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, plano: JSON.parse(objeto.plano) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+
+  console.log('comparaPlanoFuncionario', comparaPlanoFuncionario);
+
+  const verificaDataFuncionarioPlano = comparaPlanoFuncionario.filter(
+    (objetoA) => {
+      try {
+        // Verifica se o objeto da Lista A possui a data e ano selecionados
+        const possuiDataAno =
+          Array.isArray(objetoA.plano) &&
+          objetoA.plano.some((item) => item.ano === ano && item.mes === mes);
+        // Retorna verdadeiro se as condições forem atendidas
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    },
+  );
+
+  console.log('verificaDataFuncionarioPlano', verificaDataFuncionarioPlano);
+
+  const verificaDataPlano = verificaDataFuncionarioPlano.map((item) => {
+    // Crie uma cópia do objeto original
+    const newObj = { ...item };
+
+    // Aplique o filtro apenas na chave "plano"
+    newObj.plano = item.plano.filter(
+      (planoItem) => planoItem.ano == ano && planoItem.mes == mes,
+    );
+
+    return newObj;
+  });
+
+  console.log('verificaDataPlano', verificaDataPlano);
+
+  const verificaDataPlano2 = verificaDataPlano.filter((item) =>
+    item.plano.every((planoItem) => planoItem.feito === true),
+  );
+  const emails = verificaDataPlano2.map((item) => item.email);
+  listaFinal2 = listaFinal2.map((item) => {
+    const newItem = { ...item };
+    newItem.completo = emails.includes(newItem.email);
+    return newItem;
+  });
+  console.log('listaFinal2', listaFinal2);
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
@@ -305,16 +375,34 @@ export default function Planodeacao({
 
   //Função apagar
   function apagar(index) {
-    const lista = inputsFiltrados[index];
-    const novoIndex = inputs.findIndex(
-      (item) => item.ano == ano && item.mes == mes && lista.plano == item.plano,
-    );
-    let newInputs = [...inputs];
-    newInputs.splice(novoIndex, 1);
-    setInputs(newInputs);
-    //Função para deixar os dados atualizados
+    console.log('index',index);
+  
+    if (inputs.length> 1||eraseLast) {
+      setOpenErase(false);
+  
+      const lista = newIndexButton ? inputsFiltrados[newIndexButton] : inputsFiltrados[index];
+      const novoIndex = inputs.findIndex(
+        (item) => item.ano === ano && item.mes === mes && lista.plano === item.plano
+      );
+  
+      let newInputs = [...inputs];
+      newInputs.splice(novoIndex, 1);
+      setInputs(newInputs);
+      
+      setNewIndexButton(null);
+      
+    } else {
+      setEraseLast(true);
+      setOpenErase(true);
+      setNewIndexButton(index);
+    }
+
+            
+ 
   }
 
+  
+  
   //Funções para deixar os inputs dinâmicos
   const handleInputChange = (event) => {
     let newInputs = [...inputs];
@@ -334,8 +422,6 @@ export default function Planodeacao({
       setInputs(newInputs);
     }
   };
-
-  console.log('inputs', inputs);
 
   function voltar() {
     setGravarPlano(false);
@@ -374,7 +460,8 @@ export default function Planodeacao({
 
   //Função para deixar o input atualizado
   async function atualizaInputs() {
-    if (inputs.length > 0) {
+    console.log('eraseLast', eraseLast);
+    if (inputs.length > 0 || eraseLast) {
       try {
         await axios.put(`/cadastro/${idFuncionario}/update-plano`, {
           plano: inputs,
@@ -383,6 +470,7 @@ export default function Planodeacao({
       } catch (error) {
         console.log('Erro ao fazer a gravação do plano', error);
       }
+      setEraseLast(false);
     }
   }
 
@@ -508,7 +596,7 @@ export default function Planodeacao({
                   email={item.email}
                   setor={item.setor}
                   chefe={item.administrador}
-                  botao1="Selecionar"
+                  botao1={!item.completo ? 'Selecionar' : 'Completo'}
                 />
               </div>
             );
@@ -579,6 +667,15 @@ export default function Planodeacao({
           </button>
         </>
       )}
+      <Dialog
+        open={openErase}
+        descricao={erase}
+        handleClose={() => setOpenErase(false)}
+        Title="Atenção"
+        button="Não"
+        button2="Sim"
+        handleButton={apagar}
+      />
     </>
   );
 }
