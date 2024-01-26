@@ -375,34 +375,37 @@ export default function Planodeacao({
 
   //Função apagar
   function apagar(index) {
-    console.log('index',index);
-  
-    if (inputs.length> 1||eraseLast) {
+    console.log('inputsFiltrados.length:', inputsFiltrados.length);
+    console.log('eraseLast:', eraseLast);
+    console.log('eraseLast', eraseLast);
+    console.log('openErase', openErase);
+    console.log('newIndexButton', newIndexButton);
+
+    if (inputsFiltrados.length > 1 || eraseLast) {
       setOpenErase(false);
-  
-      const lista = newIndexButton ? inputsFiltrados[newIndexButton] : inputsFiltrados[index];
+
+      const lista = inputsFiltrados[index];
       const novoIndex = inputs.findIndex(
-        (item) => item.ano === ano && item.mes === mes && lista.plano === item.plano
+        (item) =>
+          item.ano === ano && item.mes === mes && lista.plano === item.plano,
       );
-  
+
       let newInputs = [...inputs];
       newInputs.splice(novoIndex, 1);
       setInputs(newInputs);
-      
       setNewIndexButton(null);
-      
+
+      if(inputsFiltrados.length==1){
+        setPlano(false);
+        setGravarPlano(true);
+      }
     } else {
       setEraseLast(true);
       setOpenErase(true);
       setNewIndexButton(index);
     }
-
-            
- 
   }
 
-  
-  
   //Funções para deixar os inputs dinâmicos
   const handleInputChange = (event) => {
     let newInputs = [...inputs];
@@ -674,7 +677,7 @@ export default function Planodeacao({
         Title="Atenção"
         button="Não"
         button2="Sim"
-        handleButton={apagar}
+        handleButton={()=>apagar(newIndexButton)}
       />
     </>
   );
