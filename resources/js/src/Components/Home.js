@@ -160,13 +160,54 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   });
   console.log('listaFinal2', listaFinal2);
 
+
+  //Lógica para formar os dados para o gráfico
+  const totaisPorMes = ultimosMeses.map((mes) => {
+    const verificaDataFuncionarioMes = comparaAvaliacoesFuncionario.filter((objetoA) => {
+      try {
+        const possuiDataAno = Array.isArray(objetoA.avaliacoes) &&
+          objetoA.avaliacoes.some(
+            (avaliacao) => avaliacao.ano === anoAtual && avaliacao.mes === mes,
+          );
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    });
+  
+    const listaFeedChefeMes = comparaCadastrados.filter((objetoA) => {
+      try {
+        const possuiDataAno = Array.isArray(objetoA.avaliacoes) &&
+          objetoA.avaliacoes.some(
+            (avaliacao) => avaliacao.ano === anoAtual && avaliacao.mes === mes,
+          );
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    });
+  
+    const listaFinalMes = listaFeedChefeMes.filter((objetoA) => {
+      const objetoB = verificaDataFuncionarioMes.find(
+        (objetoB) => objetoB.nome === objetoA.nome,
+      );
+      return objetoB;
+    });
+  
+    return listaFinalMes.length;
+  });
+  
+  console.log('totaisPorMes', totaisPorMes);
+
   //Data para a configuração do Chart.js
   const data = {
     labels: ultimosMeses,
     datasets: [
       {
         label: 'Feedbacks realizados',
-        data: [15, 20, 22, 19, 17, 23],
+        data: totaisPorMes,
         borderrowor: 'blue',
         backgroundrowor: 'blue',
       },
@@ -174,7 +215,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
         label: 'Metas',
         /*Aqui a meta é automaticamente preenchido de acordo com o número dos
         feedbacks de cima e de acordo com o número de funcionários cadastrados*/
-        data: Array(5).fill(listaCadastro.length),
+        data: Array(5).fill(meta),
         borderrowor: 'red',
         backgroundrowor: 'red',
       },
