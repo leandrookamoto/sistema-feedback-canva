@@ -16,7 +16,7 @@ export default function Canva({
   avalDoFuncionario,
 }) {
   //Constantes para gravação de estado para o canva
-  //Constante para gravar a lista que só o suficiente para gerar o canva. Ao longo do código fiz 
+  //Constante para gravar a lista que só o suficiente para gerar o canva. Ao longo do código fiz
   //a separação e o tratamento principalmente na função comparaCanva()
   const [listaCanva, setListaCanva] = useState([]);
   //As const posteriores é para gravar as outras informações para geração do canva
@@ -87,52 +87,57 @@ export default function Canva({
     setNomeFuncionario(listaNomeAtual.map((item) => item.nome).join());
     setEmailFuncionario(listaNomeAtual.map((item) => item.email).join());
 
-    //Faz a comparação com a dataHistorica escolhida e se tem a data no canvaParse
-
-    //Comparação do nome selecionado e o nome recuperado no banco de dados do funcionário
-
+    //Retirada do nome do funcionário selecionado da listaCadastro (lista de cadastro) do gestor
+    //para comparação posterior com a lista das avaliações feitas pelos próprios funcionários
     const newName = listaNomeAtual.map((item) => item.nome).join();
 
-
-
-    let canvaDoFuncionario = avalDoFuncionario.find(
+    //Variável usado para gravação dos dados da avaliação do próprio funcionário para retirada de 
+    //dados puxados do banco do software do funcionário para realizar a renderização do canva da 
+    //avaliação feita pelo funcionário. Os dados que são puxados do banco estão no avalDoFuncionario
+    let dadosDoFuncionarioDoProprioCanva = avalDoFuncionario.find(
       (item) => item.nome == newName,
     );
 
-
+    //Retirada do nome do funcionário das avaliações realizadas pelo funcionário para comparação dos canvas
     let comparaName = [];
     try {
-      comparaName = canvaDoFuncionario.nome;
+      comparaName = dadosDoFuncionarioDoProprioCanva.nome;
     } catch (error) {
       console.log('Erro no comparaName', error);
     }
 
-    let canvaDoFuncionario2 = [];
-
+    //Retirada dos dados específicos do funcionário selecionado para a formação do canva do funcionário
+    let dadosParaCanvaDoFuncionario = [];
     try {
-      canvaDoFuncionario2 = JSON.parse(canvaDoFuncionario.avaliacoes);
+      dadosParaCanvaDoFuncionario = JSON.parse(
+        dadosDoFuncionarioDoProprioCanva.avaliacoes,
+      );
     } catch (error) {
       console.log('Erro ao fazer o parse', error);
     }
 
-    console.log('canvaDoFuncionario',canvaDoFuncionario);
-    console.log('canvaDoFuncionario2',canvaDoFuncionario2);
+    console.log('dadosParaCanvaDoFuncionario', dadosParaCanvaDoFuncionario);
 
+    //Seleção dos dados específicos para a formação do canva do funcionário baseado nas datas
+    //selecionadas pelo usuário.
     let canvaParseData =
       dataHistorico !== 'Última Data'
-        ? canvaDoFuncionario2.filter(
+        ? dadosParaCanvaDoFuncionario.filter(
             (item) =>
               item.ano === dataHistorico.ano && item.mes === dataHistorico.mes,
           )
-        : canvaDoFuncionario2.filter(
+        : dadosParaCanvaDoFuncionario.filter(
             (item) =>
               item.ano ===
-              canvaDoFuncionario2[canvaDoFuncionario2.length - 1]
-                  .ano &&
+                dadosParaCanvaDoFuncionario[dadosParaCanvaDoFuncionario.length - 1].ano &&
               item.mes ===
-              canvaDoFuncionario2[canvaDoFuncionario2.length - 1].mes,
+                dadosParaCanvaDoFuncionario[dadosParaCanvaDoFuncionario.length - 1].mes,
           );
+
+    //Comparação entre o nome dos dados do funcionário selecionado com o nome e os dados
+    //do canva já feito do gestor
     if (comparaName == newName) {
+      //Gravação dos dados para renderização do canva
       setDadosCanvaDoFuncionario(canvaParseData);
 
       setSeniorDoFuncionario(
@@ -140,9 +145,11 @@ export default function Canva({
           canvaParseData.length - 1
         ],
       );
-      
     }
 
+ 
+    //listaCanva é a variável que está gravado todos os dados específicos do funcionário selecionado 
+    // para geração do canva do gestor 
     if (listaCanva.length > 0) {
       let render = null;
       if (dataHistorico === 'Última Data') {
@@ -159,12 +166,13 @@ export default function Canva({
         setMouthDate(render[0].mes);
         setSenioridade(render[0].senioridade);
         console.table(render);
-        setListaRender(render); // Definindo disretamente o resultado do filtro
+        //Constante para geração direta do canva do gestor
+        setListaRender(render); // Definindo diretamente o resultado do filtro
       }
     }
   }, [listaCanva, dataHistorico]);
 
-  //useEffect para resetar a const atividades
+  //useEffect para resetar a const atividades baseado na troca de avaliação
   useEffect(() => {
     setAtividades('');
     setListaAtividades([]);
@@ -175,9 +183,11 @@ export default function Canva({
     setMouthDate('');
     setSelectedDate('');
   }, [avaliar2]);
+
   //useEffect para  recuperação e manutenção dos dados atualizados
   // do banco de dados e setando para o listaAtividades e listaCanva
   useEffect(() => {
+    //Função responsável pela atualização dos dados
     comparaCanvas();
   }, [avaliar2, historico]);
 
@@ -245,7 +255,7 @@ export default function Canva({
         },
       );
 
-      console.log(response.data); 
+      console.log(response.data);
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
@@ -260,6 +270,7 @@ export default function Canva({
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
+    //Atualização dos dados
     comparaCanvas();
   }
   // Função para apagar último gráfico
@@ -275,7 +286,7 @@ export default function Canva({
         },
       );
 
-      console.log(response.data); 
+      console.log(response.data);
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
@@ -290,7 +301,6 @@ export default function Canva({
       console.error('Houve um erro ao atualizar:', error);
       // Tratar o erro adequadamente
     }
-
     comparaCanvas();
   }
   //Função para envio do e-mail
@@ -404,7 +414,7 @@ export default function Canva({
       .toLowerCase()
       .replace(/[\wÀ-ú']+|-/g, (match) => capitalize(match));
   }
-  //Função para calcular a nota
+  //Função para calcular a nota e retirada da senioridade baseado na nota
   function calculateFinalGrade() {
     const notesValues = Object.values(notes).map((note) => parseFloat(note));
     const total = notesValues.reduce((acc, curr) => acc + (curr || 0), 0);
@@ -434,7 +444,7 @@ export default function Canva({
       .get(`/cadastrados/${setorChefe}`)
       .then((response) => {
         const lista = response.data;
-        
+
         //Aqui faz a separação dos objetos e faz o parse na chave avaliacoes de cada objeto
         const objetoEncontrado = lista.find(
           (objeto) => objeto.id === idFuncionario,
@@ -468,7 +478,6 @@ export default function Canva({
               } catch (error) {
                 console.log('Erro ao fazer o parse', error);
               }
-
 
               //Recuperação do funcionário selecionado atual
               const listaNomeAtual = listaCadastro.filter(
@@ -572,6 +581,7 @@ export default function Canva({
     }
   }
 
+  //Função que muda o ano ao clique do usuário
   function handleYear(props) {
     setYearDate(anoAtual + props);
     setDataHistorico({ ano: anoAtual + props, mes: mouthDate });
@@ -1455,10 +1465,10 @@ export default function Canva({
               </>
             )}
 
-
-          {(dadosCanvaDoFuncionario.length == 0 || dadosCanvaDoFuncionario.map(item=>item.mes).join() != mouthDate) && (
+          {(dadosCanvaDoFuncionario.length == 0 ||
+            dadosCanvaDoFuncionario.map((item) => item.mes).join() !=
+              mouthDate) && (
             <>
-              
               <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
                 Solicitar feedback para o funcionário
               </h2>
