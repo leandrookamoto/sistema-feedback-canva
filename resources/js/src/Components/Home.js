@@ -2,35 +2,47 @@ import Chart from './Chart';
 import './Home.css';
 import { useState, useEffect } from 'react';
 
-export default function Home({ usuario, listaCadastro }) {
+export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   //Constantes para conseguir o ano atual
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
   //Constante responsável pela gravação do estado das avaliações realizadas para análise de metas
   const [avaliacoesRealizadas, setAvaliacoesRealizadas] = useState([]);
-  
 
   // Obter o mês atual (retornado como um número, onde janeiro é 0 e dezembro é 11)
   const mesAtual = dataAtual.getMonth();
 
-// Lista de nomes dos meses
-const meses = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
+  // Lista de nomes dos meses
+  const meses = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
 
-const ultimosMeses = [];
-for (let i = mesAtual; i > mesAtual - 5; i--) {
-  if (i >= 0) {
-    ultimosMeses.unshift(meses[i]);
+  // Obter o nome do mês correspondente ao índice retornado por getMonth()
+  const nomeMesAtual = meses[mesAtual];
+
+  const ultimosMeses = [];
+  for (let i = mesAtual; i > mesAtual - 5; i--) {
+    if (i >= 0) {
+      ultimosMeses.unshift(meses[i]);
+    }
   }
-}
 
-//Constante para verificar o número da meta
-const meta = (listaCadastro.length*0.86).toFixed(0);
+  //Constante para verificar o número da meta
+  const meta = (listaCadastro.length * 0.86).toFixed(0);
 
-// Exibir o array resultante
-console.log(ultimosMeses);
+  // Exibir o array resultante
+  console.log(ultimosMeses);
 
   //useEffect responsável pela retirada das informações do banco de dados através do props listaCadastro
   useEffect(() => {
@@ -49,6 +61,104 @@ console.log(ultimosMeses);
       setAvaliacoesRealizadas(arrayDeObjetos);
     }
   }, []);
+
+  //Lógica para o cálculo dos feedbacks feitos
+  //Constantes para comparação das avaliações (se tem) e datas
+  //Aqui puxa os dados de todos os funcionários que se cadastraram no feedback do funcionário
+  //Os dados do banco vem por props com a const avalDoFuncionario
+  let nomesDiferentes = [];
+  const listaCadastrados = listaCadastro.filter((obj1) => {
+    const obj2 = avalDoFuncionario.find((obj) => obj.nome === obj1.nome);
+    if (!obj2 || obj1.nome !== obj2.nome) {
+      nomesDiferentes.push(obj1);
+      return false;
+    }
+    return true;
+  });
+
+  console.log('1 listaCadastrados', listaCadastrados);
+  //Aqui somente faz o parse das avaliações para facilitar, pois vem como stringfy do banco
+  const comparaCadastrados = listaCadastrados.map((objeto) => {
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        return objeto;
+      }
+    }
+    return objeto;
+  });
+  console.log('2 comparaCadastrados', comparaCadastrados);
+  //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
+  //parar facilitar
+  let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
+    // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
+    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+      try {
+        // Tenta fazer o parse da string JSON e atribuir de volta à chave 'avaliacoes'
+        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+      } catch (error) {
+        // Se não for uma string JSON válida, mantém o valor original
+        return objeto;
+      }
+    }
+    // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
+    return objeto;
+  });
+  console.log('3 comparaAvaliacoesFuncionario', comparaAvaliacoesFuncionario);
+  //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
+  //as datas selecionadas pelo usuário
+  const verificaDataFuncionario = comparaAvaliacoesFuncionario.filter(
+    (objetoA) => {
+      try {
+        // Verifica se o objeto da Lista A possui a data e ano selecionados
+        const possuiDataAno =
+          Array.isArray(objetoA.avaliacoes) &&
+          objetoA.avaliacoes.some(
+            (avaliacao) =>
+              avaliacao.ano === anoAtual && avaliacao.mes === nomeMesAtual,
+          );
+
+        // Retorna verdadeiro se as condições forem atendidas
+        return possuiDataAno;
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    },
+  );
+  console.log('4 verificaDataFuncionario', verificaDataFuncionario);
+
+  const listaFeedChefe3 = comparaCadastrados.filter((objetoA) => {
+    try {
+      // Verifica se o objeto da Lista A possui a data e ano selecionados
+      const possuiDataAno =
+        Array.isArray(objetoA.avaliacoes) &&
+        objetoA.avaliacoes.some(
+          (avaliacao) =>
+            avaliacao.ano === anoAtual && avaliacao.mes === nomeMesAtual,
+        );
+
+      // Retorna verdadeiro se as condições forem atendidas
+      return possuiDataAno;
+    } catch (error) {
+      console.error('Erro ao fazer parsing do JSON:', error);
+      return false;
+    }
+  });
+  console.log('5 listaFeedChefe3', listaFeedChefe3);
+
+  //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
+  //significa que ambos fizeram o feedback e retorna numa lista final
+  let listaFinal2 = listaFeedChefe3.filter((objetoA) => {
+    // Verifica se o objeto da Lista A possui um objeto correspondente na Lista B
+    const objetoB = verificaDataFuncionario.find(
+      (objetoB) => objetoB.nome === objetoA.nome,
+    );
+    // Retorna true apenas se não houver correspondência na Lista B
+    return objetoB;
+  });
+  console.log('listaFinal2', listaFinal2);
 
   //Data para a configuração do Chart.js
   const data = {
@@ -74,6 +184,7 @@ console.log(ultimosMeses);
   return (
     <>
       <h5>Olá, {usuario}!</h5>
+      <h5>Números do mês atual: {nomeMesAtual}</h5>
       <div
         style={{
           width: '100%',
@@ -145,7 +256,10 @@ console.log(ultimosMeses);
               <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z" />
             </svg>
           </div>
-          <div style={{ width: '60%', padding: '5px' }}>Feedback feitos</div>
+          <div style={{ width: '60%', padding: '5px' }}>
+            <div>Completos</div>
+            <div>{listaFinal2.length}</div>
+          </div>
         </div>
         <div
           style={{
@@ -177,7 +291,10 @@ console.log(ultimosMeses);
               <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
             </svg>
           </div>
-          <div style={{ width: '60%', padding: '5px' }}>Faltam</div>
+          <div style={{ width: '60%', padding: '5px' }}>
+          <div>Faltam</div>
+            <div>{meta - listaFinal2.length}</div>
+          </div>
         </div>
         <div
           style={{

@@ -354,7 +354,7 @@ export default function App() {
         <div className="m-3" style={{ width: '70%' }}>
           {/* Aqui é a renderização da Home */}
           {homeRender && (
-            <Home usuario={usuario} listaCadastro={listaCadastro} />
+            <Home usuario={usuario} listaCadastro={listaCadastro} avalDoFuncionario={avalDoFuncionario} />
           )}
 
           {/* Aqui é a renderização do Cadastro */}
