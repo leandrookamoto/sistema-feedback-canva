@@ -224,6 +224,10 @@ export default function Planodeacao({
     fetchData();
   }
 
+  function avisaFuncionario() {
+    //Fazer lógica para avisar funcionário das pendências.
+  }
+
   //Lógica da lista de tudo completo!
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
@@ -293,6 +297,15 @@ export default function Planodeacao({
     listaRender.length > 0
       ? orderEmployeeData(listaRender).slice(startIndex, endIndex)
       : orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
+
+  //Constante para verificar se a lista do plano está completa
+  let completo = false;
+  try {
+    completo = listaFinal2.filter((item) => item.id == idFuncionario)[0]
+      .completo;
+  } catch (error) {
+    console.log('Erro ao verificar a chave completo!', error);
+  }
 
   // Função de pesquisa
   async function pesquisar(e) {
@@ -395,7 +408,7 @@ export default function Planodeacao({
       setInputs(newInputs);
       setNewIndexButton(null);
 
-      if(inputsFiltrados.length==1){
+      if (inputsFiltrados.length == 1) {
         setPlano(false);
         setGravarPlano(true);
       }
@@ -665,9 +678,24 @@ export default function Planodeacao({
             ano={ano}
             mes={mes}
           />
-          <button type="button" class="btn btn-primary mt-3" onClick={voltar}>
-            Voltar
-          </button>
+          <div className="d-flex">
+            <button
+              type="button"
+              class="btn btn-primary mt-3 mr-3"
+              onClick={voltar}
+            >
+              Voltar
+            </button>
+            {!completo && (
+              <button
+                type="button"
+                class="btn btn-primary mt-3 ml-3"
+                onClick={avisaFuncionario}
+              >
+                Avisar Funcionário
+              </button>
+            )}
+          </div>
         </>
       )}
       <Dialog
@@ -677,7 +705,7 @@ export default function Planodeacao({
         Title="Atenção"
         button="Não"
         button2="Sim"
-        handleButton={()=>apagar(newIndexButton)}
+        handleButton={() => apagar(newIndexButton)}
       />
     </>
   );
