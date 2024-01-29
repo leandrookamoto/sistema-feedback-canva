@@ -20,10 +20,12 @@ export default function AlertDialog({
   gravarObservacao,
   renderObservacao,
   titulo='Atenção',
-  valueObservacao 
- 
+  valueObservacao ,
+  openFerias
+
 }) {
 
+  console.log('openFerias', openFerias)
   return (
     <div>
       <Dialog
@@ -40,8 +42,10 @@ export default function AlertDialog({
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {descricao}
+              
             {observacao && (
               <>
+              
                 {renderObservacao.length == 0 && (
                   <div className="mb-3" style={{ width: '500px' }}>
                     <label

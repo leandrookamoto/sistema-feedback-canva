@@ -22,7 +22,7 @@ export default function Card({
   ferias,
   listaCadastro,
 }) {
-  console.log('ferias', ferias);
+
   let dadosFuncionario=[{ferias:false}]
   try {
     dadosFuncionario = listaCadastro.filter(

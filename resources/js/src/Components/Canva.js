@@ -1132,7 +1132,7 @@ export default function Canva({
               )}
           </div>
 
-          {console.log('dadosCanvaDoFuncionario', dadosCanvaDoFuncionario)}
+
           {/* Parte do canva de comparação  */}
           {dadosCanvaDoFuncionario.length > 0 &&
             dadosCanvaDoFuncionario.filter(
@@ -1269,10 +1269,6 @@ export default function Canva({
                   </div>
 
                   <div className="row">
-                    {console.log(
-                      'dadosCanvaDoFuncionario',
-                      dadosCanvaDoFuncionario,
-                    )}
                     <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
                       {dadosCanvaDoFuncionario.length > 0 &&
                         dadosCanvaDoFuncionario.map(

@@ -86,7 +86,7 @@ class CadastroController extends Controller
      public function updateFerias(Request $request, $id) {
         if (Cadastro::where('id', $id)->exists()) {
           $funcionario = Cadastro::find($id);
-          $funcionario->ferias = is_null($request->avaliacoes) ? $funcionario->ferias : $request->ferias;
+          $funcionario->ferias = is_null($request->ferias) ? $funcionario->ferias : $request->ferias;
           $funcionario->save();
   
           return response()->json([

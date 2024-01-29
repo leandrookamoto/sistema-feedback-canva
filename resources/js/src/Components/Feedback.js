@@ -31,12 +31,34 @@ export default function Feedback({
   const [listaCompara, setListaCompara] = useState([]);
   console.log('listaCompara', listaCompara);
   const [ferias, setFerias] = useState(false);
- 
+  const [listaFerias, setListaFerias] = useState([]);
+
   //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
+  const [openFerias, setOpenFerias] = useState(false);
 
   //Descrição do Dialog
   const confirmaApagar = 'Tem certeza?';
+
+  //Constantes para controle de data
+  const anoAtual = new Date().getFullYear();
+  const [ano, setAno] = useState(anoAtual);
+  const data = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+  const mesAtual = new Date().getMonth();
+  const nomeMes = data[mesAtual];
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -81,6 +103,26 @@ export default function Feedback({
     if (isDifferent) {
       setDadosFuncionario(dadosOrdenados);
     }
+
+    let newListaFerias = [];
+    try {
+      newListaFerias = dadosFuncionario.map((item) => item.ferias);
+      newListaFerias = JSON.parse(newListaFerias);
+    } catch (error) {
+      console.log('Erro ao fazer a listaFerias', error);
+    }
+    setListaFerias(newListaFerias);
+    console.log('newListaFerias', newListaFerias)
+    let newFerias=[]
+    try {
+      newFerias = newListaFerias.filter(
+        (item) => item.ano === anoAtual && item.mes === nomeMes,
+      );
+    } catch (error) {
+      console.log('Erro nno endpoint das férias');
+    }
+    console.log('newFerias',newFerias)
+    setFerias(newFerias.map(item=>item.ferias)[0]);
   }, [dadosFuncionario]);
   // UseEffect para renderizar manter os dados atualizados após a gravação ou edição do mesmo
   useEffect(() => {
@@ -140,7 +182,6 @@ export default function Feedback({
     animateScroll.scrollToTop({
       duration: 1000, // Defina a duração desejada em milissegundos
     });
-
   }, [page]);
 
   //Funções principais
@@ -226,10 +267,8 @@ export default function Feedback({
   }
 
   //Função para deixar de férias
-  function handleFerias(){
-    const novaFerias = !ferias
-    setFerias(novaFerias);
-    //Colocar lógica para gravar férias
+  async function handleFerias() {
+    setOpenFerias(true);
   }
 
   //Funções auxiliares
@@ -271,6 +310,39 @@ export default function Feedback({
     setHistorico((current) => !current);
     setAvaliar(false);
     setAvaliar2(false);
+  }
+
+  function handleData(e) {
+    setMes(e);
+  }
+
+  async function gravarFerias() {
+    setFerias((current) => !current);
+    setOpenFerias(false);
+
+    try {
+      const feriasExistenteIndex = listaFerias.findIndex(
+        (item) => item.ano === ano && item.mes === nomeMes,
+      );
+
+      if (feriasExistenteIndex !== -1) {
+        // Se já existe um objeto com o mesmo mês e ano, atualize-o
+        const novaLista = [...listaFerias];
+        novaLista[feriasExistenteIndex] = { ano: anoAtual, mes:nomeMes, ferias: !ferias };
+
+        await axios.put(`/cadastro/${idFuncionario}/update-ferias`, {
+          ferias: novaLista,
+        });
+      } else {
+        // Se não existe, adicione um novo objeto
+        const novoObjetoFerias = { ano: anoAtual, mes:nomeMes, ferias: !ferias }; // ajuste conforme necessário
+        await axios.put(`/cadastro/${idFuncionario}/update-ferias`, {
+          ferias: [...listaFerias, novoObjetoFerias],
+        });
+      }
+    } catch (error) {
+      console.log('Erro ao gravar férias', error);
+    }
   }
 
   return (
@@ -335,7 +407,7 @@ export default function Feedback({
                 voltar={editar}
                 botao5="Voltar"
                 editar={voltar}
-                botao6={!ferias?'Acionar férias':'Voltar ativo'}
+                botao6={!ferias ? 'Acionar férias' : 'Voltar ativo'}
                 onClickFerias={handleFerias}
                 ferias={ferias}
               />
@@ -372,6 +444,17 @@ export default function Feedback({
         //Função para fechar o Dialog
         handleButton={() => setValidacaoApagar(false)}
         Title="Cadastro"
+      />
+      <Dialog
+        open={openFerias}
+        descricao="Deseja acionar férias do funcionario?"
+        handleClose={gravarFerias}
+        button={ano && nomeMes ? 'Gravar' : ''}
+        button2="Fechar"
+        //Função para fechar o Dialog
+        handleButton={() => setOpenFerias(false)}
+        Title="Cadastro"
+        openFerias={openFerias}
       />
     </>
   );
