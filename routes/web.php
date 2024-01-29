@@ -51,6 +51,10 @@ Route::middleware([
 
     Route::put('/cadastro/{id}/update-avaliacao', [CadastroController::class, 'updateAvaliacao']);
 
+    Route::put('/cadastro/{id}/update-observacao', [CadastroController::class, 'updateObservacao']);
+
+    Route::put('/cadastro/{id}/update-ferias', [CadastroController::class, 'updateFerias']);
+
     Route::delete('/deleteFuncionario/{id}', [CadastroController::class, 'deleteFuncionario']);
 
     Route::put('/funcionario/{id}', [CadastroController::class, 'update']);

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cadastro;
 use App\Models\Atestado;
 use App\Models\Funcionario;
+use App\Models\User;
 
 class CadastroController extends Controller
 {
@@ -81,6 +82,38 @@ class CadastroController extends Controller
          ], 404);
      }
      }
+
+     public function updateFerias(Request $request, $id) {
+        if (Cadastro::where('id', $id)->exists()) {
+          $funcionario = Cadastro::find($id);
+          $funcionario->ferias = is_null($request->avaliacoes) ? $funcionario->ferias : $request->ferias;
+          $funcionario->save();
+  
+          return response()->json([
+              "message" => "records updated successfully"
+          ], 200);
+          } else {
+          return response()->json([
+              "message" => "Description not found"
+          ], 404);
+      }
+      }
+
+      public function updateObservacao(Request $request, $id) {
+        if (User::where('id', $id)->exists()) {
+          $funcionario = User::find($id);
+          $funcionario->observacao = is_null($request->observacao) ? $funcionario->observacao : $request->observacao;
+          $funcionario->save();
+  
+          return response()->json([
+              "message" => "records updated successfully"
+          ], 200);
+          } else {
+          return response()->json([
+              "message" => "Description not found"
+          ], 404);
+      }
+      }
 
      public function update(Request $request, $id) {
       if (Cadastro::where('id', $id)->exists()) {

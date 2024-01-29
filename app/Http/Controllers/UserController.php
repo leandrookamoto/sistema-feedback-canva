@@ -26,6 +26,8 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'setor' => $user->setor,
+                'observacao'=> $user->observacao,
+                'id'=> $user->id,
             ]);
         } else {
             // Retorna uma resposta adequada caso não haja usuário autenticado

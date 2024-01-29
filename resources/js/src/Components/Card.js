@@ -18,8 +18,19 @@ export default function Card({
   voltar,
   onClickBotao1,
   editar,
-  botao5
+  botao5,
+  ferias,
+  listaCadastro,
 }) {
+  console.log('ferias', ferias);
+  let dadosFuncionario=[{ferias:false}]
+  try {
+    dadosFuncionario = listaCadastro.filter(
+      (item) => item.id === idFuncionario,
+    );
+  } catch (error) {
+    console.log('Erro ao fazer filter',error)
+  }
   return (
     <>
       <div className="solution_card custom-width-class">
@@ -125,6 +136,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary mt-3"
                           onClick={onClickBotao1}
+                          disabled={dadosFuncionario[0].ferias}
                         >
                           {botao1}
                         </button>
@@ -134,6 +146,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={historicoBotao}
+                          disabled={dadosFuncionario[0].ferias}
                         >
                           {botao2}
                         </button>
@@ -143,6 +156,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={apagarBotao}
+                          disabled={dadosFuncionario[0].ferias}
                         >
                           {botao3}
                         </button>
@@ -152,6 +166,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={voltar}
+                          disabled={dadosFuncionario[0].ferias}
                         >
                           {botao4}
                         </button>

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('administrador');
             $table->json('avaliacoes')->nullable();
             $table->json('plano')->nullable();
+            $table->json('ferias')->nullable();
             $table->timestamps();
         });
     }

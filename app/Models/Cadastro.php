@@ -16,7 +16,9 @@ class Cadastro extends Model
         'setor',
         'administrador',
         'avaliacoes',
-        'plano'
+        'plano',
+        'ferias',
+        'observacao'
     ];
 }
 

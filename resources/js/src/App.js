@@ -26,11 +26,13 @@ export default function App() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [setor, setSetor] = useState('');
+  const [dadosUsuarioLogado, setDadosUsuarioLogado] = useState({});
   //Constante que grava todos os dados do banco
   const [listaCadastro, setListaCadastro] = useState([]);
   const [newId, setNewId] = useState(0);
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [isValid, setIsValid] = useState(true);
+  const [idUsuario, setIdUsuario] = useState(null);
   //Constante separada principalmente para renderização de dados de um funcionário específico
   const [dadosFuncionario, setDadosFuncionario] = useState({});
   const [dados, setDados] = useState({});
@@ -42,7 +44,7 @@ export default function App() {
 
   //Constantes para o envio de informação do componente pendentes para o plano
   const [anoPai, setAnoPai] = useState(null);
-  const [mesPai,setMesPai] = useState('');
+  const [mesPai, setMesPai] = useState('');
   const [emailPai, setEmailPai] = useState('');
 
   //Variáveis que controlam a abertura dos Dialogs
@@ -66,10 +68,15 @@ export default function App() {
       try {
         //Faz a requisição das informações do login do usuário
         const responseUser = await axios.get('/user');
+
         const usuarioLogado = responseUser.data.name;
         const setor = responseUser.data.setor;
+        const newIdUsuario = responseUser.data.id;
+        setDadosUsuarioLogado(responseUser.data);
         setUsuario(usuarioLogado);
         setSetorChefe(setor);
+        setIdUsuario(newIdUsuario);
+        console.log('dadosUsuario', responseUser.data);
 
         //Faz a requisição das informações segundo o setor do usuário
         const responseListaOriginal = await axios.get('/cadastrados/' + setor);
@@ -127,108 +134,107 @@ export default function App() {
     fetchData();
   }, []);
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
-  useEffect(()=>{
-    if(!feedback){
+  useEffect(() => {
+    if (!feedback) {
       setDados([]);
-    }  
-  },[feedback]);
+    }
+  }, [feedback]);
 
   //Funções principais
   //Função para cadastrar os funcionários que vem do CadastroComponent
- //Função para cadastrar os funcionários que vem do CadastroComponent
- async function gravar() {
-  try {
-    if (dadosFuncionario.id) {
-      // Edição de funcionário existente
-      await axios.put(`/funcionario/${dadosFuncionario.id}`, {
-        nome: nome,
-        email: email,
-        setor: setor,
-      });
-      setEdicaoSucesso(true);
-      //Renderiza o componente feedback após a gravação de dados
-      setCadastrar(false);
-      setFeedback(true);
-      setHomeRender(false);
-      setPendentes(false);
-    } else {
-      // Validação dos inputs e cadastro de novo funcionário
-      if (!nome || !email || !setor) {
-        setOpen(true); // Variável para a abertura do Dialog/Modal/Popup
-        return; // Sai da função se os campos não estiverem preenchidos
-      }
-
-      if (!isValid) {
-        setOpenEmail(true); // Variável para abertura do Dialog de aviso sobre o email inválido
-        return; // Sai da função se o email não for válido
-      }
-
-      const emailJaExiste = listaCadastro.some(
-        (item) => item.email === email,
-      );
-
-      if (emailJaExiste) {
-        console.log('O e-mail já existe na lista!');
-        setOpenCadastro(true);
-        return; // Sai da função se o email já estiver na lista
-      }
-
-      const novoCadastro = {
-        nome: nome,
-        email: email,
-        setor: setor,
-        administrador: usuario,
-        id: newId,
-      };
-
-      // Cadastro do novo funcionário
-      await axios.post('/cadastrar-usuario', novoCadastro).then(() => {
-        setCadastroSucesso(true);
+  //Função para cadastrar os funcionários que vem do CadastroComponent
+  async function gravar() {
+    try {
+      if (dadosFuncionario.id) {
+        // Edição de funcionário existente
+        await axios.put(`/funcionario/${dadosFuncionario.id}`, {
+          nome: nome,
+          email: email,
+          setor: setor,
+        });
+        setEdicaoSucesso(true);
+        //Renderiza o componente feedback após a gravação de dados
         setCadastrar(false);
         setFeedback(true);
         setHomeRender(false);
         setPendentes(false);
-        setNome('');
-        setEmail('');
-        setSetor('');
-        setDadosFuncionario({});
-      });
+      } else {
+        // Validação dos inputs e cadastro de novo funcionário
+        if (!nome || !email || !setor) {
+          setOpen(true); // Variável para a abertura do Dialog/Modal/Popup
+          return; // Sai da função se os campos não estiverem preenchidos
+        }
 
-      setListaCadastro([...listaCadastro, novoCadastro]);
-      setNewId(newId + 1);
+        if (!isValid) {
+          setOpenEmail(true); // Variável para abertura do Dialog de aviso sobre o email inválido
+          return; // Sai da função se o email não for válido
+        }
+
+        const emailJaExiste = listaCadastro.some(
+          (item) => item.email === email,
+        );
+
+        if (emailJaExiste) {
+          console.log('O e-mail já existe na lista!');
+          setOpenCadastro(true);
+          return; // Sai da função se o email já estiver na lista
+        }
+
+        const novoCadastro = {
+          nome: nome,
+          email: email,
+          setor: setor,
+          administrador: usuario,
+          id: newId,
+        };
+
+        // Cadastro do novo funcionário
+        await axios.post('/cadastrar-usuario', novoCadastro).then(() => {
+          setCadastroSucesso(true);
+          setCadastrar(false);
+          setFeedback(true);
+          setHomeRender(false);
+          setPendentes(false);
+          setNome('');
+          setEmail('');
+          setSetor('');
+          setDadosFuncionario({});
+        });
+
+        setListaCadastro([...listaCadastro, novoCadastro]);
+        setNewId(newId + 1);
+      }
+
+      // Atualização da lista após edição ou cadastro
+      let response = null;
+      try {
+        response = await axios.get(`/cadastrados/${setorChefe}`);
+      } catch (error) {
+        console.log('Erro ao requisitar os dados do setor', error);
+      }
+      const lista = response.data;
+
+      //Após a gravação ou edição recupera os valores do banco de dados
+      const novaLista = lista.find((item) => item.email === email);
+      setDados(novaLista);
+
+      setListaCadastro(lista);
+
+      const id = lista.length ? lista[lista.length - 1].id : 0;
+      setIdFuncionario(id);
+
+      // Limpa os campos após a atualização ou cadastro
+      setNome('');
+      setEmail('');
+      setSetor('');
+      setDadosFuncionario({});
+
+      console.log('Atualização realizada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gravar:', error);
+      // Lidar com possíveis erros
     }
-
-    // Atualização da lista após edição ou cadastro
-    let response = null
-    try{
-    response = await axios.get(`/cadastrados/${setorChefe}`);
-    }catch(error){
-      console.log('Erro ao requisitar os dados do setor',error);
-    }
-    const lista = response.data;
-    
-
-    //Após a gravação ou edição recupera os valores do banco de dados
-    const novaLista = lista.find((item) => item.email === email);
-    setDados(novaLista);
-
-    setListaCadastro(lista);
-
-    const id = lista.length ? lista[lista.length - 1].id : 0;
-    setIdFuncionario(id);
-
-    // Limpa os campos após a atualização ou cadastro
-    setNome('');
-    setEmail('');
-    setSetor('');
-    setDadosFuncionario({});
-
-    console.log('Atualização realizada com sucesso!');
-  } catch (error) {
-    console.error('Erro ao gravar:', error);
-    // Lidar com possíveis erros
   }
-}
 
   //Funções auxiliares
   //Função para padronizar a digitação dos inputs
@@ -312,7 +318,7 @@ export default function App() {
     setPlanoDeAcao(true);
   }
   //Função disparada no componente pendentes para troca para o componente feedback
-  function handleChangeFeed(e){
+  function handleChangeFeed(e) {
     setHomeRender(e.homeRender);
     setCadastrar(e.cadastrar);
     setFeedback(e.feedback);
@@ -321,7 +327,7 @@ export default function App() {
   }
 
   //Função disparada no componente pendentes para troca para o componente plano
-  function handleChangePlano(e){
+  function handleChangePlano(e) {
     setHomeRender(e.homeRender);
     setCadastrar(e.cadastrar);
     setFeedback(e.feedback);
@@ -331,7 +337,6 @@ export default function App() {
     setMesPai(e.mes);
     setEmailPai(e.email);
   }
-
 
   return (
     <main>
@@ -354,7 +359,13 @@ export default function App() {
         <div className="m-3" style={{ width: '70%' }}>
           {/* Aqui é a renderização da Home */}
           {homeRender && (
-            <Home usuario={usuario} listaCadastro={listaCadastro} avalDoFuncionario={avalDoFuncionario} />
+            <Home
+              usuario={usuario}
+              listaCadastro={listaCadastro}
+              dadosUsuarioLogado={dadosUsuarioLogado}
+              avalDoFuncionario={avalDoFuncionario}
+              idUsuario={idUsuario}
+            />
           )}
 
           {/* Aqui é a renderização do Cadastro */}
@@ -382,11 +393,10 @@ export default function App() {
               dados={dados}
               setorChefe={setorChefe}
               avalDoFuncionario={avalDoFuncionario}
-  
             />
           )}
-            {/* Aqui é a renderização do componente do feedback */}
-            {planoDeAcao && (
+          {/* Aqui é a renderização do componente do feedback */}
+          {planoDeAcao && (
             <Planodeacao
               avalDoFuncionario={avalDoFuncionario}
               setorChefe={setorChefe}
@@ -399,10 +409,10 @@ export default function App() {
           {pendentes && (
             <Pendentes
               avalDoFuncionario={avalDoFuncionario}
-              onChangeDados={e=>setDados(e)}
-              onChangeComponenteFeedBack={e=>handleChangeFeed(e)}
+              onChangeDados={(e) => setDados(e)}
+              onChangeComponenteFeedBack={(e) => handleChangeFeed(e)}
               setorChefe={setorChefe}
-              onChangeComponentePlano={e=>handleChangePlano(e)}
+              onChangeComponentePlano={(e) => handleChangePlano(e)}
             />
           )}
         </div>

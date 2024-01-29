@@ -337,6 +337,7 @@ export default function Feedback({
                 editar={voltar}
                 botao6={!ferias?'Acionar férias':'Voltar ativo'}
                 onClickFerias={handleFerias}
+                ferias={ferias}
               />
             </div>
           ))}
@@ -357,6 +358,7 @@ export default function Feedback({
           avaliar={avaliar}
           setorChefe={setorChefe}
           avalDoFuncionario={avalDoFuncionario}
+          ferias={ferias}
         />
       )}
       {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}
