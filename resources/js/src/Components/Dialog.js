@@ -4,6 +4,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import {useEffect, useState} from 'react';
 
 //As props são enviadas para os componentes App.js, Feedback.js e Canva.js
 export default function AlertDialog({
@@ -16,11 +17,13 @@ export default function AlertDialog({
   handleButton,
   observacao = false,
   onChangeObservacao,
-  valueObservacao,
   gravarObservacao,
   renderObservacao,
-  titulo='Atenção'
+  titulo='Atenção',
+  valueObservacao 
+ 
 }) {
+
   return (
     <div>
       <Dialog

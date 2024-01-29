@@ -91,8 +91,8 @@ export default function Canva({
     //para comparação posterior com a lista das avaliações feitas pelos próprios funcionários
     const newName = listaNomeAtual.map((item) => item.nome).join();
 
-    //Variável usado para gravação dos dados da avaliação do próprio funcionário para retirada de 
-    //dados puxados do banco do software do funcionário para realizar a renderização do canva da 
+    //Variável usado para gravação dos dados da avaliação do próprio funcionário para retirada de
+    //dados puxados do banco do software do funcionário para realizar a renderização do canva da
     //avaliação feita pelo funcionário. Os dados que são puxados do banco estão no avalDoFuncionario
     let dadosDoFuncionarioDoProprioCanva = avalDoFuncionario.find(
       (item) => item.nome == newName,
@@ -129,10 +129,16 @@ export default function Canva({
         : dadosParaCanvaDoFuncionario.filter(
             (item) =>
               item.ano ===
-                dadosParaCanvaDoFuncionario[dadosParaCanvaDoFuncionario.length - 1].ano &&
+                dadosParaCanvaDoFuncionario[
+                  dadosParaCanvaDoFuncionario.length - 1
+                ].ano &&
               item.mes ===
-                dadosParaCanvaDoFuncionario[dadosParaCanvaDoFuncionario.length - 1].mes,
+                dadosParaCanvaDoFuncionario[
+                  dadosParaCanvaDoFuncionario.length - 1
+                ].mes,
           );
+
+    console.log('canvaParseData', canvaParseData);
 
     //Comparação entre o nome dos dados do funcionário selecionado com o nome e os dados
     //do canva já feito do gestor
@@ -147,9 +153,8 @@ export default function Canva({
       );
     }
 
- 
-    //listaCanva é a variável que está gravado todos os dados específicos do funcionário selecionado 
-    // para geração do canva do gestor 
+    //listaCanva é a variável que está gravado todos os dados específicos do funcionário selecionado
+    // para geração do canva do gestor
     if (listaCanva.length > 0) {
       let render = null;
       if (dataHistorico === 'Última Data') {
@@ -1127,6 +1132,7 @@ export default function Canva({
               )}
           </div>
 
+          {console.log('dadosCanvaDoFuncionario', dadosCanvaDoFuncionario)}
           {/* Parte do canva de comparação  */}
           {dadosCanvaDoFuncionario.length > 0 &&
             dadosCanvaDoFuncionario.filter(
@@ -1263,6 +1269,10 @@ export default function Canva({
                   </div>
 
                   <div className="row">
+                    {console.log(
+                      'dadosCanvaDoFuncionario',
+                      dadosCanvaDoFuncionario,
+                    )}
                     <div className="customBorder3 col-2 d-flex justify-content-center align-items-center">
                       {dadosCanvaDoFuncionario.length > 0 &&
                         dadosCanvaDoFuncionario.map(
@@ -1466,8 +1476,8 @@ export default function Canva({
             )}
 
           {(dadosCanvaDoFuncionario.length == 0 ||
-            dadosCanvaDoFuncionario.map((item) => item.mes).join() !=
-              mouthDate) && (
+            dadosCanvaDoFuncionario.map((item) => item.mes)[0] != mouthDate ||
+            dadosCanvaDoFuncionario.map((item) => item.ano)[0] != yearDate) && (
             <>
               <h2 className="mt-2" style={{ color: '#a5a3a3' }}>
                 Solicitar feedback para o funcionário

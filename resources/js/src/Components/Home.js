@@ -27,6 +27,7 @@ export default function Home({
   const [valueObservacao, setValueObservacao] = useState('');
   const [listaObservacao, setListaObservacao] = useState([]);
   const [renderObservacao, setRenderObservacao] = useState([]);
+  const [updateFlag, setUpdateFlag] = useState(false);
 
   // Lista de nomes dos meses
   const meses = [
@@ -108,6 +109,7 @@ export default function Home({
     } catch (error) {
       console.log('Erro ao fazer o filter do render',error);
     }
+    setValueObservacao('');
   }, [ano, nomeMes]);
 
   console.log('renderObservacao',renderObservacao);
@@ -290,6 +292,7 @@ export default function Home({
         (item) => item.mes === nomeMes && item.ano === ano
       );
   
+      setOpen(false);
       if (observacaoExistente) {
         // Substituir o objeto existente
         const novaLista = listaObservacao.map((item) =>
@@ -577,7 +580,8 @@ export default function Home({
       <Dialog
         open={open}
         // descricao={descricao}
-        handleClose={() => setOpen(false)}
+        button={renderObservacao.length==0?'':'Editar'}
+        handleClose={editar} //Coloquei no handleClose para não modificar muito o código
         Title="Atenção"
         observacao={observacao}
         onChangeObservacao={onChangeObservacao}
@@ -585,8 +589,8 @@ export default function Home({
         gravarObservacao={gravarObservacao}
         renderObservacao={renderObservacao}
         titulo={renderObservacao.length==0?'Observações':`Observações ${nomeMes} ${ano}`}
-        button2={renderObservacao.length==0?'':'Editar'}
-        handleButton={editar}
+        button2='Fechar'
+        handleButton={() => setOpen(false)}
 
       />
     </>
