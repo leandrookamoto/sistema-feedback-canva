@@ -8,6 +8,8 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   const anoAtual = dataAtual.getFullYear();
   //Constante responsável pela gravação do estado das avaliações realizadas para análise de metas
   const [avaliacoesRealizadas, setAvaliacoesRealizadas] = useState([]);
+  const [mes,setMes] = useState(mesAtual);
+  const [ano,setAno] = useState(anoAtual);
 
   // Obter o mês atual (retornado como um número, onde janeiro é 0 e dezembro é 11)
   const mesAtual = dataAtual.getMonth();
@@ -29,10 +31,10 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   ];
 
   // Obter o nome do mês correspondente ao índice retornado por getMonth()
-  const nomeMesAtual = meses[mesAtual];
+  const nomeMesAtual = meses[mes];
 
   const ultimosMeses = [];
-  for (let i = mesAtual; i > mesAtual - 5; i--) {
+  for (let i = mes; i > mes - 5; i--) {
     if (i >= 0) {
       ultimosMeses.unshift(meses[i]);
     }
@@ -61,6 +63,11 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
       setAvaliacoesRealizadas(arrayDeObjetos);
     }
   }, []);
+
+  //Funções principais
+  function handleMeses(e){
+    setMes(e.currentTarget.value);
+  }
 
   //Lógica para o cálculo dos feedbacks feitos
   //Constantes para comparação das avaliações (se tem) e datas
@@ -225,6 +232,83 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   return (
     <>
       <h5>Olá, {usuario}!</h5>
+      <div className="container w-100 mb-3">
+            <h5>Escolha a data</h5>
+            <div className="container text-center">
+              <div className="row align-items-start mb-1">
+                <div
+                  className={
+                    anoAtual - 2 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual - 2)}
+                >
+                  {anoAtual - 2}
+                </div>
+                <div
+                  className={
+                    anoAtual - 1 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual - 1)}
+                >
+                  {anoAtual - 1}
+                </div>
+                <div
+                  className={
+                    anoAtual === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual)}
+                >
+                  {anoAtual}
+                </div>
+                <div
+                  className={
+                    anoAtual + 1 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual + 1)}
+                >
+                  {anoAtual + 1}
+                </div>
+                <div
+                  className={
+                    anoAtual + 2 === ano
+                      ? 'col border p-1 bg-dark text-white'
+                      : 'col border p-1'
+                  }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setAno(anoAtual + 2)}
+                >
+                  {anoAtual + 2}
+                </div>
+              </div>
+            </div>
+            <select
+              className="form-select mb-2"
+              aria-label="Default select example"
+              onChange={handleMeses}
+              value={mes}
+            >
+              <option selected>Escolha a data</option>
+              {meses.map((item, index) => (
+                <>
+                  <option key={index} value={index}>
+                    {item}
+                  </option>
+                </>
+              ))}
+            </select>
+          </div>
       <h5>Números do mês atual: {nomeMesAtual}</h5>
       <div
         style={{
