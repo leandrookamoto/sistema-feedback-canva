@@ -31,7 +31,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   ];
 
   // Obter o nome do mês correspondente ao índice retornado por getMonth()
-  const nomeMesAtual = meses[mes];
+  const nomeMes = meses[mes];
 
   const ultimosMeses = [];
   for (let i = mes; i > mes - 5; i--) {
@@ -123,7 +123,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
           Array.isArray(objetoA.avaliacoes) &&
           objetoA.avaliacoes.some(
             (avaliacao) =>
-              avaliacao.ano === anoAtual && avaliacao.mes === nomeMesAtual,
+              avaliacao.ano === ano && avaliacao.mes === nomeMes,
           );
 
         // Retorna verdadeiro se as condições forem atendidas
@@ -143,7 +143,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
         Array.isArray(objetoA.avaliacoes) &&
         objetoA.avaliacoes.some(
           (avaliacao) =>
-            avaliacao.ano === anoAtual && avaliacao.mes === nomeMesAtual,
+            avaliacao.ano === ano && avaliacao.mes === nomeMes,
         );
 
       // Retorna verdadeiro se as condições forem atendidas
@@ -309,7 +309,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
               ))}
             </select>
           </div>
-      <h5>Números do mês atual: {nomeMesAtual}</h5>
+      <h5>Números do mês atual: {nomeMes}</h5>
       <div
         style={{
           width: '100%',
