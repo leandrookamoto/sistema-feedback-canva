@@ -30,9 +30,8 @@ export default function Feedback({
   const [compararAval, setCompararAval] = useState(false);
   const [listaCompara, setListaCompara] = useState([]);
   console.log('listaCompara', listaCompara);
-
-  console.log('dados', dados);
-
+  const [ferias, setFerias] = useState(false);
+ 
   //Const para o Dialog de aviso
   const [validacaoApagar, setValidacaoApagar] = useState(false);
 
@@ -226,6 +225,13 @@ export default function Feedback({
     setHistorico(false);
   }
 
+  //Função para deixar de férias
+  function handleFerias(){
+    const novaFerias = !ferias
+    setFerias(novaFerias);
+    //Colocar lógica para gravar férias
+  }
+
   //Funções auxiliares
   //Função auxiliar para a ordenação dos funcionários por nome
   function orderEmployeeData(data) {
@@ -329,6 +335,8 @@ export default function Feedback({
                 voltar={editar}
                 botao5="Voltar"
                 editar={voltar}
+                botao6={!ferias?'Acionar férias':'Voltar ativo'}
+                onClickFerias={handleFerias}
               />
             </div>
           ))}
