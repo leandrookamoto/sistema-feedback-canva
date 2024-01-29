@@ -8,11 +8,11 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
   const anoAtual = dataAtual.getFullYear();
   //Constante responsável pela gravação do estado das avaliações realizadas para análise de metas
   const [avaliacoesRealizadas, setAvaliacoesRealizadas] = useState([]);
-  const [mes,setMes] = useState(mesAtual);
-  const [ano,setAno] = useState(anoAtual);
-
   // Obter o mês atual (retornado como um número, onde janeiro é 0 e dezembro é 11)
   const mesAtual = dataAtual.getMonth();
+  //Constantes para gravação de estado
+  const [mes,setMes] = useState(mesAtual);
+  const [ano,setAno] = useState(anoAtual);
 
   // Lista de nomes dos meses
   const meses = [
@@ -174,7 +174,7 @@ export default function Home({ usuario, listaCadastro, avalDoFuncionario }) {
       try {
         const possuiDataAno = Array.isArray(objetoA.avaliacoes) &&
           objetoA.avaliacoes.some(
-            (avaliacao) => avaliacao.ano === anoAtual && avaliacao.mes === mes,
+            (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
           );
         return possuiDataAno;
       } catch (error) {
