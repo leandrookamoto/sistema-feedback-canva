@@ -400,6 +400,7 @@ export default function Home({
 
     // Iterar sobre os últimos meses e obter o número de pessoas de férias para cada mês
     const obterNumerosFeriasPorMeses = async () => {
+      const response = await axios.get(`/cadastrados/${setorChefe}`);
       const resultados = await Promise.all(
         ultimosMeses.map(async (nomeMes) => {
           const numeroFerias = await obterNumeroFerias(
@@ -407,7 +408,7 @@ export default function Home({
             ano,
             nomeMes,
           );
-          return listaCadastro.length - numeroFerias;
+          return ((response.data.length - numeroFerias)*0.86).toFixed(0);
         }),
       );
 
