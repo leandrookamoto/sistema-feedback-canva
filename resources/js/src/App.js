@@ -142,7 +142,6 @@ export default function App() {
 
   //Funções principais
   //Função para cadastrar os funcionários que vem do CadastroComponent
-  //Função para cadastrar os funcionários que vem do CadastroComponent
   async function gravar() {
     try {
       if (dadosFuncionario.id) {
@@ -150,7 +149,7 @@ export default function App() {
         await axios.put(`/funcionario/${dadosFuncionario.id}`, {
           nome: nome,
           email: email,
-          setor: setor,
+          setor: setorChefe,
         });
         setEdicaoSucesso(true);
         //Renderiza o componente feedback após a gravação de dados
@@ -160,7 +159,7 @@ export default function App() {
         setPendentes(false);
       } else {
         // Validação dos inputs e cadastro de novo funcionário
-        if (!nome || !email || !setor) {
+        if (!nome || !email ) {
           setOpen(true); // Variável para a abertura do Dialog/Modal/Popup
           return; // Sai da função se os campos não estiverem preenchidos
         }
@@ -183,7 +182,7 @@ export default function App() {
         const novoCadastro = {
           nome: nome,
           email: email,
-          setor: setor,
+          setor: setorChefe,
           administrador: usuario,
           id: newId,
         };

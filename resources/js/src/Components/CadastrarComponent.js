@@ -48,7 +48,8 @@ export default function CadastrarComponent({
         </p>
       )}
 
-      <div className="mb-3">
+        {/* Parte do cadastramento de setor desativado */}
+      {/* <div className="mb-3">
         <label htmlFor="exampleFormControlInput1" className="form-label">
           Setor
         </label>
@@ -62,7 +63,7 @@ export default function CadastrarComponent({
           <option value="Setor A">Setor A</option>
           <option value="Setor B">Setor B</option>
         </select>
-      </div>
+      </div> */}
 
       <button type="button" className="btn btn-primary" onClick={gravar}>
         Gravar
