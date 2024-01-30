@@ -88,6 +88,29 @@ export default function Feedback({
   //Const para evitar que o usuário apague
   const apagarRef = useRef(true);
 
+  //Função de atualização de férias
+  function atualizaFerias(){
+    let newListaFerias = [];
+    try {
+      newListaFerias = dadosFuncionario.map((item) => item.ferias);
+      newListaFerias = JSON.parse(newListaFerias);
+    } catch (error) {
+      console.log('Erro ao fazer a listaFerias', error);
+    }
+    setListaFerias(newListaFerias);
+    console.log('newListaFerias', newListaFerias);
+    let newFerias = [];
+    try {
+      newFerias = newListaFerias.filter(
+        (item) => item.ano === anoAtual && item.mes === nomeMes,
+      );
+    } catch (error) {
+      console.log('Erro no endpoint das férias');
+    }
+    console.log('newFerias', newFerias);
+    setFerias(newFerias.map((item) => item.ferias)[0]);
+  }
+
   //useEffects
   // useEffect para a ordenação por nome
   useEffect(() => {
@@ -104,25 +127,7 @@ export default function Feedback({
       setDadosFuncionario(dadosOrdenados);
     }
 
-    let newListaFerias = [];
-    try {
-      newListaFerias = dadosFuncionario.map((item) => item.ferias);
-      newListaFerias = JSON.parse(newListaFerias);
-    } catch (error) {
-      console.log('Erro ao fazer a listaFerias', error);
-    }
-    setListaFerias(newListaFerias);
-    console.log('newListaFerias', newListaFerias)
-    let newFerias=[]
-    try {
-      newFerias = newListaFerias.filter(
-        (item) => item.ano === anoAtual && item.mes === nomeMes,
-      );
-    } catch (error) {
-      console.log('Erro nno endpoint das férias');
-    }
-    console.log('newFerias',newFerias)
-    setFerias(newFerias.map(item=>item.ferias)[0]);
+    atualizaFerias();
   }, [dadosFuncionario]);
   // UseEffect para renderizar manter os dados atualizados após a gravação ou edição do mesmo
   useEffect(() => {
@@ -186,20 +191,28 @@ export default function Feedback({
 
   //Funções principais
   //Seleciona pelo clique no card
-  function selecionarFuncionario(id) {
-    const funcionarioSelecionado = listaCadastro.find(
-      (funcionario) => funcionario.id === id,
-    );
-    if (funcionarioSelecionado) {
-      setDadosFuncionario([funcionarioSelecionado]);
-      setIdFuncionario(id);
-      setPage(1);
-      setListaFiltrada([funcionarioSelecionado]);
-      setFuncionarioEscolhido(true);
-    } else {
-      console.error(`Funcionário com o ID ${id} não encontrado.`);
+  async function selecionarFuncionario(id) {
+    let funcionarioSelecionado = [];
+    try {
+      const lista = funcionarioSelecionado = await axios.get(`/cadastrados/${setorChefe}`);
+      funcionarioSelecionado = lista.data.find(
+        (funcionario) => funcionario.id === id,
+      );
+  
+      if (funcionarioSelecionado) {
+        setDadosFuncionario([funcionarioSelecionado]);
+        setIdFuncionario(id);
+        setPage(1);
+        setListaFiltrada([funcionarioSelecionado]);
+        setFuncionarioEscolhido(true);
+      } else {
+        console.error(`Funcionário com o ID ${id} não encontrado.`);
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar funcionário', error);
     }
   }
+  
   //Função para apagar funcionário
   async function apagar() {
     //Impede que ocorra que o usuário apague acidentalmente
@@ -266,6 +279,8 @@ export default function Feedback({
     setHistorico(false);
   }
 
+  console.log('listaFerias', listaFerias);
+
   //Função para deixar de férias
   async function handleFerias() {
     setOpenFerias(true);
@@ -328,14 +343,22 @@ export default function Feedback({
       if (feriasExistenteIndex !== -1) {
         // Se já existe um objeto com o mesmo mês e ano, atualize-o
         const novaLista = [...listaFerias];
-        novaLista[feriasExistenteIndex] = { ano: anoAtual, mes:nomeMes, ferias: !ferias };
+        novaLista[feriasExistenteIndex] = {
+          ano: anoAtual,
+          mes: nomeMes,
+          ferias: !ferias,
+        };
 
         await axios.put(`/cadastro/${idFuncionario}/update-ferias`, {
           ferias: novaLista,
         });
       } else {
         // Se não existe, adicione um novo objeto
-        const novoObjetoFerias = { ano: anoAtual, mes:nomeMes, ferias: !ferias }; // ajuste conforme necessário
+        const novoObjetoFerias = {
+          ano: anoAtual,
+          mes: nomeMes,
+          ferias: !ferias,
+        }; // ajuste conforme necessário
         await axios.put(`/cadastro/${idFuncionario}/update-ferias`, {
           ferias: [...listaFerias, novoObjetoFerias],
         });
@@ -447,10 +470,10 @@ export default function Feedback({
       />
       <Dialog
         open={openFerias}
-        descricao="Deseja acionar férias do funcionario?"
+        descricao={!ferias?"Deseja acionar férias do funcionario?":"Deseja tirar das férias?"}
         handleClose={gravarFerias}
-        button={ano && nomeMes ? 'Gravar' : ''}
-        button2="Fechar"
+        button={ano && nomeMes ? 'Sim' : ''}
+        button2="Não"
         //Função para fechar o Dialog
         handleButton={() => setOpenFerias(false)}
         Title="Cadastro"

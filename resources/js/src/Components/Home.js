@@ -9,6 +9,7 @@ export default function Home({
   avalDoFuncionario,
   idUsuario,
   dadosUsuarioLogado,
+  setorChefe
 }) {
   //Constantes para conseguir o ano atual
   const dataAtual = new Date();
@@ -21,13 +22,13 @@ export default function Home({
   const [mes, setMes] = useState(mesAtual);
   const [ano, setAno] = useState(anoAtual);
   const [open, setOpen] = useState(false);
+  const [numeroFerias,setNumeroFerias] = useState(null);
 
   //COnstante para adicionar a observação
   const [observacao, setObservacao] = useState(false);
   const [valueObservacao, setValueObservacao] = useState('');
   const [listaObservacao, setListaObservacao] = useState([]);
   const [renderObservacao, setRenderObservacao] = useState([]);
-  const [updateFlag, setUpdateFlag] = useState(false);
 
   // Lista de nomes dos meses
   const meses = [
@@ -58,9 +59,6 @@ export default function Home({
   //Constante para verificar o número da meta
   const meta = (listaCadastro.length * 0.86).toFixed(0);
 
-  // Exibir o array resultante
-  console.log(ultimosMeses);
-
   //useEffect responsável pela retirada das informações do banco de dados através do props listaCadastro
   useEffect(() => {
     const lista = listaCadastro.map((item) => item.avaliacoes);
@@ -77,6 +75,8 @@ export default function Home({
       //gravação do local
       setAvaliacoesRealizadas(arrayDeObjetos);
     }
+
+    atualizaFerias();
   }, []);
 
   useEffect(() => {
@@ -112,9 +112,6 @@ export default function Home({
     setValueObservacao('');
   }, [ano, nomeMes]);
 
-  console.log('renderObservacao',renderObservacao);
-  console.log('listaObservacao', listaObservacao);
-
   //Funções principais
   function handleMeses(e) {
     setMes(e.currentTarget.value);
@@ -123,6 +120,43 @@ export default function Home({
   function handleAdicionar() {
     setOpen(true);
     setObservacao(true);
+  }
+
+  useEffect(()=>{
+    atualizaFerias();
+  },[setorChefe,ano,nomeMes])
+
+  //Função para atualizar as férias
+  async function atualizaFerias(){
+    
+    console.log('setorChefe', setorChefe)
+    const response = await axios.get(`/cadastrados/${setorChefe}`);
+    console.log('response.data',response.data);
+    const lista = response.data.map(item=>item.ferias);
+    console.log('lista',lista);
+    let listaParse = [];
+    let numero = null
+    try{
+      listaParse = lista.map(item => {
+        const parsedItem = JSON.parse(item);
+    
+        return parsedItem;
+      });
+      listaParse = listaParse.map(item=>item[0]);
+
+      console.log('listaParse',listaParse)
+    
+      let feriasFiltradas = listaParse.filter(item=>item.ano===ano&&item.mes===nomeMes);
+      console.log('feriasFiltradas',feriasFiltradas)
+      numero = feriasFiltradas.filter(item=>item.ferias===true);
+      console.log('feriasFiltradas', feriasFiltradas);
+    }catch(error){
+      console.log('Erro no filtragem das férias',error);
+    }
+    setNumeroFerias(numero.length);
+
+    console.log('listaParse',listaParse);
+
   }
 
   //Lógica para o cálculo dos feedbacks feitos
@@ -139,7 +173,6 @@ export default function Home({
     return true;
   });
 
-  console.log('1 listaCadastrados', listaCadastrados);
   //Aqui somente faz o parse das avaliações para facilitar, pois vem como stringfy do banco
   const comparaCadastrados = listaCadastrados.map((objeto) => {
     if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
@@ -151,7 +184,7 @@ export default function Home({
     }
     return objeto;
   });
-  console.log('2 comparaCadastrados', comparaCadastrados);
+
   //Aqui pega os valores do banco de dados do app dos funcionários e faz o parse na chave avaliacoes
   //parar facilitar
   let comparaAvaliacoesFuncionario = avalDoFuncionario.map((objeto) => {
@@ -168,7 +201,7 @@ export default function Home({
     // Se não tiver a chave 'avaliacoes' ou se o valor não for uma string, mantém o objeto original
     return objeto;
   });
-  console.log('3 comparaAvaliacoesFuncionario', comparaAvaliacoesFuncionario);
+
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
   const verificaDataFuncionario = comparaAvaliacoesFuncionario.filter(
@@ -189,7 +222,7 @@ export default function Home({
       }
     },
   );
-  console.log('4 verificaDataFuncionario', verificaDataFuncionario);
+
 
   const listaFeedChefe3 = comparaCadastrados.filter((objetoA) => {
     try {
@@ -207,7 +240,7 @@ export default function Home({
       return false;
     }
   });
-  console.log('5 listaFeedChefe3', listaFeedChefe3);
+
 
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
@@ -219,7 +252,6 @@ export default function Home({
     // Retorna true apenas se não houver correspondência na Lista B
     return objetoB;
   });
-  console.log('listaFinal2', listaFinal2);
 
   //Lógica para formar os dados para o gráfico
   const totaisPorMes = ultimosMeses.map((mes) => {
@@ -263,7 +295,7 @@ export default function Home({
     return listaFinalMes.length;
   });
 
-  console.log('totaisPorMes', totaisPorMes);
+
 
   //Data para a configuração do Chart.js
   const data = {
@@ -569,7 +601,10 @@ export default function Home({
               <path d="M7 0a2 2 0 0 0-2 2H1.5A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14H2a.5.5 0 0 0 1 0h10a.5.5 0 0 0 1 0h.5a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2H11a2 2 0 0 0-2-2zM6 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1zM3 13V3h1v10zm9 0V3h1v10z" />
             </svg>
           </div>
-          <div style={{ width: '60%', padding: '5px' }}>Férias</div>
+          <div style={{ width: '60%', padding: '5px' }}>
+            <div>Férias</div>
+            <div>{numeroFerias}</div>
+          </div>
         </div>
       </div>
 

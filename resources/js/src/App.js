@@ -365,6 +365,7 @@ export default function App() {
               dadosUsuarioLogado={dadosUsuarioLogado}
               avalDoFuncionario={avalDoFuncionario}
               idUsuario={idUsuario}
+              setorChefe={setorChefe}
             />
           )}
 

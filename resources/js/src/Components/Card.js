@@ -136,7 +136,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary mt-3"
                           onClick={onClickBotao1}
-                          disabled={dadosFuncionario[0].ferias}
+                          disabled={ferias}
                         >
                           {botao1}
                         </button>
@@ -146,7 +146,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={historicoBotao}
-                          disabled={dadosFuncionario[0].ferias}
+                          disabled={ferias}
                         >
                           {botao2}
                         </button>
@@ -156,7 +156,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={apagarBotao}
-                          disabled={dadosFuncionario[0].ferias}
+                          disabled={ferias}
                         >
                           {botao3}
                         </button>
@@ -166,7 +166,7 @@ export default function Card({
                           type="button"
                           className="btn btn-primary ml-3 mt-3"
                           onClick={voltar}
-                          disabled={dadosFuncionario[0].ferias}
+                          disabled={ferias}
                         >
                           {botao4}
                         </button>
