@@ -9,7 +9,7 @@ export default function Home({
   avalDoFuncionario,
   idUsuario,
   dadosUsuarioLogado,
-  setorChefe
+  setorChefe,
 }) {
   //Constantes para conseguir o ano atual
   const dataAtual = new Date();
@@ -22,7 +22,8 @@ export default function Home({
   const [mes, setMes] = useState(mesAtual);
   const [ano, setAno] = useState(anoAtual);
   const [open, setOpen] = useState(false);
-  const [numeroFerias,setNumeroFerias] = useState(null);
+  const [numeroFerias, setNumeroFerias] = useState(null);
+  const [metaMes,setMetaMes] = useState([]);
 
   //COnstante para adicionar a observação
   const [observacao, setObservacao] = useState(false);
@@ -107,11 +108,12 @@ export default function Home({
       );
       setRenderObservacao(render);
     } catch (error) {
-      console.log('Erro ao fazer o filter do render',error);
+      console.log('Erro ao fazer o filter do render', error);
     }
     setValueObservacao('');
 
     atualizaFerias();
+    atualizaMeta();
   }, [ano, nomeMes]);
 
   //Funções principais
@@ -124,42 +126,42 @@ export default function Home({
     setObservacao(true);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     atualizaFerias();
-  },[setorChefe])
+    atualizaMeta();
+  }, [setorChefe]);
 
   //Função para atualizar as férias
-  async function atualizaFerias(){
-
-
-    console.log('setorChefe', setorChefe)
+  async function atualizaFerias() {
+    console.log('setorChefe', setorChefe);
     const response = await axios.get(`/cadastrados/${setorChefe}`);
-    console.log('response.data',response.data);
-    const lista = response.data.map(item=>item.ferias);
-    console.log('lista',lista);
+    console.log('response.data', response.data);
+    const lista = response.data.map((item) => item.ferias);
+    console.log('lista', lista);
     let listaParse = [];
-    let numero = null
-    try{
-      listaParse = lista.map(item => {
+    let numero = null;
+    try {
+      listaParse = lista.map((item) => {
         const parsedItem = JSON.parse(item);
-    
+
         return parsedItem;
       });
       listaParse = listaParse.flat();
 
-      console.log('listaParse',listaParse)
-    
-      let feriasFiltradas = listaParse.filter(item=>item.ano===ano&&item.mes===nomeMes);
-      console.log('feriasFiltradas',feriasFiltradas)
-      numero = feriasFiltradas.filter(item=>item.ferias===true);
+      console.log('listaParse', listaParse);
+
+      let feriasFiltradas = listaParse.filter(
+        (item) => item.ano === ano && item.mes === nomeMes,
+      );
       console.log('feriasFiltradas', feriasFiltradas);
-    }catch(error){
-      console.log('Erro no filtragem das férias',error);
+      numero = feriasFiltradas.filter((item) => item.ferias === true);
+      console.log('feriasFiltradas', feriasFiltradas);
+    } catch (error) {
+      console.log('Erro no filtragem das férias', error);
     }
     setNumeroFerias(numero.length);
 
-    console.log('listaParse',listaParse);
-
+    console.log('listaParse', listaParse);
   }
 
   //Lógica para o cálculo dos feedbacks feitos
@@ -226,7 +228,6 @@ export default function Home({
     },
   );
 
-
   const listaFeedChefe3 = comparaCadastrados.filter((objetoA) => {
     try {
       // Verifica se o objeto da Lista A possui a data e ano selecionados
@@ -243,7 +244,6 @@ export default function Home({
       return false;
     }
   });
-
 
   //Aqui faz a comparação se existe o valor do verificaDataFuncionario e do listaChefe2, pois se existir
   //significa que ambos fizeram o feedback e retorna numa lista final
@@ -298,8 +298,6 @@ export default function Home({
     return listaFinalMes.length;
   });
 
-
-
   //Data para a configuração do Chart.js
   const data = {
     labels: ultimosMeses,
@@ -314,7 +312,7 @@ export default function Home({
         label: 'Metas',
         /*Aqui a meta é automaticamente preenchido de acordo com o número dos
         feedbacks de cima e de acordo com o número de funcionários cadastrados*/
-        data: Array(5).fill(meta),
+        data: metaMes,
         borderrowor: 'red',
         backgroundrowor: 'red',
       },
@@ -324,22 +322,22 @@ export default function Home({
   async function gravarObservacao() {
     try {
       const observacaoExistente = listaObservacao.find(
-        (item) => item.mes === nomeMes && item.ano === ano
+        (item) => item.mes === nomeMes && item.ano === ano,
       );
-  
+
       setOpen(false);
       if (observacaoExistente) {
         // Substituir o objeto existente
         const novaLista = listaObservacao.map((item) =>
           item.mes === nomeMes && item.ano === ano
             ? { observacao: valueObservacao, mes: nomeMes, ano: ano }
-            : item
+            : item,
         );
-  
+
         await axios.put(`/cadastro/${idUsuario}/update-observacao`, {
           observacao: novaLista,
         });
-  
+
         setObservacao(false);
         setListaObservacao(novaLista);
       } else {
@@ -360,9 +358,10 @@ export default function Home({
       console.error('Erro ao gravar observação:', error);
     }
 
-    setRenderObservacao([{ observacao: valueObservacao, mes: nomeMes, ano: ano }]);
+    setRenderObservacao([
+      { observacao: valueObservacao, mes: nomeMes, ano: ano },
+    ]);
   }
-  
 
   function onChangeObservacao(e) {
     const novaObservacao = e.target.value;
@@ -373,8 +372,52 @@ export default function Home({
     }
   }
 
-  function editar(){
+  function editar() {
     setRenderObservacao([]);
+  }
+
+  async function atualizaMeta() {
+    // Função para obter o número de pessoas de férias para um mês específico
+    const obterNumeroFerias = async (setorChefe, ano, nomeMes) => {
+      const response = await axios.get(`/cadastrados/${setorChefe}`);
+      const lista = response.data.map((item) => item.ferias);
+      let listaProcessada = [];
+      let quantidade = null;
+
+      try {
+        listaProcessada = lista.map((item) => JSON.parse(item)).flat();
+
+        let feriasFiltradas = listaProcessada.filter(
+          (item) => item.ano === ano && item.mes === nomeMes,
+        );
+        quantidade = feriasFiltradas.filter((item) => item.ferias === true);
+      } catch (error) {
+        console.log('Erro na filtragem das férias', error);
+      }
+
+      return quantidade.length; // Corrigido aqui de 'numero' para 'quantidade'
+    };
+
+    // Iterar sobre os últimos meses e obter o número de pessoas de férias para cada mês
+    const obterNumerosFeriasPorMeses = async () => {
+      const resultados = await Promise.all(
+        ultimosMeses.map(async (nomeMes) => {
+          const numeroFerias = await obterNumeroFerias(
+            setorChefe,
+            ano,
+            nomeMes,
+          );
+          return listaCadastro.length - numeroFerias;
+        }),
+      );
+
+      setMetaMes(resultados);
+
+      console.log('Resultados:', resultados);
+    };
+
+    // Chame a função para obter os números de férias para cada mês
+    obterNumerosFeriasPorMeses();
   }
 
   return (
@@ -462,7 +505,11 @@ export default function Home({
         className="btn btn-primary mb-1"
         onClick={handleAdicionar}
       >
-        {renderObservacao.length==0?<>Adicionar observações</>:<>Ver observações</>}
+        {renderObservacao.length == 0 ? (
+          <>Adicionar observações</>
+        ) : (
+          <>Ver observações</>
+        )}
       </button>
       <h5>Números do mês: {nomeMes}</h5>
       <div
@@ -618,7 +665,7 @@ export default function Home({
       <Dialog
         open={open}
         // descricao={descricao}
-        button={renderObservacao.length==0?'':'Editar'}
+        button={renderObservacao.length == 0 ? '' : 'Editar'}
         handleClose={editar} //Coloquei no handleClose para não modificar muito o código
         Title="Atenção"
         observacao={observacao}
@@ -626,10 +673,13 @@ export default function Home({
         valueObservacao={valueObservacao}
         gravarObservacao={gravarObservacao}
         renderObservacao={renderObservacao}
-        titulo={renderObservacao.length==0?'Observações':`Observações ${nomeMes} ${ano}`}
-        button2='Fechar'
+        titulo={
+          renderObservacao.length == 0
+            ? 'Observações'
+            : `Observações ${nomeMes} ${ano}`
+        }
+        button2="Fechar"
         handleButton={() => setOpen(false)}
-
       />
     </>
   );
