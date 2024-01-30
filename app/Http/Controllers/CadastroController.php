@@ -7,9 +7,39 @@ use App\Models\Cadastro;
 use App\Models\Atestado;
 use App\Models\Funcionario;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MailableName;
+
 
 class CadastroController extends Controller
 {
+
+    public function enviarEmail(Request $request)
+{
+    // Lógica para enviar e-mail sem validações
+    $dados = $request->only(['nome', 'email', 'mensagem','assunto']);
+
+    // Certifique-se de que $dados está definido antes de usá-lo
+    if (!empty($dados)) {
+        try {
+            Mail::to($request->email)->send(new MailableName($dados));
+
+            // Pode retornar uma resposta se necessário
+            return response()->json(['mensagem' => 'Dados enviados com sucesso']);
+        } catch (\Exception $e) {
+            return response()->json(['erro' => 'Erro ao enviar o e-mail'], 500);
+        }
+    } else {
+        return response()->json(['erro' => 'Dados inválidos'], 400);
+    }
+}
+
+    
+    
+    
+
+
+
     public function getAllCadastro($setor)
     {
         $resultado = Cadastro::where('setor', $setor)->get();

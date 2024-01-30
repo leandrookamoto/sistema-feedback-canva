@@ -308,29 +308,69 @@ export default function Canva({
     }
     comparaCanvas();
   }
+
+  //Conteúdo mensagem
+  const mensagem = `<p>Olá ${nomeFuncionario}</p>
+  <p>Foi solicitado o envio do seu feedback pelo app Feedback Canva. Favor enviar o quanto antes. Qualquer dúvida contactar seu gestor.
+    Obrigado</p>`;
+
+
+  let nomeChefe = '';
+  try {
+    nomeChefe = listaCadastro.filter((item) => item.id === idFuncionario);
+    nomeChefe = nomeChefe.map((item) => item.administrador).join();
+  } catch (error) {
+    console.log('Erro ao conseguir nome do gestor', error);
+  }
+
+  const assuntoEmail = `${nomeChefe} solicita o seu feedback`;
   //Função para envio do e-mail
-  const sendEmail = () => {
-    const templateParams = {
-      email: emailFuncionario,
-      assunto: assunto,
+  const sendEmail = async () => {
+    const dadosEmail = {
       nome: nomeFuncionario,
+      email: emailFuncionario,
+      mensagem: mensagem,
+      assunto: assuntoEmail,
     };
 
-    emailjs
-      .send(
-        'service_3qsan9n',
-        'template_6yt5ty9',
-        templateParams,
-        'eX61PTky11yxk4MAJ',
-      )
-      .then((response) => {
-        console.log('Email enviado com sucesso', response);
+    try {
+      const resposta = await axios.post('/enviar-email', dadosEmail);
+      if (resposta.data && resposta.data.mensagem) {
+        console.log('Resposta do Backend:', resposta.data.mensagem);
         setOpenEmail(true);
-      })
-      .catch((error) => {
-        console.log('Erro ao enviar email', error);
-      });
+      } else {
+        console.error(
+          'Resposta do Backend não possui a estrutura esperada:',
+          resposta.data,
+        );
+      }
+    } catch (erro) {
+      console.error('Erro ao enviar e-mail:', erro);
+    }
   };
+
+  // const sendEmail = () => {
+  //   const templateParams = {
+  //     email: emailFuncionario,
+  //     assunto: assunto,
+  //     nome: nomeFuncionario,
+  //   };
+
+  //   emailjs
+  //     .send(
+  //       'service_3qsan9n',
+  //       'template_6yt5ty9',
+  //       templateParams,
+  //       'eX61PTky11yxk4MAJ',
+  //     )
+  //     .then((response) => {
+  //       console.log('Email enviado com sucesso', response);
+  //       setOpenEmail(true);
+  //     })
+  //     .catch((error) => {
+  //       console.log('Erro ao enviar email', error);
+  //     });
+  // };
 
   //Funções auxiliares
   //Funções para gravação do listaCanva atividades, pontos fortes e ações de melhorias e onChange
@@ -1131,7 +1171,6 @@ export default function Canva({
                 </>
               )}
           </div>
-
 
           {/* Parte do canva de comparação  */}
           {dadosCanvaDoFuncionario.length > 0 &&

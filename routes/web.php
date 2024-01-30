@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CadastroController;
+use App\Mail\MailableName;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,5 +64,7 @@ Route::middleware([
     Route::get('/funcionarios/{setor}', [CadastroController::class, 'getAllFuncionarios']);
 
     Route::put('/cadastro/{id}/update-plano', [CadastroController::class, 'updatePlano']);
+
+    Route::post('/enviar-email', [CadastroController::class, 'enviarEmail']);
 
 });
