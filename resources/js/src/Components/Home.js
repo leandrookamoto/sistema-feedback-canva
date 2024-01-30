@@ -57,7 +57,7 @@ export default function Home({
   }
 
   //Constante para verificar o número da meta
-  const meta = (listaCadastro.length * 0.86).toFixed(0);
+  const meta = ((listaCadastro.length - numeroFerias) * 0.86).toFixed(0);
 
   //useEffect responsável pela retirada das informações do banco de dados através do props listaCadastro
   useEffect(() => {
