@@ -110,6 +110,8 @@ export default function Home({
       console.log('Erro ao fazer o filter do render',error);
     }
     setValueObservacao('');
+
+    atualizaFerias();
   }, [ano, nomeMes]);
 
   //Funções principais
@@ -124,11 +126,12 @@ export default function Home({
 
   useEffect(()=>{
     atualizaFerias();
-  },[setorChefe,ano,nomeMes])
+  },[setorChefe])
 
   //Função para atualizar as férias
   async function atualizaFerias(){
-    
+
+
     console.log('setorChefe', setorChefe)
     const response = await axios.get(`/cadastrados/${setorChefe}`);
     console.log('response.data',response.data);
@@ -142,7 +145,7 @@ export default function Home({
     
         return parsedItem;
       });
-      listaParse = listaParse.map(item=>item[0]);
+      listaParse = listaParse.flat();
 
       console.log('listaParse',listaParse)
     
