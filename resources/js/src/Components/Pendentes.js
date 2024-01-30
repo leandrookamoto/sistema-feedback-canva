@@ -202,6 +202,7 @@ export default function Pendentes({
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
+  const [openPlano, setOpenPlano]=useState(false);
 
   const data = [
     'Janeiro',
@@ -240,8 +241,12 @@ export default function Pendentes({
   };
   //Constantes para controle do Dialog
   const [open, setOpen] = useState(false);
-  const descricao =
-    ' Você será encaminhado em 3 segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.';
+  const [contagem, setContagem] = useState(3);
+  const descricaoFeed =
+    `Você será encaminhado em ${contagem} segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`; 
+
+    const descricaoPlano =
+    `Você será encaminhado em ${contagem} segundos para o menu de plano de ação, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`; 
 
 
     //useEffect para manter dados atualizados
@@ -573,6 +578,12 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
   function selecionarFuncionario(id) {
     setOpen(true);
 
+    const intervalId = setInterval(() => {
+      setContagem((prevContagem) => prevContagem - 1);
+    }, 1000);
+
+ 
+
     setTimeout(() => {
       const funcionarioSelecionado = listaCadastro.find(
         (funcionario) => funcionario.id === id,
@@ -587,11 +598,16 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
         planoDeAcao: false
       });
     }, 3000);
+    return () => clearInterval(intervalId);
   }
 
   //Seleciona para deixar pré selecionado para mandar para o componenente Plano de Ação
   function selecionarFuncionario3(id) {
-    setOpen(true);
+    setOpenPlano(true);
+
+    const intervalId = setInterval(() => {
+      setContagem((prevContagem) => prevContagem - 1);
+    }, 1000);
 
     setTimeout(() => {
       const funcionarioSelecionado = listaCadastro.find(
@@ -612,6 +628,8 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
 
       });
     }, 3000);
+
+    return () => clearInterval(intervalId);
   }
 
   //Função para avisar funcionário
@@ -1108,8 +1126,14 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
       )}
       <Dialog
         open={open}
-        descricao={descricao}
+        descricao={descricaoFeed}
         handleClose={() => setOpen(false)}
+        Title="Atenção"
+      />
+      <Dialog
+        open={openPlano}
+        descricao={descricaoPlano}
+        handleClose={() => setOpenPlano(false)}
         Title="Atenção"
       />
     </Stack>
