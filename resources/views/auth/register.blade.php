@@ -33,8 +33,11 @@
                 <x-label for="setor" value="{{ __('Setor') }}" />
                 <select id="setor" name="setor" class="block mt-1 w-full" required autofocus style='border-color: #d1d5db; border-radius:7px;'>
                     <option>Escolha o setor</option>    
-                    <option value="Setor A">Setor A</option>
-                    <option value="Setor B">Setor B</option>
+                    <option value="Adoção">Adoção</option>
+                    <option value="Agendamento">Agendamento</option>
+                    <option value="Aprovisionamento">Aprovisionamento</option>
+                    <option value="Buffer-TI">Buffer-TI</option>
+                    <option value="Configuração">Configuração</option>
                 </select>
             </div>
             
