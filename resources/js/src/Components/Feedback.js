@@ -18,6 +18,7 @@ export default function Feedback({
   setorChefe,
   avalDoFuncionario,
   email,
+  dadosUsuarioLogado
 }) {
   //Variáveis para gravação de estado
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -454,6 +455,7 @@ export default function Feedback({
           setorChefe={setorChefe}
           avalDoFuncionario={avalDoFuncionario}
           ferias={ferias}
+          dadosUsuarioLogado={dadosUsuarioLogado}
         />
       )}
       {/* Dialog de aviso para o usuário apagar o funcionário com segurança */}

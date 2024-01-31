@@ -17,7 +17,7 @@ class CadastroController extends Controller
     public function enviarEmail(Request $request)
 {
     // Lógica para enviar e-mail sem validações
-    $dados = $request->only(['nome', 'email', 'mensagem','assunto']);
+    $dados = $request->only(['nome', 'email', 'mensagem','assunto','from','nomeChefe']);
 
     // Certifique-se de que $dados está definido antes de usá-lo
     if (!empty($dados)) {

@@ -25,6 +25,7 @@ class MailableName extends Mailable
     {
         $this->dados = $dados;
         $this->assunto = $dados['assunto'] ?? 'Solicitação de feedback';
+        // $this->from = $dados['from'] ?? 'naoresponda@globalhitss.com.br';
       
     }
 
@@ -45,12 +46,12 @@ class MailableName extends Mailable
      *
      * @return \Illuminate\Mail\Mailables\Content
      */
-    public function content()
+    public function build()
     {
-        return new Content(
-            view: 'mail.test-email', // Substitua 'mail.test-email' pelo nome real da sua view de e-mail
-            with: ['dados' => $this->dados],
-        );
+        return $this->from($this->dados['from'],$this->dados['nomeChefe'])
+                    ->subject($this->assunto)
+                    ->view('mail.test-email')
+                    ->with(['dados' => $this->dados]);
     }
 
     /**

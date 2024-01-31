@@ -14,6 +14,7 @@ export default function Canva({
   usuario,
   setorChefe,
   avalDoFuncionario,
+  dadosUsuarioLogado
 }) {
   //Constantes para gravação de estado para o canva
   //Constante para gravar a lista que só o suficiente para gerar o canva. Ao longo do código fiz
@@ -331,6 +332,9 @@ export default function Canva({
       email: emailFuncionario,
       mensagem: mensagem,
       assunto: assuntoEmail,
+      from: dadosUsuarioLogado.email,
+      nomeChefe:nomeChefe
+      
     };
 
     try {

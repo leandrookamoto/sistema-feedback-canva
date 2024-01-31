@@ -393,6 +393,7 @@ export default function App() {
               dados={dados}
               setorChefe={setorChefe}
               avalDoFuncionario={avalDoFuncionario}
+              dadosUsuarioLogado={dadosUsuarioLogado}
             />
           )}
           {/* Aqui é a renderização do componente do feedback */}
