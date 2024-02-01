@@ -9,7 +9,6 @@ import { Link as ScrollLink, animateScroll } from 'react-scroll';
 
 // As props são enviadas para o App.js
 export default function Feedback({
-  listaCadastro,
   usuario,
   onChangeListaCadastro,
   onChangeNewId,
@@ -30,6 +29,7 @@ export default function Feedback({
   const [avaliar2, setAvaliar2] = useState(false);
   const [compararAval, setCompararAval] = useState(false);
   const [listaCompara, setListaCompara] = useState([]);
+  const [listaCadastro, setListaCadastro] = useState([]);
   console.log('listaCompara', listaCompara);
   const [ferias, setFerias] = useState(false);
   const [listaFerias, setListaFerias] = useState([]);
@@ -113,6 +113,18 @@ export default function Feedback({
   }
 
   //useEffects
+  //useEffect para manter listaCadastro atualizado
+  useEffect(()=>{
+    console.log('setor', setorChefe)
+    async function fetchData(){
+      const lista = await axios.get('/cadastrados/' + setorChefe); 
+      console.log('lista do feed',lista.data)
+      setListaCadastro(lista.data);
+    }
+
+    fetchData()
+  },[])
+  console.log('listaCadastro', listaCadastro)
   // useEffect para a ordenação por nome
   useEffect(() => {
     if (montagemInicial.current) {

@@ -23,7 +23,7 @@ Route::get('user', [UserController::class,'getUserData']);
 // Rota para o login
 Route::get('/', function () {
     return view('../auth/login');
-});
+})->name('home');;
 
 
 

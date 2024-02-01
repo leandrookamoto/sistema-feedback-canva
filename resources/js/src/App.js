@@ -64,12 +64,15 @@ export default function App() {
   //UseEffects
   //Primeira requisição para a recuperação dos dados dos usuários ao inicializar o programa
   useEffect(() => {
+    let updatedListaOriginal = [];
+    let usuarioLogado = []
     const fetchData = async () => {
+      
       try {
         //Faz a requisição das informações do login do usuário
         const responseUser = await axios.get('/user');
 
-        const usuarioLogado = responseUser.data.name;
+        usuarioLogado = responseUser.data.name;
         const setor = responseUser.data.setor;
         const newIdUsuario = responseUser.data.id;
         setDadosUsuarioLogado(responseUser.data);
@@ -87,6 +90,7 @@ export default function App() {
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
         //Setando os dados do canva que o funcionário fez
         setAvalDoFuncionario(canvaFuncionario.data);
+        console.log('canvaFuncionario',canvaFuncionario.data)
 
         //Faz a requisição do programa atestado para o cadastramento automático
         const responseColaboradoresAtestado = await axios.get(
@@ -124,14 +128,60 @@ export default function App() {
           }),
         );
 
-        const updatedListaOriginal = await axios.get('/cadastrados' + setor);
-        setListaCadastro(updatedListaOriginal.data);
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-      }
-    };
+        // Atualiza a lista do atestado
+      updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+      console.log('setor',setor)
+      setListaCadastro(updatedListaOriginal.data);
+      console.log('updatedListaOriginal',updatedListaOriginal.data)
 
-    fetchData();
+      // Chama a função para cadastrar funcionários do canva
+      cadastrarFuncionariosAutomaticamente(canvaFuncionario.data, setor);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    }
+  };
+
+
+
+  const cadastrarFuncionariosAutomaticamente = async (listaFuncionarios, setor) => {
+    const updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+    console.log('updatedListaOriginal dentro do cadastrar', updatedListaOriginal.data);
+    try {
+      console.log('listaFuncionarios', listaFuncionarios);
+      // Lógica para fazer o cadastro automático caso não tenha sido
+      const funcionariosNaoCadastrados = listaFuncionarios.filter(
+        (funcionarioCanva) => {
+          return !updatedListaOriginal.data.some(
+            (funcionario) => funcionario.email === funcionarioCanva.email,
+          );
+        },
+      );
+  
+      await Promise.all(
+        funcionariosNaoCadastrados.map(async (item) => {
+          try {
+            const novoUsuario = {
+              nome: item.nome,
+              email: item.email,
+              setor: item.setor,
+              administrador: usuarioLogado,
+            };
+            await axios.post('/cadastrar-usuario', novoUsuario);
+            console.log('Usuário cadastrado com sucesso:', novoUsuario);
+          } catch (error) {
+            console.error('Erro ao cadastrar usuário:', error);
+          }
+        }),
+      );
+  
+      const updatedListaCadastro = await axios.get('/cadastrados/' + setor);
+      setListaCadastro(updatedListaCadastro.data);
+    } catch (error) {
+      console.error('Erro ao cadastrar funcionários automaticamente:', error);
+    }
+  };
+  
+  fetchData();
   }, []);
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
   useEffect(() => {
