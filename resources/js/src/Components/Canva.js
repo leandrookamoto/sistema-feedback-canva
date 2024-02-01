@@ -311,9 +311,9 @@ export default function Canva({
   }
 
   //Conteúdo mensagem
-  const mensagem = `<p>Olá ${nomeFuncionario}</p>
-  <p>Foi solicitado o envio do seu feedback pelo app Feedback Canva. Favor enviar o quanto antes. Qualquer dúvida contactar seu gestor.
-    Obrigado</p>`;
+  const mensagem = `
+  Foi solicitado o envio do seu feedback pelo app Feedback Canva. Favor enviar o quanto antes. Qualquer dúvida contactar seu gestor.
+  Obrigado`;
 
 
   let nomeChefe = '';
