@@ -25,7 +25,7 @@ Route::get('/', function () {
     return view('../auth/login');
 })->name('home');;
 
-
+Route::get('/automacao', [CadastroController::class, 'automacao']);
 
 // Middleware
 Route::middleware([
