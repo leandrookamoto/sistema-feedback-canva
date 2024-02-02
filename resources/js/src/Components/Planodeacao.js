@@ -69,16 +69,6 @@ export default function Planodeacao({
   //const para evitar o useEffect no inicio
   const montagemInicial = useRef(true);
 
-  //Constantes que controlam o page
-  const [page, setPage] = useState(1);
-  const pageSize = 3;
-  let totalPage = 1;
-  try {
-    totalPage = Math.ceil(listaFinal2.length / pageSize);
-  } catch (error) {
-    console.log('Erro do totalPage', error);
-  }
-
   //Função responsável por pegar os dados do banco e deixar atualizado neste componente
   async function fetchData() {
     const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
@@ -206,7 +196,6 @@ export default function Planodeacao({
     return objetoB;
   });
 
-  console.log('listaFinal2', listaFinal2);
 
   const handleData = (e) => {
     setMes(e.currentTarget.value);
@@ -291,12 +280,26 @@ export default function Planodeacao({
   });
   console.log('listaFinal2', listaFinal2);
 
+    //Constantes que controlam o page
+    const [page, setPage] = useState(1);
+    const pageSize = 3;
+    let totalPage = 1;
+    try {
+      totalPage = Math.ceil(listaFinal2.length / pageSize);
+    } catch (error) {
+      console.log('Erro do totalPage', error);
+    }
+    console.log('totalPage',totalPage);
+
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   let currentDisplayList3 =
     listaRender.length > 0
       ? orderEmployeeData(listaRender).slice(startIndex, endIndex)
       : orderEmployeeData(listaFinal2).slice(startIndex, endIndex);
+
+
+      
 
   //Constante para verificar se a lista do plano está completa
   let completo = false;
