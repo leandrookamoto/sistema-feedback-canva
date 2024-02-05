@@ -16,23 +16,6 @@ use Illuminate\Support\Facades\Auth;
 class CadastroController extends Controller
 {
 
-    public function automacao()
-    {
-       // Email e senha estáticos
-       $email = 'leandro.okamoto@globalhitss.com.br';
-       $senha = '@Teste2020';
-    
-       // Tenta autenticar o usuário
-       if (Auth::attempt(['email' => $email, 'password' => $senha])) {
-           // Se o login for bem-sucedido, redirecione para a página desejada
-           return redirect('/dashboard');
-       } else {
-           // Se o login falhar, faça algo, como redirecionar de volta para o formulário de login
-           return redirect('/login')->with('erro', 'Credenciais inválidas');
-       }
-    
-    }
-
     public function enviarEmail(Request $request)
 {
     // Lógica para enviar e-mail sem validações
@@ -54,7 +37,14 @@ class CadastroController extends Controller
 }
 
     
-    
+public function getAllUsers()
+{
+    $user = User::all(); // Obtém o usuário autenticado
+
+    return response()->json([
+        'user' => $user,
+    ]);
+}
     
 
 

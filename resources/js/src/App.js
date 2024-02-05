@@ -12,6 +12,7 @@ import Dialog from './Components/Dialog';
 import Feedback from './Components/Feedback';
 import Pendentes from './Components/Pendentes';
 import Planodeacao from './Components/Planodeacao';
+import axios from 'axios';
 
 export default function App() {
   //Variáveis para mudança de tela
@@ -65,9 +66,8 @@ export default function App() {
   //Primeira requisição para a recuperação dos dados dos usuários ao inicializar o programa
   useEffect(() => {
     let updatedListaOriginal = [];
-    let usuarioLogado = []
+    let usuarioLogado = [];
     const fetchData = async () => {
-      
       try {
         //Faz a requisição das informações do login do usuário
         const responseUser = await axios.get('/user');
@@ -79,9 +79,9 @@ export default function App() {
         setUsuario(usuarioLogado);
         setSetorChefe(setor);
         setIdUsuario(newIdUsuario);
-        console.log('dadosUsuario', responseUser.data);
 
         //Faz a requisição das informações segundo o setor do usuário
+
         const responseListaOriginal = await axios.get('/cadastrados/' + setor);
         const listaOriginal = responseListaOriginal.data;
         setListaCadastro(listaOriginal);
@@ -90,7 +90,6 @@ export default function App() {
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
         //Setando os dados do canva que o funcionário fez
         setAvalDoFuncionario(canvaFuncionario.data);
-        console.log('canvaFuncionario',canvaFuncionario.data)
 
         //Faz a requisição do programa atestado para o cadastramento automático
         const responseColaboradoresAtestado = await axios.get(
@@ -129,59 +128,60 @@ export default function App() {
         );
 
         // Atualiza a lista do atestado
-      updatedListaOriginal = await axios.get('/cadastrados/' + setor);
-      console.log('setor',setor)
-      setListaCadastro(updatedListaOriginal.data);
-      console.log('updatedListaOriginal',updatedListaOriginal.data)
+        updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+        setListaCadastro(updatedListaOriginal.data);
 
-      // Chama a função para cadastrar funcionários do canva
-      cadastrarFuncionariosAutomaticamente(canvaFuncionario.data, setor);
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-    }
-  };
+        // Chama a função para cadastrar funcionários do canva
+        cadastrarFuncionariosAutomaticamente(canvaFuncionario.data, setor);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
+    };
 
+    const cadastrarFuncionariosAutomaticamente = async (
+      listaFuncionarios,
+      setor,
+    ) => {
+      const updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+      try {
+        // Lógica para fazer o cadastro automático caso não tenha sido
+        const funcionariosNaoCadastrados = listaFuncionarios.filter(
+          (funcionarioCanva) => {
+            return !updatedListaOriginal.data.some(
+              (funcionario) => funcionario.email === funcionarioCanva.email,
+            );
+          },
+        );
 
+        await Promise.all(
+          funcionariosNaoCadastrados.map(async (item) => {
+            try {
+              const novoUsuario = {
+                nome: item.nome,
+                email: item.email,
+                setor: item.setor,
+                administrador: usuarioLogado,
+              };
+              await axios.post('/cadastrar-usuario', novoUsuario);
+              console.log('Usuário cadastrado com sucesso:', novoUsuario);
+            } catch (error) {
+              console.error('Erro ao cadastrar usuário:', error);
+            }
+          }),
+        );
 
-  const cadastrarFuncionariosAutomaticamente = async (listaFuncionarios, setor) => {
-    const updatedListaOriginal = await axios.get('/cadastrados/' + setor);
-    console.log('updatedListaOriginal dentro do cadastrar', updatedListaOriginal.data);
-    try {
-      console.log('listaFuncionarios', listaFuncionarios);
-      // Lógica para fazer o cadastro automático caso não tenha sido
-      const funcionariosNaoCadastrados = listaFuncionarios.filter(
-        (funcionarioCanva) => {
-          return !updatedListaOriginal.data.some(
-            (funcionario) => funcionario.email === funcionarioCanva.email,
-          );
-        },
-      );
-  
-      await Promise.all(
-        funcionariosNaoCadastrados.map(async (item) => {
-          try {
-            const novoUsuario = {
-              nome: item.nome,
-              email: item.email,
-              setor: item.setor,
-              administrador: usuarioLogado,
-            };
-            await axios.post('/cadastrar-usuario', novoUsuario);
-            console.log('Usuário cadastrado com sucesso:', novoUsuario);
-          } catch (error) {
-            console.error('Erro ao cadastrar usuário:', error);
-          }
-        }),
-      );
-  
-      const updatedListaCadastro = await axios.get('/cadastrados/' + setor);
-      setListaCadastro(updatedListaCadastro.data);
-    } catch (error) {
-      console.error('Erro ao cadastrar funcionários automaticamente:', error);
-    }
-  };
-  
-  fetchData();
+        const updatedListaCadastro = await axios.get('/cadastrados/' + setor);
+        setListaCadastro(updatedListaCadastro.data);
+      } catch (error) {
+        console.error('Erro ao cadastrar funcionários automaticamente:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    sendEmailAll();
+    console.log('UseEffect ok!');
   }, []);
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
   useEffect(() => {
@@ -209,7 +209,7 @@ export default function App() {
         setPendentes(false);
       } else {
         // Validação dos inputs e cadastro de novo funcionário
-        if (!nome || !email ) {
+        if (!nome || !email) {
           setOpen(true); // Variável para a abertura do Dialog/Modal/Popup
           return; // Sai da função se os campos não estiverem preenchidos
         }
@@ -283,6 +283,93 @@ export default function App() {
       console.error('Erro ao gravar:', error);
       // Lidar com possíveis erros
     }
+  }
+
+  async function sendEmailAll() {
+    //Lógica para obter as avaliações do Gestor do mês e ano.
+    const meses = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ];
+    const data = new Date();
+    const mes = data.getMonth();
+    const nomeMes = meses[mes]
+    // const nomeMes = 'Janeiro';
+    const anoAtual= data.getFullYear();
+    let users = [];
+    try {
+      const response = await axios.get('/users');
+      users = response.data.user;
+    } catch (error) {
+      console.log('Erro na requisição', error);
+    }
+    console.log('users', users);
+
+    for (const user of users) {
+      // Etapa 1: Obter Avaliações do Usuário
+      let funcionarios=[]
+      let todasAvaliacoes = [];
+      try {
+        funcionarios = await axios.get('/cadastrados/' + user.setor);
+        todasAvaliacoes = funcionarios.data.map((item) => JSON.parse(item.avaliacoes)).flat();
+        todasAvaliacoes = todasAvaliacoes.filter(item => item.mes === nomeMes && item.ano === anoAtual);
+      } catch (error) {
+        console.log('Erro ao fazer o parse das avaliações', error);
+      }
+    
+      // Etapa 2: Obter Férias do Usuário
+      let feriasFuncionarios = [];
+      try {
+
+        feriasFuncionarios = funcionarios.data.map(item => JSON.parse(item.ferias)).flat();
+        feriasFuncionarios = feriasFuncionarios.filter(item => item.mes === nomeMes && item.ano === anoAtual && item.ferias === true);
+      } catch (error) {
+        console.log('Erro ao fazer o parse do feriasFuncionarios', error);
+      }
+    
+      // Etapa 3: Calcular a Meta para o Usuário
+      const meta = ((funcionarios.data.length - feriasFuncionarios.length) * 0.86).toFixed(0);
+    
+      // Etapa 4: Verificar Avaliações do Gestor
+      let dadosFuncionarios = [];
+      try {
+        dadosFuncionarios = await axios.get(`/funcionarios/${user.setor}`);
+      } catch (error) {
+        console.log('Erro na requisição', error);
+      }
+    
+      console.log(`user.setor do ${user.name}`, user.setor);
+      console.log(`dados do ${user.name}`, dadosFuncionarios.data);
+    
+      // Etapa 5: Verificar se a Meta foi Atingida para o Usuário
+      const avaliacoesDosFuncionarios = dadosFuncionarios.data.map(item => JSON.parse(item.avaliacoes)).flat();
+      const avaliacoesUsuario = avaliacoesDosFuncionarios.filter(item => item.mes === nomeMes && item.ano === anoAtual);
+      console.log(`avaliacoesUsuario do ${user.name}`, avaliacoesUsuario);
+      console.log('todasAvaliacoes.length: ' + user.name, todasAvaliacoes.length);
+      console.log('feriasFuncionarios.length: ' + user.name, feriasFuncionarios.length);
+    
+      console.log(`funcionarios.length do ${user.name}`, meta);
+      console.log(`meta.length do ${user.name}`, avaliacoesUsuario.length);
+    
+      // Etapa 6: Enviar E-mail se a Meta foi Atingida
+      if (avaliacoesUsuario.length < meta) {
+        console.log(`Enviar e-mail para ${user.name}, a meta não foi atingida!`);
+        // Lógica para enviar e-mail
+      }
+    }
+    
+
+  
   }
 
   //Funções auxiliares
