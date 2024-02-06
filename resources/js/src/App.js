@@ -82,8 +82,15 @@ export default function App() {
 
         //Faz a requisição das informações segundo o setor do usuário
 
-        const responseListaOriginal = await axios.get('/cadastrados/' + setor);
-        const listaOriginal = responseListaOriginal.data;
+        let listaOriginal = [];
+        try {
+          const responseListaOriginal = await axios.get(
+            '/cadastrados/' + setor,
+          );
+          listaOriginal = responseListaOriginal.data;
+        } catch (error) {
+          console.log('Erro na requisição', error);
+        }
         setListaCadastro(listaOriginal);
 
         //Faz a requisição das informações das avaliações dos funcionários segundo o setor do usuário
@@ -128,7 +135,11 @@ export default function App() {
         );
 
         // Atualiza a lista do atestado
-        updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+        try {
+          updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+        } catch (error) {
+          console.log('Erro na requisição', error);
+        }
         setListaCadastro(updatedListaOriginal.data);
 
         // Chama a função para cadastrar funcionários do canva
@@ -142,7 +153,13 @@ export default function App() {
       listaFuncionarios,
       setor,
     ) => {
-      const updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+      let updatedListaOriginal=[];
+      try{
+      updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+      }catch(error){
+        console.log('Erro na requisição',error)
+      }
+
       try {
         // Lógica para fazer o cadastro automático caso não tenha sido
         const funcionariosNaoCadastrados = listaFuncionarios.filter(
@@ -170,7 +187,13 @@ export default function App() {
           }),
         );
 
-        const updatedListaCadastro = await axios.get('/cadastrados/' + setor);
+        let updatedListaCadastro=[];
+        try{
+          updatedListaCadastro = await axios.get('/cadastrados/' + setor);
+        }catch(error){
+          console.log('Erro na requisição',error);
+        }
+
         setListaCadastro(updatedListaCadastro.data);
       } catch (error) {
         console.error('Erro ao cadastrar funcionários automaticamente:', error);
@@ -180,9 +203,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    sendEmailAll();
-    console.log('UseEffect ok!');
-  }, []);
+   
+    if (dadosUsuarioLogado.email === 'robo@globalhitss.com.br') {
+      sendEmailAll();
+    }
+
+  }, [dadosUsuarioLogado]);
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
   useEffect(() => {
     if (!feedback) {
@@ -303,9 +329,9 @@ export default function App() {
     ];
     const data = new Date();
     const mes = data.getMonth();
-    const nomeMes = meses[mes]
+    const nomeMes = meses[mes];
     // const nomeMes = 'Janeiro';
-    const anoAtual= data.getFullYear();
+    const anoAtual = data.getFullYear();
     let users = [];
     try {
       const response = await axios.get('/users');
@@ -317,29 +343,42 @@ export default function App() {
 
     for (const user of users) {
       // Etapa 1: Obter Avaliações do Usuário
-      let funcionarios=[]
+      let funcionarios = [];
       let todasAvaliacoes = [];
       try {
         funcionarios = await axios.get('/cadastrados/' + user.setor);
-        todasAvaliacoes = funcionarios.data.map((item) => JSON.parse(item.avaliacoes)).flat();
-        todasAvaliacoes = todasAvaliacoes.filter(item => item.mes === nomeMes && item.ano === anoAtual);
+        todasAvaliacoes = funcionarios.data
+          .map((item) => JSON.parse(item.avaliacoes))
+          .flat();
+        todasAvaliacoes = todasAvaliacoes.filter(
+          (item) => item.mes === nomeMes && item.ano === anoAtual,
+        );
       } catch (error) {
         console.log('Erro ao fazer o parse das avaliações', error);
       }
-    
+
       // Etapa 2: Obter Férias do Usuário
       let feriasFuncionarios = [];
       try {
-
-        feriasFuncionarios = funcionarios.data.map(item => JSON.parse(item.ferias)).flat();
-        feriasFuncionarios = feriasFuncionarios.filter(item => item.mes === nomeMes && item.ano === anoAtual && item.ferias === true);
+        feriasFuncionarios = funcionarios.data
+          .map((item) => JSON.parse(item.ferias))
+          .flat();
+        feriasFuncionarios = feriasFuncionarios.filter(
+          (item) =>
+            item.mes === nomeMes &&
+            item.ano === anoAtual &&
+            item.ferias === true,
+        );
       } catch (error) {
         console.log('Erro ao fazer o parse do feriasFuncionarios', error);
       }
-    
+
       // Etapa 3: Calcular a Meta para o Usuário
-      const meta = ((funcionarios.data.length - feriasFuncionarios.length) * 0.86).toFixed(0);
-    
+      const meta = (
+        (funcionarios.data.length - feriasFuncionarios.length) *
+        0.86
+      ).toFixed(0);
+
       // Etapa 4: Verificar Avaliações do Gestor
       let dadosFuncionarios = [];
       try {
@@ -347,29 +386,38 @@ export default function App() {
       } catch (error) {
         console.log('Erro na requisição', error);
       }
-    
+
       console.log(`user.setor do ${user.name}`, user.setor);
       console.log(`dados do ${user.name}`, dadosFuncionarios.data);
-    
+
       // Etapa 5: Verificar se a Meta foi Atingida para o Usuário
-      const avaliacoesDosFuncionarios = dadosFuncionarios.data.map(item => JSON.parse(item.avaliacoes)).flat();
-      const avaliacoesUsuario = avaliacoesDosFuncionarios.filter(item => item.mes === nomeMes && item.ano === anoAtual);
+      const avaliacoesDosFuncionarios = dadosFuncionarios.data
+        .map((item) => JSON.parse(item.avaliacoes))
+        .flat();
+      const avaliacoesUsuario = avaliacoesDosFuncionarios.filter(
+        (item) => item.mes === nomeMes && item.ano === anoAtual,
+      );
       console.log(`avaliacoesUsuario do ${user.name}`, avaliacoesUsuario);
-      console.log('todasAvaliacoes.length: ' + user.name, todasAvaliacoes.length);
-      console.log('feriasFuncionarios.length: ' + user.name, feriasFuncionarios.length);
-    
+      console.log(
+        'todasAvaliacoes.length: ' + user.name,
+        todasAvaliacoes.length,
+      );
+      console.log(
+        'feriasFuncionarios.length: ' + user.name,
+        feriasFuncionarios.length,
+      );
+
       console.log(`funcionarios.length do ${user.name}`, meta);
       console.log(`meta.length do ${user.name}`, avaliacoesUsuario.length);
-    
+
       // Etapa 6: Enviar E-mail se a Meta foi Atingida
       if (avaliacoesUsuario.length < meta) {
-        console.log(`Enviar e-mail para ${user.name}, a meta não foi atingida!`);
+        console.log(
+          `Enviar e-mail para ${user.name}, a meta não foi atingida!`,
+        );
         // Lógica para enviar e-mail
       }
     }
-    
-
-  
   }
 
   //Funções auxiliares
