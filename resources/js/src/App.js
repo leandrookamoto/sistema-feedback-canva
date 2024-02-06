@@ -202,13 +202,13 @@ export default function App() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-   
+  //useEffect para o envio dos e-mails para os gestores semanais pelo robo
+  useEffect(() => {   
     if (dadosUsuarioLogado.email === 'robo@globalhitss.com.br') {
       sendEmailAll();
     }
-
   }, [dadosUsuarioLogado]);
+  
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
   useEffect(() => {
     if (!feedback) {

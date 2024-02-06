@@ -142,6 +142,7 @@ export default function Feedback({
 
     atualizaFerias();
   }, [dadosFuncionario]);
+
   // UseEffect para renderizar manter os dados atualizados após a gravação ou edição do mesmo
   useEffect(() => {
     if (montagemInicial.current) {
@@ -177,6 +178,7 @@ export default function Feedback({
   useEffect(() => {
     setPage(1);
   }, [listaCadastro]);
+
   //useEffect para atualização do avaliar
   useEffect(() => {
     setAvaliar(avaliar2);
@@ -207,7 +209,7 @@ export default function Feedback({
   async function selecionarFuncionario(id) {
     let funcionarioSelecionado = [];
     try {
-      const lista = funcionarioSelecionado = await axios.get(`/cadastrados/${setorChefe}`);
+      const lista =  await axios.get(`/cadastrados/${setorChefe}`);
       funcionarioSelecionado = lista.data.find(
         (funcionario) => funcionario.id === id,
       );

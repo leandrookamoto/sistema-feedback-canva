@@ -22,6 +22,8 @@ export default function Card({
   ferias,
   listaCadastro,
 }) {
+  //Componente usado nos componentes Feedback, Pendentes e Plano de ação para a geração dos cards 
+  //com os dados dos funcionários
 
   let dadosFuncionario=[{ferias:false}]
   try {

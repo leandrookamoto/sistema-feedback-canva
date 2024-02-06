@@ -16,6 +16,7 @@ export default function Canva({
   avalDoFuncionario,
   dadosUsuarioLogado
 }) {
+  //Componente responsável pela geração do feedback Canva
   //Constantes para gravação de estado para o canva
   //Constante para gravar a lista que só o suficiente para gerar o canva. Ao longo do código fiz
   //a separação e o tratamento principalmente na função comparaCanva()

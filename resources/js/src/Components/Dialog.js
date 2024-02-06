@@ -24,8 +24,8 @@ export default function AlertDialog({
   openFerias
 
 }) {
-
-  console.log('openFerias', openFerias)
+  //Componente usado nos componentes Home, Canva, Feedback, Plano de Ação para a geração do 
+  //Dialog/Modal/Pop up
   return (
     <div>
       <Dialog
