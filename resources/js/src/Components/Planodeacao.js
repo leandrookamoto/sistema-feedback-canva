@@ -345,8 +345,6 @@ export default function Planodeacao({
 
         if (novaListaFiltrada.length === 0) {
           const novaLista = listaOriginal.filter((item) => item.email === e);
-          console.log('listaCadastro', listaCadastro);
-          console.log('novaLista', novaLista);
 
           if (novaLista.length > 0) {
             setListaRender(novaLista);
@@ -391,11 +389,6 @@ export default function Planodeacao({
 
   //Função apagar
   function apagar(index) {
-    console.log('inputsFiltrados.length:', inputsFiltrados.length);
-    console.log('eraseLast:', eraseLast);
-    console.log('eraseLast', eraseLast);
-    console.log('openErase', openErase);
-    console.log('newIndexButton', newIndexButton);
 
     if (inputsFiltrados.length > 1 || eraseLast) {
       setOpenErase(false);
@@ -479,7 +472,7 @@ export default function Planodeacao({
 
   //Função para deixar o input atualizado
   async function atualizaInputs() {
-    console.log('eraseLast', eraseLast);
+
     if (inputs.length > 0 || eraseLast) {
       try {
         await axios.put(`/cadastro/${idFuncionario}/update-plano`, {

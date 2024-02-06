@@ -118,8 +118,6 @@ export default function Canva({
       console.log('Erro ao fazer o parse', error);
     }
 
-    console.log('dadosParaCanvaDoFuncionario', dadosParaCanvaDoFuncionario);
-
     //Seleção dos dados específicos para a formação do canva do funcionário baseado nas datas
     //selecionadas pelo usuário.
     let canvaParseData =
@@ -139,8 +137,6 @@ export default function Canva({
                   dadosParaCanvaDoFuncionario.length - 1
                 ].mes,
           );
-
-    console.log('canvaParseData', canvaParseData);
 
     //Comparação entre o nome dos dados do funcionário selecionado com o nome e os dados
     //do canva já feito do gestor
@@ -262,8 +258,6 @@ export default function Canva({
         },
       );
 
-      console.log(response.data);
-
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {
         setListaCanva([]);
@@ -292,8 +286,6 @@ export default function Canva({
           avaliacoes: JSON.stringify(listaAtualizada), // Envie a lista no formato esperado pela API
         },
       );
-
-      console.log(response.data);
 
       setListaCanva(listaAtualizada);
       if (listaAtualizada.length == 0) {

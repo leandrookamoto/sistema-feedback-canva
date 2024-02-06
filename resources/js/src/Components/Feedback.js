@@ -30,7 +30,6 @@ export default function Feedback({
   const [compararAval, setCompararAval] = useState(false);
   const [listaCompara, setListaCompara] = useState([]);
   const [listaCadastro, setListaCadastro] = useState([]);
-  console.log('listaCompara', listaCompara);
   const [ferias, setFerias] = useState(false);
   const [listaFerias, setListaFerias] = useState([]);
 
@@ -99,7 +98,6 @@ export default function Feedback({
       console.log('Erro ao fazer a listaFerias', error);
     }
     setListaFerias(newListaFerias);
-    console.log('newListaFerias', newListaFerias);
     let newFerias = [];
     try {
       newFerias = newListaFerias.filter(
@@ -108,14 +106,13 @@ export default function Feedback({
     } catch (error) {
       console.log('Erro no endpoint das férias');
     }
-    console.log('newFerias', newFerias);
     setFerias(newFerias.map((item) => item.ferias)[0]);
   }
 
   //useEffects
   //useEffect para manter listaCadastro atualizado
   useEffect(()=>{
-    console.log('setor', setorChefe)
+
     async function fetchData(){
       const lista = await axios.get('/cadastrados/' + setorChefe); 
       console.log('lista do feed',lista.data)
@@ -124,7 +121,7 @@ export default function Feedback({
 
     fetchData()
   },[])
-  console.log('listaCadastro', listaCadastro)
+
   // useEffect para a ordenação por nome
   useEffect(() => {
     if (montagemInicial.current) {
@@ -164,7 +161,7 @@ export default function Feedback({
         const novaListaFiltrada = listaFiltrada2.filter((item) =>
           item.email.includes(dados.email),
         );
-        console.log('Esta é a novaListaFiltrada', novaListaFiltrada);
+
         setListaFiltrada(novaListaFiltrada);
         setPage(1);
       })
@@ -293,8 +290,6 @@ export default function Feedback({
     setAvaliar2(false);
     setHistorico(false);
   }
-
-  console.log('listaFerias', listaFerias);
 
   //Função para deixar de férias
   async function handleFerias() {

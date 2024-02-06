@@ -339,7 +339,6 @@ export default function App() {
     } catch (error) {
       console.log('Erro na requisição', error);
     }
-    console.log('users', users);
 
     for (const user of users) {
       // Etapa 1: Obter Avaliações do Usuário

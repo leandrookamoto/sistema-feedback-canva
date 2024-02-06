@@ -133,11 +133,11 @@ export default function Home({
 
   //Função para atualizar as férias
   async function atualizaFerias() {
-    console.log('setorChefe', setorChefe);
+
     const response = await axios.get(`/cadastrados/${setorChefe}`);
-    console.log('response.data', response.data);
+
     const lista = response.data.map((item) => item.ferias);
-    console.log('lista', lista);
+
     let listaParse = [];
     let numero = null;
     try {
@@ -148,20 +148,17 @@ export default function Home({
       });
       listaParse = listaParse.flat();
 
-      console.log('listaParse', listaParse);
 
       let feriasFiltradas = listaParse.filter(
         (item) => item.ano === ano && item.mes === nomeMes,
       );
-      console.log('feriasFiltradas', feriasFiltradas);
       numero = feriasFiltradas.filter((item) => item.ferias === true);
-      console.log('feriasFiltradas', feriasFiltradas);
     } catch (error) {
       console.log('Erro no filtragem das férias', error);
     }
     setNumeroFerias(numero.length);
 
-    console.log('listaParse', listaParse);
+
   }
 
   //Lógica para o cálculo dos feedbacks feitos
@@ -414,7 +411,6 @@ export default function Home({
 
       setMetaMes(resultados);
 
-      console.log('Resultados:', resultados);
     };
 
     // Chame a função para obter os números de férias para cada mês
