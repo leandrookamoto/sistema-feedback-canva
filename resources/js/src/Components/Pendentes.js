@@ -189,7 +189,9 @@ export default function Pendentes({
   onChangeComponenteFeedBack,
   onChangeDados,
   setorChefe,
-  onChangeComponentePlano
+  onChangeComponentePlano,
+  dadosUsuarioLogado,
+
 }) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
@@ -202,7 +204,7 @@ export default function Pendentes({
   const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
-  const [openPlano, setOpenPlano]=useState(false);
+  const [openPlano, setOpenPlano] = useState(false);
 
   const data = [
     'Janeiro',
@@ -242,23 +244,23 @@ export default function Pendentes({
   //Constantes para controle do Dialog
   const [open, setOpen] = useState(false);
   const [contagem, setContagem] = useState(3);
-  const descricaoFeed =
-    `Você será encaminhado em ${contagem} segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`; 
+  const [openEmail,setOpenEmail] = useState(false);
+  const descricaoFeed = `Você será encaminhado em ${contagem} segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`;
+  const sucessoEmail = 'Aviso por e-mail enviado com sucesso!'
+  const descricaoPlano = `Você será encaminhado em ${contagem} segundos para o menu de plano de ação, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`;
 
-    const descricaoPlano =
-    `Você será encaminhado em ${contagem} segundos para o menu de plano de ação, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`; 
+  //useEffect para manter dados atualizados
+  useEffect(() => {
+    async function fetchData() {
+      const responseListaOriginal = await axios.get(
+        '/cadastrados/' + setorChefe,
+      );
+      const listaOriginal = responseListaOriginal.data;
+      setListaCadastro(listaOriginal);
+    }
 
-
-    //useEffect para manter dados atualizados
-    useEffect(()=>{
-      async function fetchData(){
-        const responseListaOriginal = await axios.get('/cadastrados/' + setorChefe);
-        const listaOriginal = responseListaOriginal.data;
-        setListaCadastro(listaOriginal);
-      }
-
-      fetchData();
-    },[])
+    fetchData();
+  }, []);
   //Lógica da lista do primeiro step
   /*Formação da LISTA DO início do processo que são os funcionários 
   que o gestor ainda não realizou o feedback canva
@@ -295,7 +297,10 @@ export default function Pendentes({
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   //Renderização do primeiro step
-  let currentDisplayList = orderEmployeeData(listaRender).slice(startIndex, endIndex);
+  let currentDisplayList = orderEmployeeData(listaRender).slice(
+    startIndex,
+    endIndex,
+  );
 
   //Lógica da lista do segundo step
   //Esta const pega a lista e verifica se há avaliações registradas do gestor na data selecionada
@@ -359,15 +364,14 @@ export default function Pendentes({
   //Esta const exclui do comparaCadastrados pessoas que tiverem dados do mês selecionado
   // Filtra o array de objetos
   const excluiMesFuncionario = comparaAvaliacoesFuncionario.filter((item) => {
-  
-    const temMesProcurado = item.avaliacoes &&
+    const temMesProcurado =
+      item.avaliacoes &&
       item.avaliacoes.some(
-        (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes
+        (avaliacao) => avaliacao.ano === ano && avaliacao.mes === mes,
       );
-  
+
     return temMesProcurado;
   });
-  
 
   console.log('excluiMesFuncionario', excluiMesFuncionario);
   //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
@@ -410,7 +414,10 @@ export default function Pendentes({
   }
   const startIndex2 = (page2 - 1) * pageSize;
   const endIndex2 = startIndex2 + pageSize;
-  let currentDisplayList2 = orderEmployeeData(listaFinal).slice(startIndex2, endIndex2);
+  let currentDisplayList2 = orderEmployeeData(listaFinal).slice(
+    startIndex2,
+    endIndex2,
+  );
 
   //Lógica da lista do 3º step
   //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
@@ -472,12 +479,9 @@ export default function Pendentes({
   }
   const startIndex3 = (page3 - 1) * pageSize;
   const endIndex3 = startIndex3 + pageSize;
-  
-
-
 
   //Lógica da lista de tudo completo!
-    //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
+  //Aqui pega as avaliações realizadas pelos funcionarios e retorna somente aquelas que forem iguais
   //as datas selecionadas pelo usuário
   let comparaPlanoFuncionario = listaCadastro.map((objeto) => {
     // Verifica se o objeto tem a chave 'avaliacoes' e se o valor é uma string JSON
@@ -494,7 +498,7 @@ export default function Pendentes({
     return objeto;
   });
 
-  console.log('comparaPlanoFuncionario',comparaPlanoFuncionario)
+  console.log('comparaPlanoFuncionario', comparaPlanoFuncionario);
 
   const verificaDataFuncionarioPlano = comparaPlanoFuncionario.filter(
     (objetoA) => {
@@ -502,9 +506,7 @@ export default function Pendentes({
         // Verifica se o objeto da Lista A possui a data e ano selecionados
         const possuiDataAno =
           Array.isArray(objetoA.plano) &&
-          objetoA.plano.some(
-            (item) => item.ano === ano && item.mes === mes,
-          );
+          objetoA.plano.some((item) => item.ano === ano && item.mes === mes);
         // Retorna verdadeiro se as condições forem atendidas
         return possuiDataAno;
       } catch (error) {
@@ -514,34 +516,38 @@ export default function Pendentes({
     },
   );
 
-  console.log('verificaDataFuncionarioPlano',verificaDataFuncionarioPlano);
+  console.log('verificaDataFuncionarioPlano', verificaDataFuncionarioPlano);
 
-  const verificaDataPlano = verificaDataFuncionarioPlano.map(item => {
+  const verificaDataPlano = verificaDataFuncionarioPlano.map((item) => {
     // Crie uma cópia do objeto original
     const newObj = { ...item };
-  
+
     // Aplique o filtro apenas na chave "plano"
-    newObj.plano = item.plano.filter(planoItem => planoItem.ano == ano && planoItem.mes == mes);
-  
+    newObj.plano = item.plano.filter(
+      (planoItem) => planoItem.ano == ano && planoItem.mes == mes,
+    );
+
     return newObj;
   });
-  
-  console.log('verificaDataPlano',verificaDataPlano);
 
-  const verificaDataPlano2 = verificaDataPlano.filter(item =>
-    item.plano.every(planoItem => planoItem.feito === true)
+  console.log('verificaDataPlano', verificaDataPlano);
+
+  const verificaDataPlano2 = verificaDataPlano.filter((item) =>
+    item.plano.every((planoItem) => planoItem.feito === true),
   );
-  
 
-console.log('verificaDataPlano2',verificaDataPlano2);
+  console.log('verificaDataPlano2', verificaDataPlano2);
 
-const emailsToRemove = verificaDataPlano2.map(item => item.email);
-listaFinal2 = listaFinal2.filter(item => !emailsToRemove.includes(item.email));
-console.log('listaFinal2',listaFinal2);
-let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endIndex3);
+  const emailsToRemove = verificaDataPlano2.map((item) => item.email);
+  listaFinal2 = listaFinal2.filter(
+    (item) => !emailsToRemove.includes(item.email),
+  );
+  console.log('listaFinal2', listaFinal2);
+  let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(
+    startIndex3,
+    endIndex3,
+  );
 
-
-  
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page4, setPage4] = useState(1);
   let totalPage4 = 1;
@@ -552,7 +558,10 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
   }
   const startIndex4 = (page4 - 1) * pageSize;
   const endIndex4 = startIndex4 + pageSize;
-  let currentDisplayList4 = orderEmployeeData(verificaDataPlano2).slice(startIndex4, endIndex4);
+  let currentDisplayList4 = orderEmployeeData(verificaDataPlano2).slice(
+    startIndex4,
+    endIndex4,
+  );
 
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
@@ -582,8 +591,6 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
       setContagem((prevContagem) => prevContagem - 1);
     }, 1000);
 
- 
-
     setTimeout(() => {
       const funcionarioSelecionado = listaCadastro.find(
         (funcionario) => funcionario.id === id,
@@ -595,7 +602,7 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
         pendentes: false,
         cadastrar: false,
         feedback: true,
-        planoDeAcao: false
+        planoDeAcao: false,
       });
     }, 3000);
     return () => clearInterval(intervalId);
@@ -614,7 +621,7 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
         (funcionario) => funcionario.id === id,
       );
 
-      const lista = listaCadastrados.filter(item=>item.id==id);
+      const lista = listaCadastrados.filter((item) => item.id == id);
       onChangeDados(funcionarioSelecionado);
       onChangeComponentePlano({
         homeRender: false,
@@ -622,10 +629,9 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
         cadastrar: false,
         feedback: false,
         planoDeAcao: true,
-        ano:ano,
-        mes:mes,
-        email: lista[0].email
-
+        ano: ano,
+        mes: mes,
+        email: lista[0].email,
       });
     }, 3000);
 
@@ -633,9 +639,54 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
   }
 
   //Função para avisar funcionário
-  function avisarFuncionario(){
-    //Colocar a lógica para enviar e-mail para funcionário
+  //Conteúdo mensagem
+  async function avisarFuncionario(id) {
+    const mensagem = `
+    Foi solicitado o envio do seu feedback pelo app Feedback Canva. Favor enviar o quanto antes. Qualquer dúvida contactar seu gestor.
+    Obrigado`;
+
+    console.log('dadosUsuarioLogado',dadosUsuarioLogado)
+
+
+    try {
+      const funcionario = listaCadastro.find(item => item.id === id);
+  
+      if (!funcionario) {
+        console.error('Funcionário não encontrado.');
+        return;
+      }
+      const assuntoEmail = `${dadosUsuarioLogado.name} solicita o seu feedback`;
+  
+      console.log('Funcionário selecionado:', funcionario.nome);
+  
+      const dadosEmail = {
+        nome: funcionario.nome,
+        email: funcionario.email,
+        mensagem: mensagem,
+        assunto: assuntoEmail,
+        from: dadosUsuarioLogado.email,
+        nomeChefe: dadosUsuarioLogado.name,
+      };
+      console.log('dadosEmail',dadosEmail)
+  
+      try {
+        const resposta = await axios.post('/enviar-email', dadosEmail);
+      
+        if (resposta.data && resposta.data.mensagem) {
+          console.log('Resposta do Backend:', resposta.data.mensagem);
+          setOpenEmail(true);
+        } else {
+          console.error('Resposta do Backend não possui a estrutura esperada:', resposta.data);
+        }
+      } catch (erro) {
+        console.error('Erro ao enviar e-mail:', erro);
+      }
+      
+    } catch (erro) {
+      console.error('Erro ao enviar e-mail:', erro);
+    }
   }
+  
 
   //Funções auxiliares
   //Função para a mudança de página
@@ -889,7 +940,9 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
             </>
           ))}
         </select>
-        {(!ano||!mes)&&<h5 style={{color: 'rgb(34 155 175)'}}>Favor colocar a data!</h5>}
+        {(!ano || !mes) && (
+          <h5 style={{ color: 'rgb(34 155 175)' }}>Favor colocar a data!</h5>
+        )}
       </div>
       <Stepper
         alternativeLabel
@@ -920,43 +973,41 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
           <Typography sx={{ mt: 2, mb: 1 }}>
             Todos os funcionários que estão o com feedback completo.
             <>
-                {/* Renderização da lista de funcionários */}
-                <div style={estiloInput}>
-                  <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
-                  <input
-                    type="text"
-                    placeholder="Pesquisar"
-                    onChange={pesquisar4}
-                    style={{
-                      paddingLeft: '30px',
-                      width: '250px',
-                      borderRadius: '5px',
-                      border: '1px solid #ccc',
-                      height: '40px',
-                    }}
-                  />
-                </div>
-                {currentDisplayList4.map((item) => {
-                  return (
-                    <div
-                      key={item.id}
-                    >
-                      <Card
-                        nome={item.nome}
-                        email={item.email}
-                        setor={item.setor}
-                        chefe={item.administrador}
-                        botao1="Completo"
-                      />
-                    </div>
-                  );
-                })}
-                <Pagination
-                  page={page4}
-                  handleChange={handleChange4}
-                  totalPage={totalPage4}
+              {/* Renderização da lista de funcionários */}
+              <div style={estiloInput}>
+                <FontAwesomeIcon icon={faSearch} style={estiloIcone} />
+                <input
+                  type="text"
+                  placeholder="Pesquisar"
+                  onChange={pesquisar4}
+                  style={{
+                    paddingLeft: '30px',
+                    width: '250px',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc',
+                    height: '40px',
+                  }}
                 />
-              </>
+              </div>
+              {currentDisplayList4.map((item) => {
+                return (
+                  <div key={item.id}>
+                    <Card
+                      nome={item.nome}
+                      email={item.email}
+                      setor={item.setor}
+                      chefe={item.administrador}
+                      botao1="Completo"
+                    />
+                  </div>
+                );
+              })}
+              <Pagination
+                page={page4}
+                handleChange={handleChange4}
+                totalPage={totalPage4}
+              />
+            </>
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Box sx={{ flex: '1 1 auto' }} />
@@ -1036,10 +1087,7 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
                   />
                 </div>
                 {currentDisplayList2.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={avisarFuncionario}
-                  >
+                  <div key={item.id} onClick={()=>avisarFuncionario(item.id)}>
                     <Card
                       nome={item.nome}
                       email={item.email}
@@ -1134,6 +1182,12 @@ let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(startIndex3, endI
         open={openPlano}
         descricao={descricaoPlano}
         handleClose={() => setOpenPlano(false)}
+        Title="Atenção"
+      />
+      <Dialog
+        open={openEmail}
+        descricao={sucessoEmail}
+        handleClose={() => setOpenEmail(false)}
         Title="Atenção"
       />
     </Stack>

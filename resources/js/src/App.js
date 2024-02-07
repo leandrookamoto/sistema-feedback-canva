@@ -598,6 +598,7 @@ export default function App() {
               onChangeComponenteFeedBack={(e) => handleChangeFeed(e)}
               setorChefe={setorChefe}
               onChangeComponentePlano={(e) => handleChangePlano(e)}
+              dadosUsuarioLogado={dadosUsuarioLogado}
             />
           )}
         </div>
