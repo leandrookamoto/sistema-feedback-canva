@@ -295,6 +295,7 @@ export default function Canva({
         setYearDate('');
       } else {
         setListaRender([listaAtualizada[listaAtualizada.length - 1]]);
+       
       }
     } catch (error) {
       console.error('Houve um erro ao atualizar:', error);
@@ -302,6 +303,8 @@ export default function Canva({
     }
     comparaCanvas();
   }
+
+
 
   //Conteúdo mensagem
   const mensagem = `
@@ -486,11 +489,13 @@ export default function Canva({
       .get(`/cadastrados/${setorChefe}`)
       .then((response) => {
         const lista = response.data;
+       
 
         //Aqui faz a separação dos objetos e faz o parse na chave avaliacoes de cada objeto
         const objetoEncontrado = lista.find(
           (objeto) => objeto.id === idFuncionario,
         );
+    
         if (objetoEncontrado) {
           if (objetoEncontrado.avaliacoes != null) {
             let avaliacoes = [];
@@ -498,6 +503,7 @@ export default function Canva({
               avaliacoes = JSON.parse(objetoEncontrado.avaliacoes);
               //Lógica para gravar a parte de avaliações com o funcionário já selecionado pelo id
               if (avaliacoes.length > 0) {
+                console.log('listaCanva dentro de avaliações', avaliacoes)
                 setListaCanva(avaliacoes);
                 setSenioridade(avaliacoes[avaliacoes.length - 1].senioridade);
                 setMouthDate(avaliacoes[avaliacoes.length - 1].mes);
@@ -508,6 +514,7 @@ export default function Canva({
                 setSenioridade('');
                 setMouthDate('');
               }
+             
 
               //Aqui é  a lógica para gerar o canva do funcionário no try pega os dados do banco
               //pela const avalDoFuncionario e faz o parse para facilitar
@@ -520,7 +527,7 @@ export default function Canva({
               } catch (error) {
                 console.log('Erro ao fazer o parse', error);
               }
-
+            
               //Recuperação do funcionário selecionado atual
               const listaNomeAtual = listaCadastro.filter(
                 (item) => item.id === idFuncionario,
@@ -538,6 +545,7 @@ export default function Canva({
                   item.ano === avaliacoes[avaliacoes.length - 1].ano &&
                   item.mes === avaliacoes[avaliacoes.length - 1].mes,
               );
+          
 
               if (
                 avalDoFuncionario.map((item) => item.nome).join() ==
@@ -550,10 +558,10 @@ export default function Canva({
               }
             } catch (error) {
               console.error('Erro ao analisar avaliações:', error);
-              setAtividades([]);
-              setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
-              setSenioridade('');
-              setMouthDate('');
+              // setAtividades([]);
+              // setListaCanva([]); // Definir lista como um array vazio se houver um erro de análise
+              // setSenioridade('');
+              // setMouthDate('');
             }
           } else {
             console.log('Nenhum dado de avaliações encontrado');
@@ -809,6 +817,7 @@ export default function Canva({
               >
                 <option selected>Escolha a data</option>
                 <option value="Última Data">Última Data</option>
+                {console.log('listaCanva',listaCanva)}
                 {listaCanva.map((item, index) => (
                   <>
                     <option
@@ -837,15 +846,20 @@ export default function Canva({
             >
               Apagar Último Canva
             </button>
+           
+
+            {console.log('mouthDate',mouthDate)}
             {listaRender.length > 0 &&
+            // Essa parte esta dando erro
               listaRender.filter(
                 (item) =>
                   (item.mes == mouthDate && item.ano == yearDate) ||
                   (item.mes == dataHistorico.mes &&
                     item.ano == dataHistorico.ano),
-              ).length > 0 && (
+                  ).length > 0 && (
                 <>
-                  <div className="headerCanva d-flex justify-content-between align-items-center">
+               
+                   <div className="headerCanva d-flex justify-content-between align-items-center">
                     <div>Feedback Canva</div>
                     {mouthDate && (
                       <div style={{ fontSize: '15px' }}>
