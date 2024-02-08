@@ -48,7 +48,7 @@
                         </a>
                     </span>
 
-                    <x-button class="ms-4">
+                    <x-button class="ms-4" id='button'>
                         {{ __('Log in') }}
                     </x-button>
                 </div>

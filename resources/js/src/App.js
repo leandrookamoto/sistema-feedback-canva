@@ -412,11 +412,69 @@ export default function App() {
       // Etapa 6: Enviar E-mail se a Meta foi Atingida
       if (avaliacoesUsuario.length < meta) {
         console.log(
-          `Enviar e-mail para ${user.name}, a meta não foi atingida!`,
+          `Enviar e-mail para ${user.name}, a meta não foi atingida! o id é o ${user.id}`,
         );
+
+        avisarGestores(user.id);
+
+        
+
         // Lógica para enviar e-mail
       }
     }
+  }
+
+  async function avisarGestores(id) {
+    const responseUser = await axios.get('/conseguir-usuarios');
+    const gestores = responseUser.data;
+
+    const mensagem = `
+    Você possui feedbacks pendentes do software Feedback Canva`;
+
+    console.log('id do gestor', id);
+    console.log('gestor',gestores);
+
+
+    let newGestores = []
+    try {
+      newGestores = gestores.user.find(item => item.id === id);
+  
+      if (!newGestores) {
+        console.error('Gestor não encontrado.');
+        return;
+      }
+      const assuntoEmail = `${newGestores.name}, você possui feedbacks pendentes no App Feedback Canva`;
+  
+      console.log('Gestor selecionado:', newGestores.name);
+  
+      const dadosEmail = {
+        nome: newGestores.name,
+        email: newGestores.email,
+        mensagem: mensagem,
+        assunto: assuntoEmail,
+        from: 'naoresponda@globalhitss.com.br',
+        nomeChefe: 'Feedback Canva',
+      };
+      console.log('dadosEmail',dadosEmail)
+  
+      try {
+        const resposta = await axios.post('/enviar-email', dadosEmail);
+      
+        if (resposta.data && resposta.data.mensagem) {
+          console.log('Resposta do Backend:', resposta.data.mensagem);
+        } else {
+          console.error('Resposta do Backend não possui a estrutura esperada:', resposta.data);
+        }
+
+        
+      } catch (erro) {
+        console.error('Erro ao enviar e-mail:', erro);
+      }
+      
+    } catch (erro) {
+      console.error('Erro ao enviar e-mail:', erro);
+    }
+   
   }
 
   //Funções auxiliares
@@ -588,6 +646,7 @@ export default function App() {
               anoPai={anoPai}
               mesPai={mesPai}
               emailPai={emailPai}
+              dadosUsuarioLogado={dadosUsuarioLogado}
             />
           )}
           {/* Aqui é a renderização do componente do pendentes */}

@@ -80,7 +80,7 @@
                 @endif
 
                 <!-- Settings Dropdown -->
-                <div class="ms-3 relative">
+                <div class="ms-3 relative" id='button'>
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
@@ -123,7 +123,7 @@
                                 @csrf
 
                                 <x-dropdown-link href="{{ route('logout') }}"
-                                         @click.prevent="$root.submit();">
+                                         @click.prevent="$root.submit();" id='logout'>
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>

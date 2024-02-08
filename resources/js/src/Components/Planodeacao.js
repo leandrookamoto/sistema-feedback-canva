@@ -13,6 +13,7 @@ export default function Planodeacao({
   anoPai,
   mesPai,
   emailPai,
+  dadosUsuarioLogado
 }) {
   //Lembrar que se der bug de novo no CADASTRO fazer o useEffect para puxar os dados direto do banco
   //e isolar este componente.
@@ -22,6 +23,10 @@ export default function Planodeacao({
   const [openErase, setOpenErase] = useState(false);
   const [eraseLast, setEraseLast] = useState(false);
   const [newIndexButton, setNewIndexButton] = useState(null);
+
+  //Constantes para o envio de e-mail
+  const sucessoEmail = 'Aviso por e-mail enviado com sucesso!';
+  const [openEmail, setOpenEmail] = useState(false);
 
   //Variáveis para o estilo do search input
   const estiloInput = {
@@ -211,10 +216,6 @@ export default function Planodeacao({
 
     //Função para deixar os dados atualizados
     fetchData();
-  }
-
-  function avisaFuncionario() {
-    //Fazer lógica para avisar funcionário das pendências.
   }
 
   //Lógica da lista de tudo completo!
@@ -497,6 +498,55 @@ export default function Planodeacao({
     });
   }
 
+  //Função para avisar funcionário
+  //Parei aqui
+  //Conteúdo mensagem
+  async function avisarFuncionario() {
+    const mensagem = `
+    Você possui algumas atividades pendentes no plano de ação do software Feedback Canva`;
+
+    console.log('dadosUsuarioLogado',dadosUsuarioLogado)
+
+
+    try {
+      const funcionario = listaCadastro.find(item => item.id === idFuncionario);
+  
+      if (!funcionario) {
+        console.error('Funcionário não encontrado.');
+        return;
+      }
+      const assuntoEmail = `${funcionario.nome}, você possui algumas atividades pendentes`;
+  
+      console.log('Funcionário selecionado:', funcionario.nome);
+  
+      const dadosEmail = {
+        nome: funcionario.nome,
+        email: funcionario.email,
+        mensagem: mensagem,
+        assunto: assuntoEmail,
+        from: dadosUsuarioLogado.email,
+        nomeChefe: dadosUsuarioLogado.name,
+      };
+      console.log('dadosEmail',dadosEmail)
+  
+      try {
+        const resposta = await axios.post('/enviar-email', dadosEmail);
+      
+        if (resposta.data && resposta.data.mensagem) {
+          console.log('Resposta do Backend:', resposta.data.mensagem);
+          setOpenEmail(true);
+        } else {
+          console.error('Resposta do Backend não possui a estrutura esperada:', resposta.data);
+        }
+      } catch (erro) {
+        console.error('Erro ao enviar e-mail:', erro);
+      }
+      
+    } catch (erro) {
+      console.error('Erro ao enviar e-mail:', erro);
+    }
+  }
+
   return (
     <>
       {!gravarPlano && (
@@ -686,7 +736,7 @@ export default function Planodeacao({
               <button
                 type="button"
                 class="btn btn-primary mt-3 ml-3"
-                onClick={avisaFuncionario}
+                onClick={avisarFuncionario}
               >
                 Avisar Funcionário
               </button>
@@ -702,6 +752,12 @@ export default function Planodeacao({
         button="Não"
         button2="Sim"
         handleButton={() => apagar(newIndexButton)}
+      />
+      <Dialog
+        open={openEmail}
+        descricao={sucessoEmail}
+        handleClose={() => setOpenEmail(false)}
+        Title="Atenção"
       />
     </>
   );

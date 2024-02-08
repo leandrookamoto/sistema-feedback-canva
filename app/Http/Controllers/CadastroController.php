@@ -9,6 +9,7 @@ use App\Models\Funcionario;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MailableName;
+use App\Mail\AvisoPlano;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -39,7 +40,7 @@ class CadastroController extends Controller
     
 public function getAllUsers()
 {
-    $user = User::all(); // Obtém o usuário autenticado
+    $user = User::all();
 
     return response()->json([
         'user' => $user,
