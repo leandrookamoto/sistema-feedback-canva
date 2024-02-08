@@ -11,7 +11,8 @@ O Feedback Canva é uma aplicação desenvolvida com o propósito de simplificar
 Com o Feedback Canva, a administração de feedbacks torna-se uma tarefa simplificada e eficiente, proporcionando aos gestores uma ferramenta abrangente para otimizar o processo de avaliação e desenvolvimento da equipe.
 
 ## Instalação
-<h6>Requisitos do sistema.</h6>
+<p style='font-size: 17px; font-weight: bold'>Requisitos do sistema.</p>
+Para utilizar o aplicativo, é necessário ter um navegador instalado em sua máquina.
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
