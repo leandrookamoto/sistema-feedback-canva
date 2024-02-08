@@ -474,7 +474,7 @@ export default function App() {
     } catch (erro) {
       console.error('Erro ao enviar e-mail:', erro);
     }
-   
+   3
   }
 
   //Funções auxiliares
