@@ -3,9 +3,11 @@
     height: 600px;
     background-color: lightgray;
     display: flex;
+
 }
 
-.home{
-    color: gray;
-    cursor: pointer;
+.escolhido{
+    color: black;
+    font-weight: bolder;
 }
+

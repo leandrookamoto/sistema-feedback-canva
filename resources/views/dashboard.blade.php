@@ -3,6 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard') }}
         </h2>
+        <!-- <div style='display: flex; font-size: 12px; margin-top: -10px; font-weight: bold;'><div>Desenvolvido por </div> <img alt='' src='./img/Buffer.jpeg' style='width: 20px; height: 20px; margin: -3px 2px 0 7px'/>Buffer-TI</div> -->
         
     </x-slot>
     <!-- links cdn -->

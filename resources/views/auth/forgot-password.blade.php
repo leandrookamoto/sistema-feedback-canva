@@ -1,11 +1,11 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            <img src='../img/global_hitss_logo.png' style='height: 80px;'/>
         </x-slot>
 
         <div class="mb-4 text-sm text-gray-600">
-            {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+            {{ __('Esqueceu sua senha? Sem problemas. Basta nos informar seu endereço de e-mail e enviaremos por e-mail um link de redefinição de senha que permitirá que você escolha uma nova.') }}
         </div>
 
         @if (session('status'))
@@ -24,9 +24,16 @@
                 <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             </div>
 
+            
+
             <div class="flex items-center justify-end mt-4">
+            <span style='margin-right: 20px'>
+                        <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('home') }}">
+                                {{ __('Voltar') }}
+                        </a>
+            </span>
                 <x-button>
-                    {{ __('Email Password Reset Link') }}
+                    {{ __('Link de redefinição de senha de e-mail') }}
                 </x-button>
             </div>
         </form>

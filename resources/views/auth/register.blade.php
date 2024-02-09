@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+        <img src='./img/logo.jpg' />
         </x-slot>
 
         <x-validation-errors class="mb-4" />
@@ -28,6 +28,19 @@
                 <x-label for="password_confirmation" value="{{ __('Confirme o Password') }}" />
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
             </div>
+
+            <div class="mt-4" >
+                <x-label for="setor" value="{{ __('Setor') }}" />
+                <select id="setor" name="setor" class="block mt-1 w-full" required autofocus style='border-color: #d1d5db; border-radius:7px;'>
+                    <option>Escolha o setor</option>    
+                    <option value="Adoção">Adoção</option>
+                    <option value="Agendamento">Agendamento</option>
+                    <option value="Aprovisionamento">Aprovisionamento</option>
+                    <option value="Buffer-TI">Buffer-TI</option>
+                    <option value="Configuração">Configuração</option>
+                </select>
+            </div>
+            
 
             @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
                 <div class="mt-4">
