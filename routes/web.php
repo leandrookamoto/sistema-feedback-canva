@@ -25,7 +25,6 @@ Route::get('/', function () {
     return view('../auth/login');
 })->name('home');;
 
-Route::get('/automacao', [CadastroController::class, 'automacao']);
 
 Route::get('/conseguir-usuarios', [CadastroController::class, 'getAllUsers']);
 
