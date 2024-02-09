@@ -68,10 +68,10 @@ export default function Canva({
   const [open, setOpen] = useState(false);
   const [openEmail, setOpenEmail] = useState(false);
   const descricao =
-    'Favor usar vírgulas para separar as características. Por exemplo: Pontualidade, Educação';
+    'Favor preencher todos os campos!';
   const validaNota = 'O intervalo de notas é de 1 a 7';
   const validaData = 'Mês e ano já cadastrados!';
-  const sucessoEmail = 'Sua solicitação de feedback foi enviada com sucesso!';
+  const sucessoEmail = 'O funcionário recebeu a solicitação para realizar sua própria avaliação e fornecer feedback no e-mail dele!';
 
   //useEffects
   //useEffect para manter o listaRender atualizado e avalDoFuncionario que vem do App.js
@@ -205,10 +205,10 @@ export default function Canva({
       setOpenValidaData(true);
     } else {
       if (
-        !isValidAtencao ||
-        !isValidAtividades ||
-        !isValidFortes ||
-        !isValidMelhorias
+        !atencao ||
+        !atividades ||
+        !fortes ||
+        !melhorias
       ) {
         setOpen(true);
       } else {
@@ -237,12 +237,14 @@ export default function Canva({
 
           onHistorico(true);
           onAvaliacao(false);
+          sendEmail();
         } catch (error) {
           console.error('Erro ao enviar requisição:', error);
           // Tratar erros, se necessário
         }
       }
     }
+  
   }
 
   // Função para apagar primeiro gráfico
@@ -1535,7 +1537,7 @@ export default function Canva({
                 style={{ marginRight: '10px' }}
                 onClick={sendEmail}
               >
-                Solicitar feedback para o funcionário
+                Reenviar solicitação de feedback para o funcionário
               </button>
             </>
           )}

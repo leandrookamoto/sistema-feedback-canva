@@ -93,6 +93,27 @@ export default function App() {
         }
         setListaCadastro(listaOriginal);
 
+        //Exemplo de código para acertar os retornos nulos caso necessário
+        // let testeFerias = [];
+        // try{
+        //   testeFerias = listaOriginal.map(item => {
+        //     try {
+        //       return item.ferias ? JSON.parse(item.ferias) : [];
+        //     } catch (error) {
+        //       console.error(`Erro ao fazer parse de JSON: ${error}`);
+        //       return [];
+        //     }
+        //   });
+
+          
+        // }catch (error){
+        //   console.log('Erro de férias',error)
+        // }
+
+        // console.log('testeFerias',testeFerias);
+
+       
+
         //Faz a requisição das informações das avaliações dos funcionários segundo o setor do usuário
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
         //Setando os dados do canva que o funcionário fez
