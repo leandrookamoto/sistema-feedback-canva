@@ -25,7 +25,7 @@ export default function Planodeacao({
   const [newIndexButton, setNewIndexButton] = useState(null);
 
   //Constantes para o envio de e-mail
-  const sucessoEmail = 'Aviso por e-mail enviado com sucesso!';
+  const sucessoEmail = 'Um aviso de atividades pendentes foi enviado ao funcionário.';
   const [openEmail, setOpenEmail] = useState(false);
 
   //Variáveis para o estilo do search input
@@ -213,6 +213,7 @@ export default function Planodeacao({
   //Funções principais
   async function gravar() {
     setPlano(true);
+    avisarFuncionario();
 
     //Função para deixar os dados atualizados
     fetchData();

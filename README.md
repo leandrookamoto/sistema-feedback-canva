@@ -72,6 +72,9 @@ Para otimizar a utilização do programa, recomenda-se verificar seu e-mail sema
 Para assegurar a integridade das suas informações, é aconselhável ativar a autenticação de duas etapas no programa.
 
 ***Observação para desenvolvedores:*** Certifique-se de que o relógio do servidor esteja sincronizado com o horário oficial do Windows; do contrário, a autenticação de dois fatores não funcionará corretamente. Em situações de falha na autenticação dupla ou perda do dispositivo do usuário, como um celular, proceda à exclusão do registro correspondente no banco de dados. Em seguida, solicite que o usuário refaça o cadastro, fornecendo o mesmo nome, e-mail e, crucialmente, o setor, para recuperar automaticamente os dados.
+***É crucial acessar o painel administrativo do MySQL para este programa e pré-configurar todas as colunas que contenham arrays (longtext) como tipo, deixando predefinido como [].***
+
+***Para ver vídeo do programa clique [aqui](https://1drv.ms/v/s!Ak7vvHm88zdfqCOckIXLx999JGWh?e=RPBtDu)*** 
 
 
 
