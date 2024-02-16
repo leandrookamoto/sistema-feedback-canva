@@ -1,6 +1,6 @@
 .sidebar{
     width: 25%;
-    height: auto;
+    min-height: 600px;
     background-color: lightgray;
     display: flex;
 }
