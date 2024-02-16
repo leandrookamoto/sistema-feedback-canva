@@ -67,13 +67,14 @@ export default function App() {
   useEffect(() => {
     let updatedListaOriginal = [];
     let usuarioLogado = [];
+    let setor = null;
     const fetchData = async () => {
       try {
         //Faz a requisição das informações do login do usuário
         const responseUser = await axios.get('/user');
 
         usuarioLogado = responseUser.data.name;
-        const setor = responseUser.data.setor;
+        setor = responseUser.data.setor;
         const newIdUsuario = responseUser.data.id;
         setDadosUsuarioLogado(responseUser.data);
         setUsuario(usuarioLogado);
@@ -88,6 +89,7 @@ export default function App() {
             '/cadastrados/' + setor,
           );
           listaOriginal = responseListaOriginal.data;
+          console.log('listaOriginal', listaOriginal);
         } catch (error) {
           console.log('Erro na requisição', error);
         }
@@ -105,14 +107,11 @@ export default function App() {
         //     }
         //   });
 
-          
         // }catch (error){
         //   console.log('Erro de férias',error)
         // }
 
         // console.log('testeFerias',testeFerias);
-
-       
 
         //Faz a requisição das informações das avaliações dos funcionários segundo o setor do usuário
         const canvaFuncionario = await axios.get(`funcionarios/${setor}`);
@@ -158,6 +157,7 @@ export default function App() {
         // Atualiza a lista do atestado
         try {
           updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+          console.log('updatedListaOriginal', updatedListaOriginal);
         } catch (error) {
           console.log('Erro na requisição', error);
         }
@@ -174,11 +174,11 @@ export default function App() {
       listaFuncionarios,
       setor,
     ) => {
-      let updatedListaOriginal=[];
-      try{
-      updatedListaOriginal = await axios.get('/cadastrados/' + setor);
-      }catch(error){
-        console.log('Erro na requisição',error)
+      let updatedListaOriginal = [];
+      try {
+        updatedListaOriginal = await axios.get('/cadastrados/' + setor);
+      } catch (error) {
+        console.log('Erro na requisição', error);
       }
 
       try {
@@ -208,11 +208,11 @@ export default function App() {
           }),
         );
 
-        let updatedListaCadastro=[];
-        try{
+        let updatedListaCadastro = [];
+        try {
           updatedListaCadastro = await axios.get('/cadastrados/' + setor);
-        }catch(error){
-          console.log('Erro na requisição',error);
+        } catch (error) {
+          console.log('Erro na requisição', error);
         }
 
         setListaCadastro(updatedListaCadastro.data);
@@ -224,12 +224,12 @@ export default function App() {
   }, []);
 
   //useEffect para o envio dos e-mails para os gestores semanais pelo robo
-  useEffect(() => {   
+  useEffect(() => {
     if (dadosUsuarioLogado.email === 'robo@globalhitss.com.br') {
       sendEmailAll();
     }
   }, [dadosUsuarioLogado]);
-  
+
   //useEffect para resetar o valor dados para tirar o bug da seleção automática ao gravar
   useEffect(() => {
     if (!feedback) {
@@ -407,9 +407,6 @@ export default function App() {
         console.log('Erro na requisição', error);
       }
 
-      console.log(`user.setor do ${user.name}`, user.setor);
-      console.log(`dados do ${user.name}`, dadosFuncionarios.data);
-
       // Etapa 5: Verificar se a Meta foi Atingida para o Usuário
       const avaliacoesDosFuncionarios = dadosFuncionarios.data
         .map((item) => JSON.parse(item.avaliacoes))
@@ -417,18 +414,6 @@ export default function App() {
       const avaliacoesUsuario = avaliacoesDosFuncionarios.filter(
         (item) => item.mes === nomeMes && item.ano === anoAtual,
       );
-      console.log(`avaliacoesUsuario do ${user.name}`, avaliacoesUsuario);
-      console.log(
-        'todasAvaliacoes.length: ' + user.name,
-        todasAvaliacoes.length,
-      );
-      console.log(
-        'feriasFuncionarios.length: ' + user.name,
-        feriasFuncionarios.length,
-      );
-
-      console.log(`funcionarios.length do ${user.name}`, meta);
-      console.log(`meta.length do ${user.name}`, avaliacoesUsuario.length);
 
       // Etapa 6: Enviar E-mail se a Meta foi Atingida
       if (avaliacoesUsuario.length < meta) {
@@ -436,11 +421,8 @@ export default function App() {
           `Enviar e-mail para ${user.name}, a meta não foi atingida! o id é o ${user.id}`,
         );
 
+        //Função para mandar os e-mails
         avisarGestores(user.id);
-
-        
-
-        // Lógica para enviar e-mail
       }
     }
   }
@@ -452,22 +434,18 @@ export default function App() {
     const mensagem = `
     Você possui feedbacks pendentes do software Feedback Canva`;
 
-    console.log('id do gestor', id);
-    console.log('gestor',gestores);
-
-
-    let newGestores = []
+    let newGestores = [];
     try {
-      newGestores = gestores.user.find(item => item.id === id);
-  
+      newGestores = gestores.user.find((item) => item.id === id);
+
       if (!newGestores) {
         console.error('Gestor não encontrado.');
         return;
       }
       const assuntoEmail = `${newGestores.name}, você possui feedbacks pendentes no App Feedback Canva`;
-  
+
       console.log('Gestor selecionado:', newGestores.name);
-  
+
       const dadosEmail = {
         nome: newGestores.name,
         email: newGestores.email,
@@ -476,26 +454,25 @@ export default function App() {
         from: 'naoresponda@globalhitss.com.br',
         nomeChefe: 'Feedback Canva',
       };
-      console.log('dadosEmail',dadosEmail)
-  
+   
       try {
         const resposta = await axios.post('/enviar-email', dadosEmail);
-      
+
         if (resposta.data && resposta.data.mensagem) {
           console.log('Resposta do Backend:', resposta.data.mensagem);
         } else {
-          console.error('Resposta do Backend não possui a estrutura esperada:', resposta.data);
+          console.error(
+            'Resposta do Backend não possui a estrutura esperada:',
+            resposta.data,
+          );
         }
-
-        
       } catch (erro) {
         console.error('Erro ao enviar e-mail:', erro);
       }
-      
     } catch (erro) {
       console.error('Erro ao enviar e-mail:', erro);
     }
-   3
+    3;
   }
 
   //Funções auxiliares
@@ -618,6 +595,7 @@ export default function App() {
           planoDeAcao={planoDeAcao}
         />
 
+<div className="m-3" style={{ flex: 1 }}>
         <div className="m-3" style={{ width: '70%' }}>
           {/* Aqui é a renderização da Home */}
           {homeRender && (
@@ -682,6 +660,7 @@ export default function App() {
             />
           )}
         </div>
+        </div>
       </section>
       {/* Aqui são as renderizações dos Dialogs de avisos */}
       <Dialog
@@ -711,6 +690,7 @@ export default function App() {
         handleClose={() => setEdicaoSucesso(false)}
         Title="Cadastro"
       />
+    
     </main>
   );
 }

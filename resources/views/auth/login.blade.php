@@ -4,7 +4,7 @@
             <x-slot name="logo">
                 <img src='./img/logo.jpg' />
             </x-slot>
-
+            <div style="margin-bottom: 20px; font-weight: bold; font-size: 20px">Feedback Canva Gestores</div>
             <x-validation-errors class="mb-4" />
 
             @if (session('status'))

@@ -17,4 +17,19 @@
 
     <!-- Parte interna do dashboard -->
     <div id='root'></div>
+    <div class="border-top" style="height: 150px">
+        <footer class="footer p-3" style="width: 100%">
+            <div class="footer-copyright text-center py-1 mt-3">
+                © Propriedade Global Hitss 2023 Desenvolvido por Buffer TI
+            </div>
+            <div class="footer-copyright text-center py-1">
+    <div>Ferramenta compatível com os navegadores, Chrome 
+        <img class="d-inline" width="20px" src="{{ asset('/img/chrome.svg') }}" />, 
+        Firefox <img class="d-inline" width="20px" src="{{ asset('/img/firefox.svg') }}" /> 
+        e Edge <img class="d-inline" width="20px" src="{{ asset('/img/edge.svg') }}" />
+    </div>
+</div>
+
+        </footer>
+    </div>
 </x-app-layout>
