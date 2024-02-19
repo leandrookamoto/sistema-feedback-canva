@@ -45,7 +45,5 @@
     var dataDiv = document.getElementById('data');
     dataDiv.innerHTML = `© Propriedade Global Hitss ${getAnoAtual()} Desenvolvido por <img class="d-inline" alt='' src='./img/global_hitss_logo.png' style='width: 15px; height: 15px; margin: -5px 2px 0 4px;'> Buffer TI`;
   });
-
-
 </script>
 </x-app-layout>

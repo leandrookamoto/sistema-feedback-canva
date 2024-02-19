@@ -200,10 +200,12 @@ export default function Pendentes({
   const [listaRender, setListaRender] = useState([]);
   const [listaRender2, setListaRender2] = useState([]);
   const [listaCadastro, setListaCadastro] = useState([]);
+  const [listaConfereFeedChefe, setListaConfereFeedChefe] = useState([]);
+  const [listaParseAvaliacoes,setListaParseAvaliacoes ]= useState([]);
   //Constantes para controle de data
-  const [mes, setMes] = useState('');
-  const anoAtual = new Date().getFullYear();
-  const [ano, setAno] = useState(anoAtual);
+  const dataAtual = new Date();
+  const anoAtual = dataAtual.getFullYear();
+  const [ano, setAno] = useState(dataAtual.getFullYear());
   const [openPlano, setOpenPlano] = useState(false);
 
   const data = [
@@ -220,6 +222,9 @@ export default function Pendentes({
     'Novembro',
     'Dezembro',
   ];
+
+  const mesAtual = dataAtual.getMonth();
+  const [mes, setMes] = useState(data[mesAtual]);
   //Constantes que controlam o page
   const [page, setPage] = useState(1);
   const pageSize = 3;
@@ -266,34 +271,7 @@ export default function Pendentes({
   que o gestor ainda não realizou o feedback canva
   Fazendo o parse da chave avaliacoes para facilitar o processo, pois vem do banco de dados
   como stringfy*/
-  const listaParseAvaliacoes = listaCadastro.map((objeto) => {
-    if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
-      try {
-        return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
-      } catch (error) {
-        return objeto;
-      }
-    }
-    return objeto;
-  });
-  /*Verifica se há alguma avaliação do gerente registrada no mês selecionado e se tiver excluindo
-  da lista, pois na primeira lista quero todos os funcionários que não tem nenhum feedback registrado 
-  no mês*/
-  const listaConfereFeedChefe = listaParseAvaliacoes.filter((objeto) => {
-    try {
-      const avaliacoesArray = objeto.avaliacoes;
-      return (
-        !Array.isArray(avaliacoesArray) ||
-        avaliacoesArray.length === 0 ||
-        avaliacoesArray.every(
-          (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao fazer parsing do JSON:', error);
-      return false;
-    }
-  });
+  
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   //Renderização do primeiro step
@@ -566,15 +544,43 @@ export default function Pendentes({
   //useEffects
   //useEffect responsável por ordenar a lista em ordem alfabética
   useEffect(() => {
+    const novaLista = listaCadastro.map((objeto) => {
+      if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+        try {
+          return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+        } catch (error) {
+          return objeto;
+        }
+      }
+      return objeto;
+    });
+    /*Verifica se há alguma avaliação do gerente registrada no mês selecionado e se tiver excluindo
+    da lista, pois na primeira lista quero todos os funcionários que não tem nenhum feedback registrado 
+    no mês*/
+    const lista = novaLista.filter((objeto) => {
+      try {
+        const avaliacoesArray = objeto.avaliacoes;
+        return (
+          !Array.isArray(avaliacoesArray) ||
+          avaliacoesArray.length === 0 ||
+          avaliacoesArray.every(
+            (avaliacao) => avaliacao.ano !== ano || avaliacao.mes !== mes,
+          )
+        );
+      } catch (error) {
+        console.error('Erro ao fazer parsing do JSON:', error);
+        return false;
+      }
+    });
+    
     if (mes && ano) {
-      const lista = listaConfereFeedChefe;
       const orderedList = orderEmployeeData(lista);
       setListaRender(orderedList);
       setPage(1);
     } else {
       setListaRender([]);
     }
-  }, [mes, ano]);
+  }, [mes, ano, listaCadastro]);
   //useEffect para fazer subir a tela toda vez que mudar pagination
   useEffect(() => {
     animateScroll.scrollToTop({
@@ -930,6 +936,7 @@ export default function Pendentes({
           className="form-select mb-2"
           aria-label="Default select example"
           onChange={handleData}
+          value={mes}
         >
           <option selected>Escolha a data</option>
           {data.map((item, index) => (
