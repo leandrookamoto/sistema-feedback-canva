@@ -191,7 +191,6 @@ export default function Pendentes({
   setorChefe,
   onChangeComponentePlano,
   dadosUsuarioLogado,
-
 }) {
   //Constantes do material UI para renderização dos steps
   const [activeStep, setActiveStep] = useState(0);
@@ -201,7 +200,7 @@ export default function Pendentes({
   const [listaRender2, setListaRender2] = useState([]);
   const [listaCadastro, setListaCadastro] = useState([]);
   const [listaConfereFeedChefe, setListaConfereFeedChefe] = useState([]);
-  const [listaParseAvaliacoes,setListaParseAvaliacoes ]= useState([]);
+  const [listaParseAvaliacoes, setListaParseAvaliacoes] = useState([]);
   //Constantes para controle de data
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
@@ -249,9 +248,9 @@ export default function Pendentes({
   //Constantes para controle do Dialog
   const [open, setOpen] = useState(false);
   const [contagem, setContagem] = useState(3);
-  const [openEmail,setOpenEmail] = useState(false);
+  const [openEmail, setOpenEmail] = useState(false);
   const descricaoFeed = `Você será encaminhado em ${contagem} segundos para o menu de feedback, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`;
-  const sucessoEmail = 'Aviso por e-mail enviado com sucesso!'
+  const sucessoEmail = 'Aviso por e-mail enviado com sucesso!';
   const descricaoPlano = `Você será encaminhado em ${contagem} segundos para o menu de plano de ação, onde poderá fornecer suas avaliações sobre o desempenho do colaborador.`;
 
   //useEffect para manter dados atualizados
@@ -262,6 +261,19 @@ export default function Pendentes({
       );
       const listaOriginal = responseListaOriginal.data;
       setListaCadastro(listaOriginal);
+
+      const novasAvaliacoes = listaOriginal.map((objeto) => {
+        if (objeto.avaliacoes && typeof objeto.avaliacoes === 'string') {
+          try {
+            return { ...objeto, avaliacoes: JSON.parse(objeto.avaliacoes) };
+          } catch (error) {
+            return objeto;
+          }
+        }
+        return objeto;
+      });
+      
+      setListaParseAvaliacoes(novasAvaliacoes);
     }
 
     fetchData();
@@ -271,7 +283,7 @@ export default function Pendentes({
   que o gestor ainda não realizou o feedback canva
   Fazendo o parse da chave avaliacoes para facilitar o processo, pois vem do banco de dados
   como stringfy*/
-  
+
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   //Renderização do primeiro step
@@ -282,6 +294,7 @@ export default function Pendentes({
 
   //Lógica da lista do segundo step
   //Esta const pega a lista e verifica se há avaliações registradas do gestor na data selecionada
+
   const listaFeedChefe = listaParseAvaliacoes.filter((objeto) => {
     try {
       const avaliacoesArray = objeto.avaliacoes;
@@ -297,6 +310,7 @@ export default function Pendentes({
     }
   });
   console.log('listaFeedChefe', listaFeedChefe);
+
   //Constantes para comparação das avaliações (se tem) e datas
   //Aqui puxa os dados de todos os funcionários que se cadastraram no feedback do funcionário
   //Os dados do banco vem por props com a const avalDoFuncionario
@@ -351,7 +365,6 @@ export default function Pendentes({
     return temMesProcurado;
   });
 
-  console.log('excluiMesFuncionario', excluiMesFuncionario);
   //Aqui faz uma lista para comparação abaixo dos funcionários que fizeram feedback na mesma data
   //do que o gestor programa de feedback dos funcionários e excluindo caso sejam iguais, pois
   //isso significa que não está faltando o feedback do funcionário para a data escolhida
@@ -381,7 +394,7 @@ export default function Pendentes({
     // Retorna true apenas se não houver correspondência na Lista B
     return !objetoB;
   });
-  console.log('listaFinal', listaFinal);
+
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page2, setPage2] = useState(1);
   let totalPage2 = 1;
@@ -446,7 +459,7 @@ export default function Pendentes({
     // Retorna true apenas se não houver correspondência na Lista B
     return objetoB;
   });
-  console.log('listaFinal2', listaFinal2);
+
   //Controles da paginação do segundo step coloquei aqui para evitar erro
   const [page3, setPage3] = useState(1);
   let totalPage3 = 1;
@@ -476,8 +489,6 @@ export default function Pendentes({
     return objeto;
   });
 
-  console.log('comparaPlanoFuncionario', comparaPlanoFuncionario);
-
   const verificaDataFuncionarioPlano = comparaPlanoFuncionario.filter(
     (objetoA) => {
       try {
@@ -494,8 +505,6 @@ export default function Pendentes({
     },
   );
 
-  console.log('verificaDataFuncionarioPlano', verificaDataFuncionarioPlano);
-
   const verificaDataPlano = verificaDataFuncionarioPlano.map((item) => {
     // Crie uma cópia do objeto original
     const newObj = { ...item };
@@ -508,19 +517,15 @@ export default function Pendentes({
     return newObj;
   });
 
-  console.log('verificaDataPlano', verificaDataPlano);
-
   const verificaDataPlano2 = verificaDataPlano.filter((item) =>
     item.plano.every((planoItem) => planoItem.feito === true),
   );
-
-  console.log('verificaDataPlano2', verificaDataPlano2);
 
   const emailsToRemove = verificaDataPlano2.map((item) => item.email);
   listaFinal2 = listaFinal2.filter(
     (item) => !emailsToRemove.includes(item.email),
   );
-  console.log('listaFinal2', listaFinal2);
+
   let currentDisplayList3 = orderEmployeeData(listaFinal2).slice(
     startIndex3,
     endIndex3,
@@ -572,7 +577,7 @@ export default function Pendentes({
         return false;
       }
     });
-    
+
     if (mes && ano) {
       const orderedList = orderEmployeeData(lista);
       setListaRender(orderedList);
@@ -651,20 +656,15 @@ export default function Pendentes({
     Foi solicitado o envio do seu feedback pelo app Feedback Canva. Favor enviar o quanto antes. Qualquer dúvida contactar seu gestor.
     Obrigado`;
 
-    console.log('dadosUsuarioLogado',dadosUsuarioLogado)
-
-
     try {
-      const funcionario = listaCadastro.find(item => item.id === id);
-  
+      const funcionario = listaCadastro.find((item) => item.id === id);
+
       if (!funcionario) {
         console.error('Funcionário não encontrado.');
         return;
       }
       const assuntoEmail = `${dadosUsuarioLogado.name} solicita o seu feedback`;
-  
-      console.log('Funcionário selecionado:', funcionario.nome);
-  
+
       const dadosEmail = {
         nome: funcionario.nome,
         email: funcionario.email,
@@ -673,26 +673,26 @@ export default function Pendentes({
         from: dadosUsuarioLogado.email,
         nomeChefe: dadosUsuarioLogado.name,
       };
-      console.log('dadosEmail',dadosEmail)
-  
+
       try {
         const resposta = await axios.post('/enviar-email', dadosEmail);
-      
+
         if (resposta.data && resposta.data.mensagem) {
           console.log('Resposta do Backend:', resposta.data.mensagem);
           setOpenEmail(true);
         } else {
-          console.error('Resposta do Backend não possui a estrutura esperada:', resposta.data);
+          console.error(
+            'Resposta do Backend não possui a estrutura esperada:',
+            resposta.data,
+          );
         }
       } catch (erro) {
         console.error('Erro ao enviar e-mail:', erro);
       }
-      
     } catch (erro) {
       console.error('Erro ao enviar e-mail:', erro);
     }
   }
-  
 
   //Funções auxiliares
   //Função para a mudança de página
@@ -1094,7 +1094,7 @@ export default function Pendentes({
                   />
                 </div>
                 {currentDisplayList2.map((item) => (
-                  <div key={item.id} onClick={()=>avisarFuncionario(item.id)}>
+                  <div key={item.id} onClick={() => avisarFuncionario(item.id)}>
                     <Card
                       nome={item.nome}
                       email={item.email}

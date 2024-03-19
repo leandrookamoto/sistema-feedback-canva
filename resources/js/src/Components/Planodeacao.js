@@ -42,7 +42,6 @@ export default function Planodeacao({
   };
 
   //Constantes para controle de data
-  const [mes, setMes] = useState('');
   const anoAtual = new Date().getFullYear();
   const [idFuncionario, setIdFuncionario] = useState(null);
   const [ano, setAno] = useState(anoAtual);
@@ -60,6 +59,9 @@ export default function Planodeacao({
     'Novembro',
     'Dezembro',
   ];
+  const mesAtual = new Date().getMonth();
+  const [mes, setMes] = useState(data[mesAtual]);
+
   //Constantes para gravação de estado
   const [inputs, setInputs] = useState([{ value: '', feito: false }]);
   const [listaCadastro, setListaCadastro] = useState([]);
